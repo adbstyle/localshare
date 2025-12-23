@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -14,6 +13,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OwnershipGuard } from '../auth/guards/ownership.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { CommunitiesService } from './communities.service';
 import { MembershipService } from './membership.service';
 import { CreateCommunityDto, UpdateCommunityDto } from './dto';
@@ -36,6 +36,12 @@ export class CommunitiesController {
     return this.communitiesService.findAllForUser(user.id);
   }
 
+  @Public()
+  @Get('preview/:token')
+  async getPreview(@Param('token') token: string) {
+    return this.communitiesService.getPreviewByToken(token);
+  }
+
   @Get(':id')
   async findOne(@CurrentUser() user, @Param('id') id: string) {
     return this.communitiesService.findOne(id, user.id);
@@ -54,8 +60,8 @@ export class CommunitiesController {
     await this.communitiesService.delete(id);
   }
 
-  @Post('join')
-  async join(@CurrentUser() user, @Query('token') token: string) {
+  @Post('join/:token')
+  async join(@CurrentUser() user, @Param('token') token: string) {
     return this.membershipService.joinCommunity(user.id, token);
   }
 

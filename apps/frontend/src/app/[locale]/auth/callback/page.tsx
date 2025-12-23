@@ -15,7 +15,14 @@ export default function AuthCallback() {
     if (token) {
       localStorage.setItem('accessToken', token);
       fetchUser().then(() => {
-        router.push('/');
+        // Check if there's a pending invite token
+        const pendingInviteToken = sessionStorage.getItem('pendingInviteToken');
+        if (pendingInviteToken) {
+          sessionStorage.removeItem('pendingInviteToken');
+          router.push(`/communities/join?token=${pendingInviteToken}`);
+        } else {
+          router.push('/');
+        }
       });
     } else {
       // No token, redirect to home

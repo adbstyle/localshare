@@ -72,6 +72,8 @@
     "linkCopied": "Link kopiert!",
     "refreshInviteLink": "Link erneuern",
     "linkRefreshed": "Neuer Einladungslink erstellt",
+    "invitePending": "Einladung zur Gemeinschaft",
+    "invitePendingText": "Sie wurden zu einer Gemeinschaft eingeladen. Melden Sie sich an, um beizutreten.",
     "join": "Beitreten",
     "leave": "Verlassen",
     "leaveConfirm": "Sind Sie sicher, dass Sie diese Gemeinschaft verlassen möchten?",

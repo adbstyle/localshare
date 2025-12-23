@@ -29,10 +29,9 @@ export class GroupsController {
   @Post()
   async create(
     @CurrentUser() user,
-    @Query('communityId') communityId: string,
     @Body() dto: CreateGroupDto,
   ) {
-    return this.groupsService.create(user.id, communityId, dto);
+    return this.groupsService.create(user.id, dto.communityId, dto);
   }
 
   @Get()

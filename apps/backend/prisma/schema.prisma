@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SsoProvider {
+  GOOGLE
+  MICROSOFT
+}
+
+enum ListingType {
+  SELL
+  RENT
+  LEND
+  SEARCH
+}
+
+enum ListingCategory {
+  ELECTRONICS
+  FURNITURE
+  SPORTS_LEISURE
+  CLOTHING_ACCESSORIES
+  HOUSEHOLD
+  GARDEN_PLANTS
+  BOOKS_MEDIA
+  TOYS_KIDS
+  TOOLS_HARDWARE
+  FOOD_BEVERAGES
+  SERVICES
+  VEHICLES
+  OTHER
+}
+
+enum VisibilityType {
+  COMMUNITY
+  GROUP
+}
+
+model User {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String   @unique
+  firstName         String   @map("first_name")
+  lastName          String   @map("last_name")
+  homeAddress       String?  @map("home_address")
+  phoneNumber       String?  @map("phone_number")
+  preferredLanguage String   @default("de") @map("preferred_language") @db.VarChar(2)
+  consentGivenAt    DateTime? @map("consent_given_at") @db.Timestamptz(6)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  ssoAccounts          SsoAccount[]
+  refreshTokens        RefreshToken[]
+  ownedCommunities     Community[]       @relation("CommunityOwner")
+  communityMemberships CommunityMember[]
+  ownedGroups          Group[]           @relation("GroupOwner")
+  groupMemberships     GroupMember[]
+  listings             Listing[]
+
+  @@index([email])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model SsoAccount {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String      @map("user_id") @db.Uuid
+  provider       SsoProvider
+  providerUserId String      @map("provider_user_id")
+  providerEmail  String?     @map("provider_email")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("sso_accounts")
+}
+
+model RefreshToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model Community {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @db.VarChar(100)
+  description String?
+  ownerId     String    @map("owner_id") @db.Uuid
+  inviteToken String    @unique @default(dbgenerated("gen_random_uuid()")) @map("invite_token") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  owner             User                @relation("CommunityOwner", fields: [ownerId], references: [id])
+  members           CommunityMember[]
+  groups            Group[]
+  listingVisibility ListingVisibility[]
+
+  @@index([ownerId])
+  @@index([inviteToken])
+  @@index([deletedAt])
+  @@map("communities")
+}
+
+model CommunityMember {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  communityId String   @map("community_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  joinedAt    DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, userId])
+  @@index([communityId])
+  @@index([userId])
+  @@index([joinedAt])
+  @@map("community_members")
+}
+
+model Group {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  communityId String    @map("community_id") @db.Uuid
+  name        String    @db.VarChar(100)
+  description String?
+  ownerId     String    @map("owner_id") @db.Uuid
+  inviteToken String    @unique @default(dbgenerated("gen_random_uuid()")) @map("invite_token") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  community         Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  owner             User                @relation("GroupOwner", fields: [ownerId], references: [id])
+  members           GroupMember[]
+  listingVisibility ListingVisibility[]
+
+  @@index([communityId])
+  @@index([ownerId])
+  @@index([inviteToken])
+  @@index([deletedAt])
+  @@map("groups")
+}
+
+model GroupMember {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId  String   @map("group_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+model Listing {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creatorId   String          @map("creator_id") @db.Uuid
+  title       String          @db.VarChar(200)
+  description String?
+  type        ListingType
+  price       Int? // Price in cents
+  category    ListingCategory
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?       @map("deleted_at") @db.Timestamptz(6)
+
+  creator    User                @relation(fields: [creatorId], references: [id])
+  images     ListingImage[]
+  visibility ListingVisibility[]
+
+  @@index([creatorId])
+  @@index([type])
+  @@index([category])
+  @@index([createdAt(sort: Desc)])
+  @@index([deletedAt])
+  @@map("listings")
+}
+
+model ListingImage {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listingId    String   @map("listing_id") @db.Uuid
+  filename     String
+  originalName String?  @map("original_name")
+  mimeType     String?  @map("mime_type")
+  sizeBytes    Int?     @map("size_bytes")
+  orderIndex   Int      @default(0) @map("order_index")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@map("listing_images")
+}
+
+model ListingVisibility {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listingId      String         @map("listing_id") @db.Uuid
+  visibilityType VisibilityType @map("visibility_type")
+  communityId    String?        @map("community_id") @db.Uuid
+  groupId        String?        @map("group_id") @db.Uuid
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  listing   Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  community Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  group     Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, visibilityType, communityId, groupId])
+  @@index([listingId])
+  @@index([communityId])
+  @@index([groupId])
+  @@index([visibilityType, communityId])
+  @@index([visibilityType, groupId])
+  @@map("listing_visibility")
+}

@@ -214,4 +214,59 @@ export class GroupsService {
 
     return { inviteToken: updated.inviteToken };
   }
+
+  async getMembers(groupId: string, userId: string) {
+    // First verify the group exists and user is a member
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId, deletedAt: null },
+      select: {
+        id: true,
+        ownerId: true,
+        members: {
+          where: {
+            userId,
+          },
+        },
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    // Check if user is member
+    if (group.members.length === 0) {
+      throw new ForbiddenException('You are not a member of this group');
+    }
+
+    // Fetch all members with user details
+    const members = await this.prisma.groupMember.findMany({
+      where: {
+        groupId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        joinedAt: 'desc',
+      },
+    });
+
+    // Transform to flat structure with role
+    return members.map((member) => ({
+      id: member.user.id,
+      firstName: member.user.firstName,
+      lastName: member.user.lastName,
+      email: member.user.email,
+      joinedAt: member.joinedAt,
+      role: member.userId === group.ownerId ? 'owner' : 'member',
+    }));
+  }
 }

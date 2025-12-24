@@ -37,6 +37,7 @@ interface GroupMember {
   lastName: string;
   email: string;
   joinedAt: string;
+  role: 'owner' | 'member';
 }
 
 export default function GroupDetailPage() {
@@ -299,7 +300,7 @@ export default function GroupDetailPage() {
                 <div>
                   <p className="font-medium">
                     {member.firstName} {member.lastName}
-                    {member.id === group.ownerId && (
+                    {member.role === 'owner' && (
                       <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
                         {t('groups.owner')}
                       </span>

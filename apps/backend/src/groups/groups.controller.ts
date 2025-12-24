@@ -73,4 +73,9 @@ export class GroupsController {
   async refreshInvite(@Param('id') id: string) {
     return this.groupsService.refreshInviteToken(id);
   }
+
+  @Get(':id/members')
+  async getMembers(@CurrentUser() user, @Param('id') id: string) {
+    return this.groupsService.getMembers(id, user.id);
+  }
 }

@@ -97,8 +97,9 @@ export default function CommunityDetailPage() {
   const handleRefreshInviteLink = async () => {
     setActionLoading(true);
     try {
-      const { data } = await api.patch<Community>(`/communities/${params.id}/invite-token`);
-      setCommunity(data);
+      const { data } = await api.post<{ inviteToken: string }>(`/communities/${params.id}/refresh-invite`);
+      // Update community state with new invite token
+      setCommunity((prev) => (prev ? { ...prev, inviteToken: data.inviteToken } : prev));
       toast({
         title: t('communities.linkRefreshed'),
       });

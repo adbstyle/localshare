@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { undefinedToNull } from '../common/utils/prisma.utils';
 
 @Injectable()
 export class UsersService {
@@ -31,16 +30,9 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto) {
-    // Convert undefined to null for Prisma (undefined fields are ignored by Prisma)
-    const data = undefinedToNull(dto);
-
-    // DEBUG LOG
-    console.log('[UsersService.update] Original DTO:', JSON.stringify(dto));
-    console.log('[UsersService.update] After undefinedToNull:', JSON.stringify(data));
-
     return this.prisma.user.update({
       where: { id, deletedAt: null },
-      data,
+      data: dto,
       select: {
         id: true,
         email: true,

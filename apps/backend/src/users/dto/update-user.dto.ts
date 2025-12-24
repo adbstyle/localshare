@@ -16,8 +16,7 @@ export class UpdateUserDto {
   @Length(1, 500)
   homeAddress?: string;
 
-  @IsOptional()
-  @ValidateIf((o) => o.phoneNumber !== null)
+  @ValidateIf((_, value) => value !== null && value !== undefined)
   @IsString()
   @Matches(/^\+[1-9]\d{1,14}$/, {
     message: 'Phone number must be in E.164 format (e.g., +41791234567)',

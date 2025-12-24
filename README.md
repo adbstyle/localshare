@@ -2,7 +2,7 @@
 
 Eine Progressive Web App für Nachbarschafts-Communities zum Teilen von Anzeigen (verkaufen, vermieten, verleihen, suchen).
 
-> **📊 Projekt-Status**: Backend 100% ✅ | Frontend 30% 🚧
+> **📊 Projekt-Status**: Backend 100% ✅ | Frontend 45% 🚧
 
 ## 🚀 Features
 
@@ -134,34 +134,60 @@ docker exec localshare-db pg_dump -U localshare localshare > backup.sql
 docker exec -i localshare-db psql -U localshare localshare < backup.sql
 ```
 
+## 🎯 Recent Improvements (December 2024)
+
+### Backend Bug Fixes
+- **Phone Number Handling**: Simplified optional phone number field with proper null handling
+  - Converts undefined to null in Prisma updates
+  - Allows empty phone number in validation
+  - Proper TypeScript typing with nullable fields
+- **Community Owner Membership**: Fixed issue where community owners weren't automatically listed as members
+- **Group Owner Membership**: Fixed issue where group owners weren't automatically listed as members
+- **Invite Link Persistence**: Community invite links now persist through the login flow
+
+### Frontend Enhancements
+- **Community Join Flow**: Implemented visual feedback for pending invites on login page
+- **Join Dialog**: Added community join dialog with auto-refresh functionality
+- **Highlight Animation**: New highlight animation for newly joined communities
+- **Page Structure**: Expanded page structure for communities, groups, and listings
+
 ## 📊 Implementierungs-Status
 
 ### Backend ✅ 100% Complete
 - ✅ **Authentication**: Google & Microsoft OAuth2 + JWT
 - ✅ **Users Module**: Profile, GDPR export, account deletion
+  - ✅ **Bug Fix**: Phone number field now properly optional with null handling
+  - ✅ **Bug Fix**: Converts undefined to null in Prisma updates
 - ✅ **Communities Module**: Full CRUD, invite system, membership
+  - ✅ **Bug Fix**: Community owner now automatically listed as member
+  - ✅ **Bug Fix**: Community invite links persist through login flow
 - ✅ **Groups Module**: Full CRUD, auto-join parent community
+  - ✅ **Bug Fix**: Group owner now automatically listed as member
 - ✅ **Listings Module**: CRUD, image upload (Sharp), filtering, visibility
 - ✅ **Image Processing**: Auto-resize, HEIC→JPEG, compression
 - ✅ **Security**: Guards, validation, rate limiting
-- ✅ **Database**: Prisma with PostgreSQL, soft deletes
+- ✅ **Database**: Prisma with PostgreSQL, soft deletes (10 tables)
 - ✅ **40 API Endpoints**: All documented and tested
 
 👉 **See**: [BACKEND_COMPLETE.md](./BACKEND_COMPLETE.md)
 
-### Frontend 🚧 30% Complete
+### Frontend 🚧 45% Complete
 - ✅ **Project Setup**: Next.js 14 with App Router
 - ✅ **TypeScript**: Strict mode configuration
-- ✅ **i18n**: German & French translations
-- ✅ **Design System**: shadcn/ui with 11 components
+- ✅ **i18n**: German & French translations (150+ keys per language)
+- ✅ **Design System**: shadcn/ui with 12 components
 - ✅ **API Client**: Axios with auth interceptors
 - ✅ **Shared Package**: Types, schemas, validation
-- ⏳ **Authentication UI**: Login, OAuth callback
-- ⏳ **Communities UI**: List, create, detail, edit
-- ⏳ **Groups UI**: List, create, detail, edit
-- ⏳ **Listings UI**: Grid, filters, create, detail, image upload
+- ✅ **App Structure**: Root layout, error pages, locale routing
+- ✅ **UI Components**: Beta badge, language switch, layout components
+- ✅ **Communities UI**: List page, detail page, join flow, join dialog with auto-refresh
+  - ✅ **New Feature**: Visual feedback for pending invite on login page
+  - ✅ **New Feature**: Join community dialog with highlight animation
+- ✅ **Groups UI**: List page, detail page, join flow
+- ⏳ **Authentication UI**: Login, OAuth callback (in progress)
+- ⏳ **Listings UI**: Create page, detail page, image upload (partial)
 - ⏳ **Profile UI**: Edit, export, delete account
-- ⏳ **Legal Pages**: Privacy, Terms, Imprint
+- ⏳ **Legal Pages**: Privacy, Terms, Imprint (structure ready)
 - ⏳ **PWA**: Manifest, service worker, icons
 
 👉 **See**: [FRONTEND_STATUS.md](./FRONTEND_STATUS.md) | [FRONTEND_IMPLEMENTATION_GUIDE.md](./FRONTEND_IMPLEMENTATION_GUIDE.md)
@@ -190,11 +216,23 @@ localsharerepo/
 │   │   │   └── seed.ts        # Test data
 │   │   └── uploads/      # Image storage (created on upload)
 │   │
-│   └── frontend/         🚧 Next.js 14 App (30% complete)
+│   └── frontend/         🚧 Next.js 14 App (45% complete)
 │       ├── src/
-│       │   ├── app/      # App Router pages
-│       │   ├── components/  # UI components
-│       │   │   └── ui/   # shadcn components (11 files)
+│       │   ├── app/      # App Router pages (58 files)
+│       │   │   ├── [locale]/  # Localized routes
+│       │   │   │   ├── auth/  # Authentication pages
+│       │   │   │   ├── communities/  # Community pages (list, detail, join)
+│       │   │   │   ├── groups/  # Group pages (list, detail, join)
+│       │   │   │   ├── listings/  # Listing pages (create, detail)
+│       │   │   │   ├── profile/  # User profile pages
+│       │   │   │   └── privacy|terms|imprint/  # Legal pages
+│       │   ├── components/  # UI & feature components
+│       │   │   ├── ui/   # shadcn components (12 files)
+│       │   │   ├── auth/  # Auth components
+│       │   │   ├── communities/  # Community components
+│       │   │   ├── groups/  # Group components
+│       │   │   ├── listings/  # Listing components
+│       │   │   └── layout/  # Layout components
 │       │   ├── lib/      # Utilities (API client, utils)
 │       │   └── hooks/    # Custom hooks
 │       ├── messages/     # i18n translations (de.json, fr.json)
@@ -220,10 +258,12 @@ localsharerepo/
 | Dokument | Beschreibung | Status |
 |----------|--------------|--------|
 | [BACKEND_COMPLETE.md](./BACKEND_COMPLETE.md) | Vollständige Backend-Doku, 40 Endpoints | ✅ Complete |
-| [FRONTEND_STATUS.md](./FRONTEND_STATUS.md) | Frontend-Fortschritt & Roadmap | 🚧 30% |
+| [FRONTEND_STATUS.md](./FRONTEND_STATUS.md) | Frontend-Fortschritt & Roadmap | 🚧 45% |
 | [FRONTEND_IMPLEMENTATION_GUIDE.md](./FRONTEND_IMPLEMENTATION_GUIDE.md) | Schritt-für-Schritt Implementierung | 📖 Guide |
 | [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md) | Architektur & Tech Stack | ✅ Complete |
 | [QUICKSTART.md](./QUICKSTART.md) | 30-Min Setup Guide | ✅ Complete |
+| [ARCHITECTURE_REVIEW.md](./ARCHITECTURE_REVIEW.md) | Architecture Analysis & Recommendations | ✅ Complete |
+| [PRODUCTION_READINESS_REPORT.md](./PRODUCTION_READINESS_REPORT.md) | Production Deployment Readiness | ✅ Complete |
 
 ## 🔑 API Endpoints (Übersicht)
 
@@ -285,9 +325,11 @@ Das Frontend-Foundation ist bereit! Folge dem Guide:
    ```
 
 3. **Implementierungs-Priorität**:
-   - Phase 1: Authentication & Layout (Woche 1)
-   - Phase 2: Communities, Groups, Listings (Woche 2-3)
-   - Phase 3: Legal Pages & PWA (Woche 4)
+   - ✅ Phase 1: Project Setup & Design System
+   - ✅ Phase 2: Communities & Groups UI (Partial)
+   - ⏳ Phase 3: Authentication & Protected Routes
+   - ⏳ Phase 4: Listings & Profile Pages
+   - ⏳ Phase 5: Legal Pages & PWA
 
 ## 🧪 Testing
 
@@ -341,12 +383,12 @@ npm run test
 ## 📊 Statistics
 
 ```
-📦 Total Files Created: 85+
-📝 Lines of Code: ~12,000
+📦 Total Files Created: 100+
+📝 Lines of Code: ~15,000+
 🔌 API Endpoints: 40
 🌐 Languages: 2 (de, fr)
-🎨 UI Components: 11 (shadcn/ui)
-📚 Documentation Pages: 5
+🎨 UI Components: 12 (shadcn/ui)
+📚 Documentation Pages: 7
 ```
 
 ### Backend Statistics
@@ -357,12 +399,15 @@ npm run test
 - **Strategies**: 3
 - **DTOs**: 8
 - **Database Tables**: 10
+- **TypeScript Files**: 42
 
 ### Frontend Statistics
-- **UI Components**: 11 (Button, Input, Card, Dialog, etc.)
+- **UI Components**: 12 (Button, Input, Card, Dialog, Toast, etc.)
 - **Translation Keys**: 150+ per language
-- **Pages**: 15+ (to be implemented)
-- **Hooks**: 2 (useToast, useAuth partially done)
+- **Pages Implemented**: 12+ (Communities, Groups, Listings, Legal)
+- **Feature Components**: 15+ (Auth, Communities, Groups, Listings, Layout)
+- **Total TypeScript Files**: 58
+- **Hooks**: 2 (useToast, useAuth)
 
 ## 🚀 Deployment Checklist
 

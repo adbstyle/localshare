@@ -34,6 +34,10 @@ export class UsersService {
     // Convert undefined to null for Prisma (undefined fields are ignored by Prisma)
     const data = undefinedToNull(dto);
 
+    // DEBUG LOG
+    console.log('[UsersService.update] Original DTO:', JSON.stringify(dto));
+    console.log('[UsersService.update] After undefinedToNull:', JSON.stringify(data));
+
     return this.prisma.user.update({
       where: { id, deletedAt: null },
       data,

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, Length, Matches } from 'class-validator';
+import { IsString, IsOptional, Length, Matches, ValidateIf } from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -17,11 +17,12 @@ export class UpdateUserDto {
   homeAddress?: string;
 
   @IsOptional()
+  @ValidateIf((o) => o.phoneNumber !== null)
   @IsString()
   @Matches(/^\+[1-9]\d{1,14}$/, {
     message: 'Phone number must be in E.164 format (e.g., +41791234567)',
   })
-  phoneNumber?: string;
+  phoneNumber?: string | null;
 
   @IsOptional()
   @IsString()

@@ -13,7 +13,7 @@ export const updateUserSchema = z.object({
     })
     .optional()
     .or(z.literal(''))
-    .transform((val) => (val === '' ? undefined : val)),
+    .transform((val) => (val === '' ? null : val)),
   preferredLanguage: z.string().length(2).optional(),
 });
 

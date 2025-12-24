@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CreateCommunityDto, UpdateCommunityDto } from './dto';
 
@@ -176,16 +177,11 @@ export class CommunitiesService {
 
   async refreshInviteToken(id: string) {
     // Generate new UUID for invite token
-    const community = await this.prisma.community.update({
-      where: { id, deletedAt: null },
-      data: {
-        inviteToken: undefined, // Will trigger default gen_random_uuid()
-      },
-    });
+    const newToken = randomUUID();
 
-    // Need to fetch again to get the new token
-    const updated = await this.prisma.community.findUnique({
-      where: { id },
+    const updated = await this.prisma.community.update({
+      where: { id, deletedAt: null },
+      data: { inviteToken: newToken },
       select: { inviteToken: true },
     });
 

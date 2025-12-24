@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
 
@@ -195,16 +196,11 @@ export class GroupsService {
 
   async refreshInviteToken(id: string) {
     // Generate new UUID for invite token
-    await this.prisma.group.update({
-      where: { id, deletedAt: null },
-      data: {
-        inviteToken: undefined, // Will trigger default gen_random_uuid()
-      },
-    });
+    const newToken = randomUUID();
 
-    // Need to fetch again to get the new token
-    const updated = await this.prisma.group.findUnique({
-      where: { id },
+    const updated = await this.prisma.group.update({
+      where: { id, deletedAt: null },
+      data: { inviteToken: newToken },
       select: { inviteToken: true },
     });
 

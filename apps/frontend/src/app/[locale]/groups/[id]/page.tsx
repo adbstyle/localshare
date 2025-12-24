@@ -96,8 +96,9 @@ export default function GroupDetailPage() {
   const handleRefreshInviteLink = async () => {
     setActionLoading(true);
     try {
-      const { data } = await api.patch<Group>(`/groups/${params.id}/invite-token`);
-      setGroup(data);
+      const { data } = await api.post<{ inviteToken: string }>(`/groups/${params.id}/refresh-invite`);
+      // Update group state with new invite token
+      setGroup((prev) => (prev ? { ...prev, inviteToken: data.inviteToken } : prev));
       toast({
         title: t('groups.linkRefreshed'),
       });

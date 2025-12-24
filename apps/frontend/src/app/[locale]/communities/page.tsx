@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { Community } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
@@ -18,14 +19,19 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { CreateCommunityDialog } from '@/components/communities/create-community-dialog';
+import { JoinCommunityDialog } from '@/components/communities/join-community-dialog';
+import { CommunityCard } from '@/components/communities/community-card';
 
 export default function CommunitiesPage() {
   const t = useTranslations();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [liveMessage, setLiveMessage] = useState('');
 
   useEffect(() => {
     if (!authLoading) {
@@ -41,8 +47,10 @@ export default function CommunitiesPage() {
     try {
       const { data } = await api.get<Community[]>('/communities');
       setCommunities(data);
+      return data;
     } catch (error) {
       console.error('Failed to fetch communities:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -51,6 +59,49 @@ export default function CommunitiesPage() {
   const handleCommunityCreated = () => {
     setCreateDialogOpen(false);
     fetchCommunities();
+  };
+
+  const handleJoinSuccess = async (communityId: string) => {
+    // Set highlight state first (optimistic)
+    setHighlightId(communityId);
+
+    try {
+      // Fetch updated communities list
+      const updatedCommunities = await fetchCommunities();
+
+      // Scroll to new community after a brief delay (allow render)
+      setTimeout(() => {
+        const element = document.getElementById(`community-${communityId}`);
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+          element.focus();
+        }
+      }, 100);
+
+      // Screen reader announcement using fresh data
+      const newCommunity = updatedCommunities.find(c => c.id === communityId);
+      if (newCommunity) {
+        setLiveMessage(t('communities.joinedAnnouncement', { name: newCommunity.name }));
+      }
+
+      // Clear highlight after animation completes
+      setTimeout(() => {
+        setHighlightId(null);
+        setLiveMessage('');
+      }, 2000);
+    } catch (error) {
+      // Handle fetch error
+      toast({
+        title: t('errors.generic'),
+        description: t('communities.refreshFailed'),
+        variant: 'destructive',
+      });
+      // Clear highlight on error
+      setHighlightId(null);
+    }
   };
 
   if (authLoading || loading) {
@@ -70,6 +121,16 @@ export default function CommunitiesPage() {
 
   return (
     <div className="container max-w-6xl py-8">
+      {/* ARIA Live Region for Screen Readers */}
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {liveMessage}
+      </div>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">{t('communities.title')}</h1>
@@ -79,23 +140,26 @@ export default function CommunitiesPage() {
               : `${communities.length} ${t('communities.memberCount', { count: communities.length })}`}
           </p>
         </div>
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('communities.create')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t('communities.create')}</DialogTitle>
-              <DialogDescription>
-                {t('communities.descriptionPlaceholder')}
-              </DialogDescription>
-            </DialogHeader>
-            <CreateCommunityDialog onSuccess={handleCommunityCreated} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <JoinCommunityDialog onJoinSuccess={handleJoinSuccess} />
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                {t('communities.create')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t('communities.create')}</DialogTitle>
+                <DialogDescription>
+                  {t('communities.descriptionPlaceholder')}
+                </DialogDescription>
+              </DialogHeader>
+              <CreateCommunityDialog onSuccess={handleCommunityCreated} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {communities.length === 0 ? (
@@ -115,33 +179,12 @@ export default function CommunitiesPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {communities.map((community) => (
-            <Card
+            <CommunityCard
               key={community.id}
-              className="hover:shadow-lg transition-shadow cursor-pointer"
+              community={community}
+              isHighlighted={highlightId === community.id}
               onClick={() => router.push(`/communities/${community.id}`)}
-            >
-              <CardHeader>
-                <CardTitle className="line-clamp-1">{community.name}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {community.description || t('communities.descriptionPlaceholder')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-muted-foreground">
-                    <Users className="h-4 w-4 mr-2" />
-                    {t('communities.memberCount', { count: community._count.members })}
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <FileText className="h-4 w-4 mr-2" />
-                    {t('communities.listingCount', { count: community._count.sharedListings })}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-4">
-                    {t('communities.owner')}: {community.owner.firstName} {community.owner.lastName}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            />
           ))}
         </div>
       )}

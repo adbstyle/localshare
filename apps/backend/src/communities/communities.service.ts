@@ -195,4 +195,36 @@ export class CommunitiesService {
 
     return { inviteToken: updated.inviteToken };
   }
+
+  async getPreviewByToken(token: string) {
+    const community = await this.prisma.community.findUnique({
+      where: {
+        inviteToken: token,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        owner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Invalid or expired invite token');
+    }
+
+    return community;
+  }
 }

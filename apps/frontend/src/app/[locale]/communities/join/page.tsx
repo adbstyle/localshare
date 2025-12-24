@@ -35,6 +35,10 @@ export default function JoinCommunityPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
+        // Store the invite token before redirecting to login
+        if (token) {
+          sessionStorage.setItem('pendingInviteToken', token);
+        }
         router.push('/');
       } else if (token) {
         fetchCommunityPreview();

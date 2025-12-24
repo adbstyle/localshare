@@ -5,15 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { Mail } from 'lucide-react';
 
 export function LoginPage() {
   const t = useTranslations();
   const { toast } = useToast();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [hasPendingInvite, setHasPendingInvite] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  useEffect(() => {
+    // Check if there's a pending invite token
+    const pendingToken = sessionStorage.getItem('pendingInviteToken');
+    setHasPendingInvite(!!pendingToken);
+  }, []);
 
   const handleLogin = (provider: 'google' | 'microsoft') => {
     if (!acceptedTerms) {
@@ -35,6 +43,21 @@ export function LoginPage() {
           <CardDescription className="text-base">{t('auth.welcomeText')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {hasPendingInvite && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
+                    {t('communities.invitePending')}
+                  </p>
+                  <p className="text-blue-700 dark:text-blue-300 text-xs mt-1">
+                    {t('communities.invitePendingText')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <Button
             className="w-full"
             size="lg"

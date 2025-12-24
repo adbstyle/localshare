@@ -76,4 +76,9 @@ export class CommunitiesController {
   async refreshInvite(@Param('id') id: string) {
     return this.communitiesService.refreshInviteToken(id);
   }
+
+  @Get(':id/members')
+  async getMembers(@CurrentUser() user, @Param('id') id: string) {
+    return this.communitiesService.getMembers(id, user.id);
+  }
 }

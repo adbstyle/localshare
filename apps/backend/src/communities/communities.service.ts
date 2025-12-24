@@ -227,4 +227,59 @@ export class CommunitiesService {
 
     return community;
   }
+
+  async getMembers(communityId: string, userId: string) {
+    // First verify the community exists and user is a member
+    const community = await this.prisma.community.findUnique({
+      where: { id: communityId, deletedAt: null },
+      select: {
+        id: true,
+        ownerId: true,
+        members: {
+          where: {
+            userId,
+          },
+        },
+      },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Community not found');
+    }
+
+    // Check if user is member
+    if (community.members.length === 0) {
+      throw new ForbiddenException('You are not a member of this community');
+    }
+
+    // Fetch all members with user details
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        joinedAt: 'desc',
+      },
+    });
+
+    // Transform to flat structure with role
+    return members.map((member) => ({
+      id: member.user.id,
+      firstName: member.user.firstName,
+      lastName: member.user.lastName,
+      email: member.user.email,
+      joinedAt: member.joinedAt,
+      role: member.userId === community.ownerId ? 'owner' : 'member',
+    }));
+  }
 }

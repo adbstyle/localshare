@@ -6,7 +6,14 @@ export const updateUserSchema = z.object({
   firstName: z.string().min(1).max(100).optional(),
   lastName: z.string().min(1).max(100).optional(),
   homeAddress: z.string().min(1).max(500).optional(),
-  phoneNumber: z.string().regex(/^\+[1-9]\d{1,14}$/).optional(),
+  phoneNumber: z
+    .string()
+    .regex(/^\+[1-9]\d{1,14}$/, {
+      message: 'Phone number must be in E.164 format (e.g., +41791234567)',
+    })
+    .optional()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? undefined : val)),
   preferredLanguage: z.string().length(2).optional(),
 });
 

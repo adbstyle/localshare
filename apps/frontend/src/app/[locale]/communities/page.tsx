@@ -137,7 +137,7 @@ export default function CommunitiesPage() {
           <p className="text-muted-foreground mt-2">
             {communities.length === 0
               ? t('communities.empty')
-              : `${communities.length} ${t('communities.memberCount', { count: communities.length })}`}
+              : t('communities.count', { count: communities.length })}
           </p>
         </div>
         <div className="flex gap-2">

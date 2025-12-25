@@ -110,7 +110,7 @@ export default function GroupsPage() {
           <p className="text-muted-foreground mt-2">
             {groups.length === 0
               ? t('groups.empty')
-              : `${groups.length} ${t('groups.memberCount', { count: groups.length })}`}
+              : t('groups.count', { count: groups.length })}
           </p>
         </div>
         <div className="flex gap-2">

@@ -144,7 +144,23 @@
     "joined": "Erfolgreich beigetreten (auch Gemeinschaft beigetreten)",
     "left": "Gruppe verlassen",
     "cannotLeaveAsOwner": "Als Inhaber können Sie die Gruppe nicht verlassen. Löschen Sie sie stattdessen.",
-    "secret": "Geheime Gruppe"
+    "secret": "Geheime Gruppe",
+    "joinViaLink": "Einladung einfügen",
+    "joinDialogTitle": "Gruppe beitreten",
+    "pastePrompt": "Link oder Token einfügen:",
+    "inputPlaceholder": "https://... oder Token",
+    "inputHelper": "Du kannst den ganzen Link oder nur den Token einfügen",
+    "next": "Weiter",
+    "alreadyMember": "Bereits Mitglied",
+    "alreadyMemberMessage": "Du bist bereits Mitglied dieser Gruppe.",
+    "joinCommunityNote": "Der Beitritt zu dieser Gruppe fügt Sie auch der {communityName}-Gemeinschaft hinzu, falls Sie noch kein Mitglied sind.",
+    "errors": {
+      "invalidFormat": "Ungültiges Format. Bitte Link oder Token einfügen.",
+      "invalidUrl": "Ungültiger Link. Bitte überprüfe die URL.",
+      "invalidToken": "Ungültiger Token. Bitte überprüfe die Eingabe.",
+      "tokenNotFound": "Ungültiger Einladungslink. Link ist abgelaufen oder ungültig.",
+      "alreadyMember": "Du bist bereits Mitglied dieser Gruppe."
+    }
   },
   "listings": {
     "title": "Anzeigen",

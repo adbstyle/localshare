@@ -14,6 +14,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OwnershipGuard } from '../auth/guards/ownership.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { GroupsService } from './groups.service';
 import { GroupMembershipService } from './group-membership.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
@@ -55,6 +56,12 @@ export class GroupsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id') id: string) {
     await this.groupsService.delete(id);
+  }
+
+  @Public()
+  @Get('preview/:token')
+  async getPreview(@Param('token') token: string) {
+    return this.groupsService.getPreviewByToken(token);
   }
 
   @Post('join')

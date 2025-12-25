@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { CreateGroupDialog } from '@/components/groups/create-group-dialog';
+import { JoinGroupDialog } from '@/components/groups/join-group-dialog';
 
 export default function GroupsPage() {
   const t = useTranslations();
@@ -26,6 +27,7 @@ export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -41,8 +43,10 @@ export default function GroupsPage() {
     try {
       const { data } = await api.get<Group[]>('/groups');
       setGroups(data);
+      return data;
     } catch (error) {
       console.error('Failed to fetch groups:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -51,6 +55,36 @@ export default function GroupsPage() {
   const handleGroupCreated = () => {
     setCreateDialogOpen(false);
     fetchGroups();
+  };
+
+  const handleJoinSuccess = async (groupId: string) => {
+    // Set highlight state first (optimistic)
+    setHighlightId(groupId);
+
+    try {
+      // Fetch updated groups list
+      await fetchGroups();
+
+      // Scroll to new group after a brief delay (allow render)
+      setTimeout(() => {
+        const element = document.getElementById(`group-${groupId}`);
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+          element.focus();
+        }
+      }, 100);
+
+      // Clear highlight after animation completes
+      setTimeout(() => {
+        setHighlightId(null);
+      }, 2000);
+    } catch (error) {
+      // Clear highlight on error
+      setHighlightId(null);
+    }
   };
 
   if (authLoading || loading) {
@@ -79,23 +113,26 @@ export default function GroupsPage() {
               : `${groups.length} ${t('groups.memberCount', { count: groups.length })}`}
           </p>
         </div>
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('groups.create')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t('groups.create')}</DialogTitle>
-              <DialogDescription>
-                {t('groups.descriptionPlaceholder')}
-              </DialogDescription>
-            </DialogHeader>
-            <CreateGroupDialog onSuccess={handleGroupCreated} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <JoinGroupDialog onJoinSuccess={handleJoinSuccess} />
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                {t('groups.create')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t('groups.create')}</DialogTitle>
+                <DialogDescription>
+                  {t('groups.descriptionPlaceholder')}
+                </DialogDescription>
+              </DialogHeader>
+              <CreateGroupDialog onSuccess={handleGroupCreated} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {groups.length === 0 ? (
@@ -117,8 +154,14 @@ export default function GroupsPage() {
           {groups.map((group) => (
             <Card
               key={group.id}
-              className="hover:shadow-lg transition-shadow cursor-pointer"
+              id={`group-${group.id}`}
+              className={`hover:shadow-lg transition-shadow cursor-pointer ${
+                highlightId === group.id
+                  ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
+                  : ''
+              }`}
               onClick={() => router.push(`/groups/${group.id}`)}
+              tabIndex={0}
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

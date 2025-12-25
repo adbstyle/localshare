@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CreateCommunityDto, UpdateCommunityDto } from './dto';
 
@@ -176,16 +177,11 @@ export class CommunitiesService {
 
   async refreshInviteToken(id: string) {
     // Generate new UUID for invite token
-    const community = await this.prisma.community.update({
-      where: { id, deletedAt: null },
-      data: {
-        inviteToken: undefined, // Will trigger default gen_random_uuid()
-      },
-    });
+    const newToken = randomUUID();
 
-    // Need to fetch again to get the new token
-    const updated = await this.prisma.community.findUnique({
-      where: { id },
+    const updated = await this.prisma.community.update({
+      where: { id, deletedAt: null },
+      data: { inviteToken: newToken },
       select: { inviteToken: true },
     });
 
@@ -194,5 +190,92 @@ export class CommunitiesService {
     }
 
     return { inviteToken: updated.inviteToken };
+  }
+
+  async getPreviewByToken(token: string) {
+    const community = await this.prisma.community.findUnique({
+      where: {
+        inviteToken: token,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        owner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Invalid or expired invite token');
+    }
+
+    return community;
+  }
+
+  async getMembers(communityId: string, userId: string) {
+    // First verify the community exists and user is a member
+    const community = await this.prisma.community.findUnique({
+      where: { id: communityId, deletedAt: null },
+      select: {
+        id: true,
+        ownerId: true,
+        members: {
+          where: {
+            userId,
+          },
+        },
+      },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Community not found');
+    }
+
+    // Check if user is member
+    if (community.members.length === 0) {
+      throw new ForbiddenException('You are not a member of this community');
+    }
+
+    // Fetch all members with user details
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        joinedAt: 'desc',
+      },
+    });
+
+    // Transform to flat structure with role
+    return members.map((member) => ({
+      id: member.user.id,
+      firstName: member.user.firstName,
+      lastName: member.user.lastName,
+      email: member.user.email,
+      joinedAt: member.joinedAt,
+      role: member.userId === community.ownerId ? 'owner' : 'member',
+    }));
   }
 }

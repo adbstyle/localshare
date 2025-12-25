@@ -37,6 +37,7 @@ interface CommunityMember {
   lastName: string;
   email: string;
   joinedAt: string;
+  role: 'owner' | 'member';
 }
 
 export default function CommunityDetailPage() {
@@ -96,8 +97,9 @@ export default function CommunityDetailPage() {
   const handleRefreshInviteLink = async () => {
     setActionLoading(true);
     try {
-      const { data } = await api.patch<Community>(`/communities/${params.id}/invite-token`);
-      setCommunity(data);
+      const { data } = await api.post<{ inviteToken: string }>(`/communities/${params.id}/refresh-invite`);
+      // Update community state with new invite token
+      setCommunity((prev) => (prev ? { ...prev, inviteToken: data.inviteToken } : prev));
       toast({
         title: t('communities.linkRefreshed'),
       });
@@ -297,7 +299,7 @@ export default function CommunityDetailPage() {
                 <div>
                   <p className="font-medium">
                     {member.firstName} {member.lastName}
-                    {member.id === community.ownerId && (
+                    {member.role === 'owner' && (
                       <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
                         {t('communities.owner')}
                       </span>

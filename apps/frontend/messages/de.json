@@ -65,6 +65,7 @@
     "owner": "Inhaber",
     "members": "Mitglieder",
     "memberCount": "{count} Mitglieder",
+    "count": "{count, plural, one {# Gemeinschaft} other {# Gemeinschaften}}",
     "listingCount": "{count} Anzeigen",
     "createdAt": "Erstellt am",
     "inviteLink": "Einladungslink",
@@ -72,6 +73,8 @@
     "linkCopied": "Link kopiert!",
     "refreshInviteLink": "Link erneuern",
     "linkRefreshed": "Neuer Einladungslink erstellt",
+    "invitePending": "Einladung zur Gemeinschaft",
+    "invitePendingText": "Sie wurden zu einer Gemeinschaft eingeladen. Melden Sie sich an, um beizutreten.",
     "join": "Beitreten",
     "leave": "Verlassen",
     "leaveConfirm": "Sind Sie sicher, dass Sie diese Gemeinschaft verlassen möchten?",
@@ -87,7 +90,26 @@
     "deleted": "Gemeinschaft erfolgreich gelöscht",
     "joined": "Erfolgreich beigetreten",
     "left": "Gemeinschaft verlassen",
-    "cannotLeaveAsOwner": "Als Inhaber können Sie die Gemeinschaft nicht verlassen. Löschen Sie sie stattdessen."
+    "cannotLeaveAsOwner": "Als Inhaber können Sie die Gemeinschaft nicht verlassen. Löschen Sie sie stattdessen.",
+    "joinViaLink": "Einladung einfügen",
+    "joinDialogTitle": "Gemeinschaft beitreten",
+    "pastePrompt": "Link oder Token einfügen:",
+    "inputPlaceholder": "https://... oder Token",
+    "inputHelper": "Du kannst den ganzen Link oder nur den Token einfügen",
+    "next": "Weiter",
+    "alreadyMember": "Bereits Mitglied",
+    "alreadyMemberMessage": "Du bist bereits Mitglied dieser Gemeinschaft.",
+    "viewCommunity": "Zur Gemeinschaft",
+    "retry": "Erneut versuchen",
+    "errors": {
+      "invalidFormat": "Ungültiges Format. Bitte Link oder Token einfügen.",
+      "invalidUrl": "Ungültiger Link. Bitte überprüfe die URL.",
+      "invalidToken": "Ungültiger Token. Bitte überprüfe die Eingabe.",
+      "tokenNotFound": "Ungültiger Einladungslink. Link ist abgelaufen oder ungültig.",
+      "alreadyMember": "Du bist bereits Mitglied dieser Gemeinschaft."
+    },
+    "joinedAnnouncement": "Gemeinschaft {name} wurde zu deiner Liste hinzugefügt",
+    "refreshFailed": "Liste konnte nicht aktualisiert werden. Bitte Seite neu laden."
   },
   "groups": {
     "title": "Gruppen",
@@ -99,6 +121,7 @@
     "owner": "Inhaber",
     "members": "Mitglieder",
     "memberCount": "{count} Mitglieder",
+    "count": "{count, plural, one {# Gruppe} other {# Gruppen}}",
     "community": "Gemeinschaft",
     "selectCommunity": "Gemeinschaft auswählen",
     "createdAt": "Erstellt am",
@@ -123,7 +146,23 @@
     "joined": "Erfolgreich beigetreten (auch Gemeinschaft beigetreten)",
     "left": "Gruppe verlassen",
     "cannotLeaveAsOwner": "Als Inhaber können Sie die Gruppe nicht verlassen. Löschen Sie sie stattdessen.",
-    "secret": "Geheime Gruppe"
+    "secret": "Geheime Gruppe",
+    "joinViaLink": "Einladung einfügen",
+    "joinDialogTitle": "Gruppe beitreten",
+    "pastePrompt": "Link oder Token einfügen:",
+    "inputPlaceholder": "https://... oder Token",
+    "inputHelper": "Du kannst den ganzen Link oder nur den Token einfügen",
+    "next": "Weiter",
+    "alreadyMember": "Bereits Mitglied",
+    "alreadyMemberMessage": "Du bist bereits Mitglied dieser Gruppe.",
+    "joinCommunityNote": "Der Beitritt zu dieser Gruppe fügt Sie auch der {communityName}-Gemeinschaft hinzu, falls Sie noch kein Mitglied sind.",
+    "errors": {
+      "invalidFormat": "Ungültiges Format. Bitte Link oder Token einfügen.",
+      "invalidUrl": "Ungültiger Link. Bitte überprüfe die URL.",
+      "invalidToken": "Ungültiger Token. Bitte überprüfe die Eingabe.",
+      "tokenNotFound": "Ungültiger Einladungslink. Link ist abgelaufen oder ungültig.",
+      "alreadyMember": "Du bist bereits Mitglied dieser Gruppe."
+    }
   },
   "listings": {
     "title": "Anzeigen",

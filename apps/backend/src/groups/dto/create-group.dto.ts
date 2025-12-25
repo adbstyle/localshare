@@ -1,4 +1,4 @@
-import { IsString, Length, IsOptional } from 'class-validator';
+import { IsString, Length, IsOptional, IsUUID } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateGroupDto {
@@ -12,4 +12,7 @@ export class CreateGroupDto {
   @Length(0, 500)
   @Transform(({ value }) => value?.trim())
   description?: string;
+
+  @IsUUID()
+  communityId: string;
 }

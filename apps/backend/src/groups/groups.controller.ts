@@ -14,6 +14,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OwnershipGuard } from '../auth/guards/ownership.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { GroupsService } from './groups.service';
 import { GroupMembershipService } from './group-membership.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
@@ -29,10 +30,9 @@ export class GroupsController {
   @Post()
   async create(
     @CurrentUser() user,
-    @Query('communityId') communityId: string,
     @Body() dto: CreateGroupDto,
   ) {
-    return this.groupsService.create(user.id, communityId, dto);
+    return this.groupsService.create(user.id, dto.communityId, dto);
   }
 
   @Get()
@@ -58,6 +58,12 @@ export class GroupsController {
     await this.groupsService.delete(id);
   }
 
+  @Public()
+  @Get('preview/:token')
+  async getPreview(@Param('token') token: string) {
+    return this.groupsService.getPreviewByToken(token);
+  }
+
   @Post('join')
   async join(@CurrentUser() user, @Query('token') token: string) {
     return this.membershipService.joinGroup(user.id, token);
@@ -73,5 +79,10 @@ export class GroupsController {
   @UseGuards(OwnershipGuard)
   async refreshInvite(@Param('id') id: string) {
     return this.groupsService.refreshInviteToken(id);
+  }
+
+  @Get(':id/members')
+  async getMembers(@CurrentUser() user, @Param('id') id: string) {
+    return this.groupsService.getMembers(id, user.id);
   }
 }

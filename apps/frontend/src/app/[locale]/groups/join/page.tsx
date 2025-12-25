@@ -65,7 +65,7 @@ export default function JoinGroupPage() {
 
     setJoining(true);
     try {
-      await api.post(`/groups/join/${token}`);
+      await api.post(`/groups/join?token=${token}`);
       toast({
         title: t('groups.joined'),
       });

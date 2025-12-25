@@ -37,6 +37,7 @@ interface GroupMember {
   lastName: string;
   email: string;
   joinedAt: string;
+  role: 'owner' | 'member';
 }
 
 export default function GroupDetailPage() {
@@ -95,8 +96,9 @@ export default function GroupDetailPage() {
   const handleRefreshInviteLink = async () => {
     setActionLoading(true);
     try {
-      const { data } = await api.patch<Group>(`/groups/${params.id}/invite-token`);
-      setGroup(data);
+      const { data } = await api.post<{ inviteToken: string }>(`/groups/${params.id}/refresh-invite`);
+      // Update group state with new invite token
+      setGroup((prev) => (prev ? { ...prev, inviteToken: data.inviteToken } : prev));
       toast({
         title: t('groups.linkRefreshed'),
       });
@@ -299,7 +301,7 @@ export default function GroupDetailPage() {
                 <div>
                   <p className="font-medium">
                     {member.firstName} {member.lastName}
-                    {member.id === group.ownerId && (
+                    {member.role === 'owner' && (
                       <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
                         {t('groups.owner')}
                       </span>

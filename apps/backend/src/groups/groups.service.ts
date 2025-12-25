@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
 
@@ -195,16 +196,11 @@ export class GroupsService {
 
   async refreshInviteToken(id: string) {
     // Generate new UUID for invite token
-    await this.prisma.group.update({
-      where: { id, deletedAt: null },
-      data: {
-        inviteToken: undefined, // Will trigger default gen_random_uuid()
-      },
-    });
+    const newToken = randomUUID();
 
-    // Need to fetch again to get the new token
-    const updated = await this.prisma.group.findUnique({
-      where: { id },
+    const updated = await this.prisma.group.update({
+      where: { id, deletedAt: null },
+      data: { inviteToken: newToken },
       select: { inviteToken: true },
     });
 
@@ -213,5 +209,91 @@ export class GroupsService {
     }
 
     return { inviteToken: updated.inviteToken };
+  }
+
+  async getPreviewByToken(token: string) {
+    const group = await this.prisma.group.findUnique({
+      where: {
+        inviteToken: token,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        community: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException('Invalid or expired invite token');
+    }
+
+    return group;
+  }
+
+  async getMembers(groupId: string, userId: string) {
+    // First verify the group exists and user is a member
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId, deletedAt: null },
+      select: {
+        id: true,
+        ownerId: true,
+        members: {
+          where: {
+            userId,
+          },
+        },
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    // Check if user is member
+    if (group.members.length === 0) {
+      throw new ForbiddenException('You are not a member of this group');
+    }
+
+    // Fetch all members with user details
+    const members = await this.prisma.groupMember.findMany({
+      where: {
+        groupId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        joinedAt: 'desc',
+      },
+    });
+
+    // Transform to flat structure with role
+    return members.map((member) => ({
+      id: member.user.id,
+      firstName: member.user.firstName,
+      lastName: member.user.lastName,
+      email: member.user.email,
+      joinedAt: member.joinedAt,
+      role: member.userId === group.ownerId ? 'owner' : 'member',
+    }));
   }
 }

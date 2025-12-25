@@ -64,10 +64,27 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: 0 },
         },
+        highlight: {
+          '0%': {
+            transform: 'scale(0.95)',
+            opacity: '0',
+            backgroundColor: 'hsl(var(--primary) / 0.1)',
+          },
+          '50%': {
+            transform: 'scale(1.02)',
+            backgroundColor: 'hsl(var(--primary) / 0.15)',
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: '1',
+            backgroundColor: 'transparent',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        highlight: 'highlight 0.6s ease-out',
       },
     },
   },

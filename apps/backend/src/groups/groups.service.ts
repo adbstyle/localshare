@@ -211,6 +211,37 @@ export class GroupsService {
     return { inviteToken: updated.inviteToken };
   }
 
+  async getPreviewByToken(token: string) {
+    const group = await this.prisma.group.findUnique({
+      where: {
+        inviteToken: token,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        community: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException('Invalid or expired invite token');
+    }
+
+    return group;
+  }
+
   async getMembers(groupId: string, userId: string) {
     // First verify the group exists and user is a member
     const group = await this.prisma.group.findUnique({

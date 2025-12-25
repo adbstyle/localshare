@@ -123,7 +123,23 @@
     "joined": "Rejointe avec succès (communauté également rejointe)",
     "left": "Groupe quitté",
     "cannotLeaveAsOwner": "En tant que propriétaire, vous ne pouvez pas quitter le groupe. Supprimez-le à la place.",
-    "secret": "Groupe secret"
+    "secret": "Groupe secret",
+    "joinViaLink": "Insérer une invitation",
+    "joinDialogTitle": "Rejoindre un groupe",
+    "pastePrompt": "Insérer le lien ou le token:",
+    "inputPlaceholder": "https://... ou token",
+    "inputHelper": "Vous pouvez coller le lien complet ou seulement le token",
+    "next": "Suivant",
+    "alreadyMember": "Déjà membre",
+    "alreadyMemberMessage": "Vous êtes déjà membre de ce groupe.",
+    "joinCommunityNote": "Rejoindre ce groupe vous ajoutera également à la communauté {communityName} si vous n'êtes pas encore membre.",
+    "errors": {
+      "invalidFormat": "Format invalide. Veuillez insérer un lien ou un token.",
+      "invalidUrl": "Lien invalide. Veuillez vérifier l'URL.",
+      "invalidToken": "Token invalide. Veuillez vérifier la saisie.",
+      "tokenNotFound": "Lien d'invitation invalide. Le lien a expiré ou est invalide.",
+      "alreadyMember": "Vous êtes déjà membre de ce groupe."
+    }
   },
   "listings": {
     "title": "Annonces",

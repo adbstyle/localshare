@@ -46,3 +46,4 @@ apps/backend/uploads/
 
 # Docker
 docker-compose.override.yml
+apps/frontend/tsconfig.tsbuildinfo

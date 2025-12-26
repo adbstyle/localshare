@@ -25,6 +25,7 @@ interface ImageUploadProps {
   maxImages?: number;
   maxSizeMB?: number;
   onImagesChange?: (images: ListingImage[]) => void;
+  onPendingImagesChange?: (files: File[]) => void;
 }
 
 export function ImageUpload({
@@ -33,6 +34,7 @@ export function ImageUpload({
   maxImages = 3,
   maxSizeMB = 10,
   onImagesChange,
+  onPendingImagesChange,
 }: ImageUploadProps) {
   const t = useTranslations();
   const { toast } = useToast();
@@ -40,6 +42,8 @@ export function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -48,12 +52,20 @@ export function ImageUpload({
     setImages(existingImages);
   }, [existingImages]);
 
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewUrls]);
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
     // Check if adding these files would exceed the limit
-    if (images.length + files.length > maxImages) {
+    const currentCount = listingId ? images.length : pendingFiles.length;
+    if (currentCount + files.length > maxImages) {
       toast({
         title: t('errors.validation'),
         description: t('listings.imageLimit'),
@@ -79,13 +91,19 @@ export function ImageUpload({
     if (listingId) {
       await uploadImages(files);
     } else {
-      // For new listings, we'll need to store files temporarily
-      // This will be handled when the listing is created
-      toast({
-        title: t('errors.generic'),
-        description: 'Image upload for new listings will be implemented',
-        variant: 'destructive',
-      });
+      // Store files temporarily for upload after listing creation
+      const newFiles = Array.from(files);
+      const updatedFiles = [...pendingFiles, ...newFiles];
+      setPendingFiles(updatedFiles);
+
+      // Create preview URLs
+      const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
+      setPreviewUrls([...previewUrls, ...newPreviewUrls]);
+
+      // Notify parent component
+      if (onPendingImagesChange) {
+        onPendingImagesChange(updatedFiles);
+      }
     }
 
     // Reset the input
@@ -160,12 +178,30 @@ export function ImageUpload({
     }
   };
 
-  const canUploadMore = images.length < maxImages;
+  const handleDeletePendingFile = (index: number) => {
+    // Revoke the object URL to free memory
+    URL.revokeObjectURL(previewUrls[index]);
+
+    // Remove from arrays
+    const newFiles = pendingFiles.filter((_, i) => i !== index);
+    const newUrls = previewUrls.filter((_, i) => i !== index);
+
+    setPendingFiles(newFiles);
+    setPreviewUrls(newUrls);
+
+    // Notify parent component
+    if (onPendingImagesChange) {
+      onPendingImagesChange(newFiles);
+    }
+  };
+
+  const currentImageCount = listingId ? images.length : pendingFiles.length;
+  const canUploadMore = currentImageCount < maxImages;
 
   return (
     <div className="space-y-4">
-      {/* Existing Images */}
-      {images.length > 0 && (
+      {/* Existing Images (for edit mode) */}
+      {images.length > 0 && listingId && (
         <div className="grid grid-cols-3 gap-4">
           {images.map((image) => (
             <div key={image.id} className="relative group">
@@ -177,25 +213,50 @@ export function ImageUpload({
                   className="object-cover"
                 />
               </div>
-              {listingId && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                  onClick={() => setImageToDelete(image.id)}
-                  disabled={deleting}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                onClick={() => setImageToDelete(image.id)}
+                disabled={deleting}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pending Images (for create mode) */}
+      {pendingFiles.length > 0 && !listingId && (
+        <div className="grid grid-cols-3 gap-4">
+          {pendingFiles.map((file, index) => (
+            <div key={index} className="relative group">
+              <div className="relative h-32 rounded-lg overflow-hidden border">
+                <Image
+                  src={previewUrls[index]}
+                  alt={file.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                onClick={() => handleDeletePendingFile(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           ))}
         </div>
       )}
 
       {/* Upload Button */}
-      {canUploadMore && listingId && (
+      {canUploadMore && (
         <div>
           <input
             type="file"
@@ -225,23 +286,11 @@ export function ImageUpload({
               ) : (
                 <>
                   <Upload className="mr-2 h-4 w-4" />
-                  {t('listings.uploadImages')} ({images.length}/{maxImages})
+                  {t('listings.uploadImages')} ({currentImageCount}/{maxImages})
                 </>
               )}
             </Button>
           </label>
-        </div>
-      )}
-
-      {!listingId && (
-        <div className="border-2 border-dashed rounded-lg p-8 text-center">
-          <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            {t('listings.uploadImages')}
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Images can be uploaded after creating the listing
-          </p>
         </div>
       )}
 

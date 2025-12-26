@@ -12,12 +12,40 @@ export default function CreateListingPage() {
   const t = useTranslations();
   const { toast } = useToast();
 
-  const handleSubmit = async (data: CreateListingDto) => {
+  const handleSubmit = async (data: CreateListingDto, pendingFiles?: File[]) => {
     try {
+      // Step 1: Create the listing
       const { data: listing } = await api.post('/listings', data);
-      toast({
-        title: t('listings.created'),
-      });
+
+      // Step 2: Upload images if any
+      if (pendingFiles && pendingFiles.length > 0) {
+        try {
+          const formData = new FormData();
+          pendingFiles.forEach((file) => formData.append('images', file));
+
+          await api.post(`/listings/${listing.id}/images`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          toast({
+            title: t('listings.created'),
+          });
+        } catch (imageError: any) {
+          // Listing was created but images failed
+          toast({
+            title: t('listings.created'),
+            description: t('listings.imageUploadFailed'),
+            variant: 'default',
+          });
+        }
+      } else {
+        toast({
+          title: t('listings.created'),
+        });
+      }
+
       router.push(`/listings/${listing.id}`);
     } catch (error: any) {
       toast({

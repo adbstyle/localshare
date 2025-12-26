@@ -33,7 +33,7 @@ import { ImageUpload } from './image-upload';
 
 interface ListingFormProps {
   listing?: Listing;
-  onSubmit: (data: CreateListingDto | UpdateListingDto) => Promise<void>;
+  onSubmit: (data: any, pendingFiles?: File[]) => Promise<void>;
 }
 
 export function ListingForm({ listing, onSubmit }: ListingFormProps) {
@@ -43,6 +43,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [currentImages, setCurrentImages] = useState(listing?.images || []);
+  const [pendingImageFiles, setPendingImageFiles] = useState<File[]>([]);
 
   const {
     register,
@@ -110,7 +111,8 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const handleFormSubmit = async (data: CreateListingDto) => {
     setLoading(true);
     try {
-      await onSubmit(data);
+      // Pass pending files for create mode, undefined for edit mode
+      await onSubmit(data, listing ? undefined : pendingImageFiles);
     } finally {
       setLoading(false);
     }
@@ -346,6 +348,9 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               maxSizeMB={10}
               onImagesChange={(images) => {
                 setCurrentImages(images);
+              }}
+              onPendingImagesChange={(files) => {
+                setPendingImageFiles(files);
               }}
             />
           </div>

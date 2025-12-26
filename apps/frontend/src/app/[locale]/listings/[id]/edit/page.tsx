@@ -35,7 +35,7 @@ export default function EditListingPage() {
     }
   };
 
-  const handleSubmit = async (data: UpdateListingDto) => {
+  const handleSubmit = async (data: UpdateListingDto, pendingFiles?: File[]) => {
     try {
       await api.patch(`/listings/${params.id}`, data);
       toast({

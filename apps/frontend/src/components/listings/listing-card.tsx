@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice, formatDate, shouldShowPrice } from '@/lib/utils';
 import Image from 'next/image';
 import { MapPin } from 'lucide-react';
 
@@ -48,7 +48,7 @@ export function ListingCard({ listing }: ListingCardProps) {
             {listing.title}
           </h3>
 
-          {listing.price !== null && (
+          {listing.price !== null && shouldShowPrice(listing.type) && (
             <p className="text-xl font-bold text-primary mb-2">
               {formatPrice(listing.price)}
             </p>

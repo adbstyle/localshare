@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
-import { ListingImage } from '@localshare/shared';
+import { ListingImage, Listing } from '@localshare/shared';
 import { Upload, X, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -100,7 +100,8 @@ export function ImageUpload({
         formData.append('images', files[i]);
       }
 
-      const { data } = await api.post<ListingImage[]>(
+      // Backend returns full Listing object, not just new images
+      const { data } = await api.post<Listing>(
         `/listings/${listingId}/images`,
         formData,
         {
@@ -110,10 +111,11 @@ export function ImageUpload({
         }
       );
 
-      const newImages = [...images, ...data];
-      setImages(newImages);
+      // Extract images array from the listing object
+      const updatedImages = data.images || [];
+      setImages(updatedImages);
       if (onImagesChange) {
-        onImagesChange(newImages);
+        onImagesChange(updatedImages);
       }
 
       toast({

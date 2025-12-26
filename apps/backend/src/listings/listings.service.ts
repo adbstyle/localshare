@@ -163,9 +163,16 @@ export class ListingsService {
       listing.creator.phoneNumber = null;
     }
 
-    // Map image URLs
+    // Map image URLs and transform visibility to match TypeScript interface
     return {
       ...listing,
+      visibility: listing.visibility.map((v) => ({
+        type: v.visibilityType,
+        communityId: v.communityId,
+        groupId: v.groupId,
+        community: v.community,
+        group: v.group,
+      })),
       images: listing.images.map((img) => ({
         ...img,
         url: this.imageService.getImageUrl(img.filename),

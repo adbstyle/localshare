@@ -42,6 +42,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [currentImages, setCurrentImages] = useState(listing?.images || []);
 
   const {
     register,
@@ -83,6 +84,13 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   useEffect(() => {
     fetchCommunitiesAndGroups();
   }, []);
+
+  // Sync currentImages when listing prop changes
+  useEffect(() => {
+    if (listing?.images) {
+      setCurrentImages(listing.images);
+    }
+  }, [listing?.images]);
 
   const fetchCommunitiesAndGroups = async () => {
     try {
@@ -333,9 +341,12 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
             <p className="text-sm text-muted-foreground">{t('listings.imageLimit')}</p>
             <ImageUpload
               listingId={listing?.id}
-              existingImages={listing?.images || []}
+              existingImages={currentImages}
               maxImages={3}
               maxSizeMB={10}
+              onImagesChange={(images) => {
+                setCurrentImages(images);
+              }}
             />
           </div>
         </CardContent>

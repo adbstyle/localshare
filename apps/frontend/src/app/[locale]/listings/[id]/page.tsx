@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ContactButtons } from '@/components/listings/contact-buttons';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice, formatDate, shouldShowPrice } from '@/lib/utils';
 import { ArrowLeft, Edit, Trash2, MapPin, Calendar, Tag, Share2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -160,7 +160,7 @@ export default function ListingDetailPage() {
                     <Badge variant="outline">{t(`listings.categories.${listing.category}`)}</Badge>
                   </div>
                   <CardTitle className="text-3xl mb-2">{listing.title}</CardTitle>
-                  {listing.price !== null && (
+                  {listing.price !== null && shouldShowPrice(listing.type) && (
                     <p className="text-3xl font-bold text-primary">
                       {formatPrice(listing.price)}
                     </p>

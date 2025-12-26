@@ -35,7 +35,7 @@ export default function EditListingPage() {
     }
   };
 
-  const handleSubmit = async (data: UpdateListingDto) => {
+  const handleSubmit = async (data: UpdateListingDto, pendingFiles?: File[]) => {
     try {
       await api.patch(`/listings/${params.id}`, data);
       toast({
@@ -70,7 +70,10 @@ export default function EditListingPage() {
   return (
     <div className="container max-w-3xl py-8">
       <h1 className="text-3xl font-bold mb-8">{t('listings.edit')}</h1>
-      <ListingForm listing={listing} onSubmit={handleSubmit} />
+      <ListingForm
+        listing={listing}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

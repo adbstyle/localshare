@@ -156,6 +156,34 @@ export class ListingsService {
       throw new ForbiddenException('You do not have access to this listing');
     }
 
+    // Filter visibility based on user membership
+    // Exception: Listing owner sees all visibility entries
+    let filteredVisibility = listing.visibility;
+
+    if (listing.creatorId !== userId) {
+      // Get user's community and group memberships
+      const [userCommunities, userGroups] = await Promise.all([
+        this.prisma.communityMember.findMany({
+          where: { userId },
+          select: { communityId: true },
+        }),
+        this.prisma.groupMember.findMany({
+          where: { userId },
+          select: { groupId: true },
+        }),
+      ]);
+
+      const userCommunityIds = new Set(userCommunities.map(m => m.communityId));
+      const userGroupIds = new Set(userGroups.map(m => m.groupId));
+
+      // Filter visibility to only show where user is a member
+      filteredVisibility = listing.visibility.filter((v) => {
+        if (v.communityId && userCommunityIds.has(v.communityId)) return true;
+        if (v.groupId && userGroupIds.has(v.groupId)) return true;
+        return false;
+      });
+    }
+
     // Hide contact info if user is viewing their own listing
     if (listing.creatorId === userId) {
       listing.creator.email = '';
@@ -163,9 +191,16 @@ export class ListingsService {
       listing.creator.phoneNumber = null;
     }
 
-    // Map image URLs
+    // Map image URLs and transform visibility to match TypeScript interface
     return {
       ...listing,
+      visibility: filteredVisibility.map((v) => ({
+        type: v.visibilityType,
+        communityId: v.communityId,
+        groupId: v.groupId,
+        community: v.community,
+        group: v.group,
+      })),
       images: listing.images.map((img) => ({
         ...img,
         url: this.imageService.getImageUrl(img.filename),

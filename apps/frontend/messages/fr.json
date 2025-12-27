@@ -23,7 +23,8 @@
     "communities": "Communautés",
     "groups": "Groupes",
     "profile": "Profil",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "userMenu": "Menu utilisateur"
   },
   "auth": {
     "login": "Se connecter",
@@ -40,6 +41,7 @@
   },
   "profile": {
     "title": "Profil",
+    "personalInformation": "Informations personnelles",
     "editProfile": "Modifier le profil",
     "firstName": "Prénom",
     "lastName": "Nom",
@@ -48,6 +50,13 @@
     "phoneNumber": "Numéro de téléphone",
     "phoneHint": "Format: +41791234567",
     "preferredLanguage": "Langue préférée",
+    "languageHint": "Modifiez votre langue préférée pour l'application",
+    "settings": "Paramètres",
+    "settingsDescription": "Gérez les paramètres de votre application",
+    "accountManagement": "Gestion du compte",
+    "accountManagementDescription": "Gérez votre compte et vos données",
+    "logoutSection": "Déconnexion",
+    "logoutDescription": "Déconnectez-vous de votre compte",
     "deleteAccount": "Supprimer le compte",
     "deleteAccountConfirm": "Êtes-vous sûr de vouloir supprimer votre compte? Cette action est irréversible.",
     "deleteAccountWarning": "Votre compte et toutes vos annonces seront supprimés.",

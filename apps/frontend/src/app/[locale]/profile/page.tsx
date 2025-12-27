@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateUserSchema } from '@localshare/shared';
@@ -31,13 +31,15 @@ import {
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Trash2, LogOut, Settings } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
 export default function ProfilePage() {
   const { user, fetchUser, logout } = useAuth();
   const t = useTranslations();
   const { toast } = useToast();
   const router = useRouter();
+  const params = useParams();
+  const currentLocale = params.locale as string;
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -58,16 +60,31 @@ export default function ProfilePage() {
     },
   });
 
+  useEffect(() => {
+    if (!user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
   if (!user) {
-    router.push('/');
     return null;
   }
 
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
+      const previousLanguage = user?.preferredLanguage || 'de';
+
       await api.patch('/users/me', data);
       await fetchUser();
+
+      // If language changed, navigate to new locale URL
+      if (data.preferredLanguage && data.preferredLanguage !== previousLanguage) {
+        const currentPath = window.location.pathname;
+        const newPath = currentPath.replace(`/${currentLocale}`, `/${data.preferredLanguage}`);
+        router.push(newPath);
+      }
+
       toast({
         title: t('profile.profileUpdated'),
       });

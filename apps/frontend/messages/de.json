@@ -23,7 +23,8 @@
     "communities": "Gemeinschaften",
     "groups": "Gruppen",
     "profile": "Profil",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "userMenu": "Benutzermenü"
   },
   "auth": {
     "login": "Anmelden",
@@ -40,6 +41,7 @@
   },
   "profile": {
     "title": "Profil",
+    "personalInformation": "Persönliche Informationen",
     "editProfile": "Profil bearbeiten",
     "firstName": "Vorname",
     "lastName": "Nachname",
@@ -48,6 +50,13 @@
     "phoneNumber": "Telefonnummer",
     "phoneHint": "Format: +41791234567",
     "preferredLanguage": "Bevorzugte Sprache",
+    "languageHint": "Ändern Sie Ihre bevorzugte Sprache für die Anwendung",
+    "settings": "Einstellungen",
+    "settingsDescription": "Verwalten Sie Ihre Anwendungseinstellungen",
+    "accountManagement": "Konto-Verwaltung",
+    "accountManagementDescription": "Verwalten Sie Ihren Account und Ihre Daten",
+    "logoutSection": "Abmelden",
+    "logoutDescription": "Melden Sie sich von Ihrem Account ab",
     "deleteAccount": "Account löschen",
     "deleteAccountConfirm": "Sind Sie sicher, dass Sie Ihren Account löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "deleteAccountWarning": "Ihr Account und alle Anzeigen werden gelöscht.",

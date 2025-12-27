@@ -2,10 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { LanguageSwitch } from '@/components/language-switch';
 import { BetaBadge } from '@/components/beta-badge';
 import { useAuth } from '@/hooks/use-auth';
+import { UserMenu } from '@/components/layout/user-menu';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -38,19 +37,13 @@ export function Header() {
               <Link href="/groups" className="text-sm font-medium hover:underline">
                 {t('nav.groups')}
               </Link>
-              <Link href="/profile" className="text-sm font-medium hover:underline">
-                {t('nav.profile')}
-              </Link>
-              <Button variant="outline" size="sm" onClick={logout}>
-                {t('nav.logout')}
-              </Button>
+              <UserMenu user={user} logout={logout} />
             </>
           ) : (
             <div className="text-sm text-muted-foreground">
               {t('auth.welcomeText')}
             </div>
           )}
-          <LanguageSwitch />
         </nav>
 
         {/* Mobile Menu Button */}
@@ -96,14 +89,17 @@ export function Header() {
                 >
                   {t('nav.profile')}
                 </Link>
-                <Button variant="outline" onClick={logout} className="w-full">
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-sm font-medium text-left text-destructive"
+                >
                   {t('nav.logout')}
-                </Button>
+                </button>
               </>
             ) : null}
-            <div className="pt-4 border-t">
-              <LanguageSwitch />
-            </div>
           </nav>
         </div>
       )}

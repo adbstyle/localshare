@@ -19,22 +19,8 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
   const t = useTranslations();
   const { user } = useAuth();
 
-  const types: ListingType[] = ['SELL', 'RENT', 'LEND', 'SEARCH'];
-  const categories: ListingCategory[] = [
-    'ELECTRONICS',
-    'FURNITURE',
-    'SPORTS',
-    'CLOTHING',
-    'HOUSEHOLD',
-    'GARDEN',
-    'BOOKS',
-    'TOYS',
-    'TOOLS',
-    'FOOD',
-    'SERVICES',
-    'VEHICLES',
-    'OTHER',
-  ];
+  const types = Object.values(ListingType);
+  const categories = Object.values(ListingCategory);
 
   const handleTypeToggle = (type: ListingType) => {
     const currentTypes = filters.types || [];

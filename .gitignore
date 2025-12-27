@@ -12,6 +12,10 @@ dist/
 .next/
 out/
 
+# Build Caches
+*.tsbuildinfo
+node_modules/.cache/
+
 # Environment variables
 .env
 .env.local

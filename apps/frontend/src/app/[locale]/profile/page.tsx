@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateUserSchema } from '@localshare/shared';
@@ -30,14 +30,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Download, Trash2, LogOut, Settings } from 'lucide-react';
+import { useRouter, useParams } from 'next/navigation';
 
 export default function ProfilePage() {
   const { user, fetchUser, logout } = useAuth();
   const t = useTranslations();
   const { toast } = useToast();
   const router = useRouter();
+  const params = useParams();
+  const currentLocale = params.locale as string;
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -58,16 +60,31 @@ export default function ProfilePage() {
     },
   });
 
+  useEffect(() => {
+    if (!user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
   if (!user) {
-    router.push('/');
     return null;
   }
 
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
+      const previousLanguage = user?.preferredLanguage || 'de';
+
       await api.patch('/users/me', data);
       await fetchUser();
+
+      // If language changed, navigate to new locale URL
+      if (data.preferredLanguage && data.preferredLanguage !== previousLanguage) {
+        const currentPath = window.location.pathname;
+        const newPath = currentPath.replace(`/${currentLocale}`, `/${data.preferredLanguage}`);
+        router.push(newPath);
+      }
+
       toast({
         title: t('profile.profileUpdated'),
       });
@@ -127,150 +144,203 @@ export default function ProfilePage() {
   const preferredLanguage = watch('preferredLanguage');
 
   return (
-    <div className="container max-w-2xl py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('profile.title')}</CardTitle>
-          <CardDescription>
-            {user.email}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+    <div className="container max-w-4xl py-8">
+      <div className="space-y-6">
+        {/* Personal Information Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('profile.personalInformation')}</CardTitle>
+            <CardDescription>
+              {user.email}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">{t('profile.firstName')} *</Label>
+                  <Input
+                    id="firstName"
+                    {...register('firstName')}
+                    className={errors.firstName ? 'border-destructive' : ''}
+                  />
+                  {errors.firstName && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.firstName.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="lastName">{t('profile.lastName')} *</Label>
+                  <Input
+                    id="lastName"
+                    {...register('lastName')}
+                    className={errors.lastName ? 'border-destructive' : ''}
+                  />
+                  {errors.lastName && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.lastName.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div>
-                <Label htmlFor="firstName">{t('profile.firstName')} *</Label>
+                <Label htmlFor="homeAddress">{t('profile.homeAddress')} *</Label>
                 <Input
-                  id="firstName"
-                  {...register('firstName')}
-                  className={errors.firstName ? 'border-destructive' : ''}
+                  id="homeAddress"
+                  {...register('homeAddress')}
+                  className={errors.homeAddress ? 'border-destructive' : ''}
                 />
-                {errors.firstName && (
+                {errors.homeAddress && (
                   <p className="text-sm text-destructive mt-1">
-                    {errors.firstName.message}
+                    {errors.homeAddress.message}
                   </p>
                 )}
               </div>
+
               <div>
-                <Label htmlFor="lastName">{t('profile.lastName')} *</Label>
+                <Label htmlFor="phoneNumber">
+                  {t('profile.phoneNumber')} ({t('common.optional')})
+                </Label>
                 <Input
-                  id="lastName"
-                  {...register('lastName')}
-                  className={errors.lastName ? 'border-destructive' : ''}
+                  id="phoneNumber"
+                  {...register('phoneNumber')}
+                  placeholder="+41791234567"
+                  className={errors.phoneNumber ? 'border-destructive' : ''}
                 />
-                {errors.lastName && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('profile.phoneHint')}
+                </p>
+                {errors.phoneNumber && (
                   <p className="text-sm text-destructive mt-1">
-                    {errors.lastName.message}
+                    {errors.phoneNumber.message}
                   </p>
                 )}
               </div>
-            </div>
 
-            <div>
-              <Label htmlFor="homeAddress">{t('profile.homeAddress')} *</Label>
-              <Input
-                id="homeAddress"
-                {...register('homeAddress')}
-                className={errors.homeAddress ? 'border-destructive' : ''}
-              />
-              {errors.homeAddress && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.homeAddress.message}
+              <div className="flex gap-4 pt-4">
+                <Button type="submit" disabled={loading}>
+                  {loading ? t('common.loading') : t('common.save')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleExportData}
+                  disabled={exporting}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {exporting ? t('common.loading') : t('profile.exportData')}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Settings Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              {t('profile.settings')}
+            </CardTitle>
+            <CardDescription>
+              {t('profile.settingsDescription')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="preferredLanguage">
+                  {t('profile.preferredLanguage')}
+                </Label>
+                <Select
+                  value={preferredLanguage}
+                  onValueChange={(value) => setValue('preferredLanguage', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('profile.languageHint')}
                 </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="phoneNumber">
-                {t('profile.phoneNumber')} ({t('common.optional')})
-              </Label>
-              <Input
-                id="phoneNumber"
-                {...register('phoneNumber')}
-                placeholder="+41791234567"
-                className={errors.phoneNumber ? 'border-destructive' : ''}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                {t('profile.phoneHint')}
-              </p>
-              {errors.phoneNumber && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.phoneNumber.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="preferredLanguage">
-                {t('profile.preferredLanguage')}
-              </Label>
-              <Select
-                value={preferredLanguage}
-                onValueChange={(value) => setValue('preferredLanguage', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="de">Deutsch</SelectItem>
-                  <SelectItem value="fr">Français</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={loading}>
+              </div>
+              <Button onClick={handleSubmit(onSubmit)} disabled={loading}>
                 {loading ? t('common.loading') : t('common.save')}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleExportData}
-                disabled={exporting}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {exporting ? t('common.loading') : t('profile.exportData')}
-              </Button>
             </div>
-          </form>
+          </CardContent>
+        </Card>
 
-          <div className="mt-8 pt-8 border-t">
-            <h3 className="text-lg font-semibold mb-4 text-destructive">
-              {t('profile.deleteAccount')}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {t('profile.deleteAccountWarning')}
-            </p>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t('profile.deleteAccount')}
+        {/* Account Management Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-destructive">
+              {t('profile.accountManagement')}
+            </CardTitle>
+            <CardDescription>
+              {t('profile.accountManagementDescription')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Logout */}
+              <div>
+                <h3 className="text-sm font-medium mb-2">{t('profile.logoutSection')}</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('profile.logoutDescription')}
+                </p>
+                <Button variant="outline" onClick={logout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  {t('nav.logout')}
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t('profile.deleteAccount')}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t('profile.deleteAccountConfirm')}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAccount}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {t('common.delete')}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+
+              {/* Delete Account */}
+              <div className="pt-6 border-t">
+                <h3 className="text-sm font-medium mb-2 text-destructive">
+                  {t('profile.deleteAccount')}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('profile.deleteAccountWarning')}
+                </p>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t('profile.deleteAccount')}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t('profile.deleteAccount')}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('profile.deleteAccountConfirm')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {t('common.delete')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

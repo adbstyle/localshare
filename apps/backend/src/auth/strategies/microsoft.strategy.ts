@@ -1,13 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-microsoft';
+import { Strategy as OAuth2Strategy } from 'passport-oauth2';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
 import { SsoProvider } from '@prisma/client';
 
+interface MicrosoftUserInfo {
+  id: string;
+  displayName?: string;
+  givenName?: string;
+  surname?: string;
+  mail?: string;
+  userPrincipalName?: string;
+}
+
 @Injectable()
 export class MicrosoftStrategy extends PassportStrategy(
-  Strategy,
+  OAuth2Strategy,
   'microsoft',
 ) {
   constructor(
@@ -15,29 +24,50 @@ export class MicrosoftStrategy extends PassportStrategy(
     private authService: AuthService,
   ) {
     super({
+      authorizationURL:
+        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+      tokenURL: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
       clientID: config.get('MICROSOFT_CLIENT_ID'),
       clientSecret: config.get('MICROSOFT_CLIENT_SECRET'),
       callbackURL: config.get('MICROSOFT_CALLBACK_URL'),
-      scope: ['user.read'],
+      scope: ['openid', 'profile', 'email', 'User.Read'],
     });
   }
 
   async validate(
     accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
+    _refreshToken: string,
+    _profile: any,
+    done: any,
   ): Promise<any> {
-    const { id, emails, name } = profile;
+    try {
+      // Fetch user info from Microsoft Graph API
+      const userInfoResponse = await fetch(
+        'https://graph.microsoft.com/v1.0/me',
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
 
-    const user = await this.authService.validateSsoUser({
-      provider: SsoProvider.MICROSOFT,
-      providerUserId: id,
-      email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
-    });
+      if (!userInfoResponse.ok) {
+        return done(new Error('Failed to fetch user profile'), null);
+      }
 
-    done(null, user);
+      const userInfo: MicrosoftUserInfo = await userInfoResponse.json();
+
+      const user = await this.authService.validateSsoUser({
+        provider: SsoProvider.MICROSOFT,
+        providerUserId: userInfo.id,
+        email: userInfo.mail || userInfo.userPrincipalName || '',
+        firstName: userInfo.givenName || '',
+        lastName: userInfo.surname || '',
+      });
+
+      done(null, user);
+    } catch (error) {
+      done(error, null);
+    }
   }
 }

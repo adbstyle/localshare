@@ -91,6 +91,13 @@ cd apps/backend && npm run dev  # Backend: http://localhost:3001
 cd apps/frontend && npm run dev # Frontend: http://localhost:3000
 ```
 
+> **⚠️ Build Failures?** Falls ein Build fehlschlägt, bereinige die Caches:
+> ```bash
+> npm run clean:cache  # Bereinigt alle Build-Caches
+> npm run dev         # Startet Dev-Server neu
+> ```
+> Mehr Infos: [Cache Management Guide](./docs/CACHE_MANAGEMENT.md)
+
 ## 🐳 Docker Deployment
 
 ### Production Deployment

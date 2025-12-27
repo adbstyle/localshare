@@ -8,15 +8,21 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
+    "dev:clean": "npm run clean:cache && turbo run dev",
     "build": "turbo run build",
+    "build:clean": "npm run clean:cache && turbo run build",
+    "build:safe": "node scripts/safe-build.js",
     "start": "turbo run start",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules",
+    "clean:cache": "node scripts/clean-cache.js",
+    "clean:all": "npm run clean:cache && npm run clean",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
+    "docker:logs": "docker-compose logs -f",
+    "verify:build": "node scripts/verify-build.js"
   },
   "devDependencies": {
     "prettier": "^3.1.0",

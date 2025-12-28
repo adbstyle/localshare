@@ -18,9 +18,10 @@ export function LoginPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
-    // Check if there's a pending invite token
-    const pendingToken = sessionStorage.getItem('pendingInviteToken');
-    setHasPendingInvite(!!pendingToken);
+    // Check if there's a pending invite token (community or group)
+    const communityToken = sessionStorage.getItem('pendingInviteToken');
+    const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
+    setHasPendingInvite(!!(communityToken || groupToken));
   }, []);
 
   const handleLogin = (provider: 'google' | 'microsoft') => {
@@ -32,7 +33,21 @@ export function LoginPage() {
       });
       return;
     }
-    window.location.href = `${apiUrl}/api/v1/auth/${provider}`;
+
+    // Check for pending invites in sessionStorage
+    const communityToken = sessionStorage.getItem('pendingInviteToken');
+    const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
+
+    // Build auth URL with invite context if present
+    let authUrl = `${apiUrl}/api/v1/auth/${provider}`;
+
+    if (communityToken) {
+      authUrl += `?inviteToken=${encodeURIComponent(communityToken)}&inviteType=community`;
+    } else if (groupToken) {
+      authUrl += `?inviteToken=${encodeURIComponent(groupToken)}&inviteType=group`;
+    }
+
+    window.location.href = authUrl;
   };
 
   return (

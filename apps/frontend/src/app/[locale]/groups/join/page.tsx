@@ -39,6 +39,10 @@ export default function JoinGroupPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
+        // Store the invite token before redirecting to login
+        if (token) {
+          sessionStorage.setItem('pendingGroupInviteToken', token);
+        }
         router.push('/');
       } else if (token) {
         fetchGroupPreview();

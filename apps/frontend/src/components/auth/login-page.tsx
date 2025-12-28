@@ -34,17 +34,21 @@ export function LoginPage() {
       return;
     }
 
-    // Check for pending invites in sessionStorage
+    // Check for pending invites in sessionStorage (SAIT pattern - Layer 3)
+    // With Layer 1 implemented, only one should exist, but handle both as fail-safe
     const communityToken = sessionStorage.getItem('pendingInviteToken');
     const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
+
+    // Prefer group token over community token (most specific invite type)
+    // This is a fail-safe in case both tokens somehow exist
+    const inviteToken = groupToken || communityToken;
+    const inviteType = groupToken ? 'group' : 'community';
 
     // Build auth URL with invite context if present
     let authUrl = `${apiUrl}/api/v1/auth/${provider}`;
 
-    if (communityToken) {
-      authUrl += `?inviteToken=${encodeURIComponent(communityToken)}&inviteType=community`;
-    } else if (groupToken) {
-      authUrl += `?inviteToken=${encodeURIComponent(groupToken)}&inviteType=group`;
+    if (inviteToken) {
+      authUrl += `?inviteToken=${encodeURIComponent(inviteToken)}&inviteType=${inviteType}`;
     }
 
     window.location.href = authUrl;

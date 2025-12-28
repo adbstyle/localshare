@@ -52,6 +52,11 @@ export function useAuth() {
     try {
       await api.post('/auth/logout');
       localStorage.removeItem('accessToken');
+
+      // Clear invite tokens from sessionStorage (SAIT pattern - Layer 2)
+      sessionStorage.removeItem('pendingInviteToken');
+      sessionStorage.removeItem('pendingGroupInviteToken');
+
       setGlobalAuthState({ user: null, loading: false });
       window.location.href = '/';
     } catch (error) {

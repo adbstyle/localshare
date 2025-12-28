@@ -41,6 +41,10 @@ export default function JoinGroupPage() {
       if (!user) {
         // Store the invite token before redirecting to login
         if (token) {
+          // Clear ALL invite tokens first (SAIT pattern - Single Active Invite Token)
+          sessionStorage.removeItem('pendingInviteToken');
+          sessionStorage.removeItem('pendingGroupInviteToken');
+          // Set the new group invite token
           sessionStorage.setItem('pendingGroupInviteToken', token);
         }
         router.push('/');

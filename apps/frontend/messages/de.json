@@ -131,6 +131,7 @@
     "members": "Mitglieder",
     "memberCount": "{count} Mitglieder",
     "count": "{count, plural, one {# Gruppe} other {# Gruppen}}",
+    "listingCount": "{count} Anzeigen",
     "community": "Gemeinschaft",
     "selectCommunity": "Gemeinschaft auswählen",
     "createdAt": "Erstellt am",

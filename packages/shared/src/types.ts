@@ -100,6 +100,7 @@ export interface Group {
   createdAt: string;
   _count: {
     members: number;
+    sharedListings: number;
   };
 }
 

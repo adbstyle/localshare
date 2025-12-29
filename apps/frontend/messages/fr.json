@@ -110,6 +110,7 @@
     "members": "Membres",
     "memberCount": "{count} membres",
     "count": "{count, plural, one {# groupe} other {# groupes}}",
+    "listingCount": "{count} annonces",
     "community": "Communauté",
     "selectCommunity": "Sélectionner une communauté",
     "createdAt": "Créé le",

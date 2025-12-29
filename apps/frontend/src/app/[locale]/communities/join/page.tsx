@@ -37,6 +37,10 @@ export default function JoinCommunityPage() {
       if (!user) {
         // Store the invite token before redirecting to login
         if (token) {
+          // Clear ALL invite tokens first (SAIT pattern - Single Active Invite Token)
+          sessionStorage.removeItem('pendingInviteToken');
+          sessionStorage.removeItem('pendingGroupInviteToken');
+          // Set the new community invite token
           sessionStorage.setItem('pendingInviteToken', token);
         }
         router.push('/');

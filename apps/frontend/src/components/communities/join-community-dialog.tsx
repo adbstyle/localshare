@@ -34,9 +34,11 @@ type DialogStep = 'input' | 'preview';
 
 interface JoinCommunityDialogProps {
   onJoinSuccess?: (communityId: string) => void;
+  className?: string;
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
 }
 
-export function JoinCommunityDialog({ onJoinSuccess }: JoinCommunityDialogProps = {}) {
+export function JoinCommunityDialog({ onJoinSuccess, className, variant = 'default' }: JoinCommunityDialogProps = {}) {
   const t = useTranslations();
   const router = useRouter();
   const { toast } = useToast();
@@ -153,7 +155,7 @@ export function JoinCommunityDialog({ onJoinSuccess }: JoinCommunityDialogProps 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant={variant} className={className}>
           <LinkIcon className="h-4 w-4 mr-2" />
           {t('communities.joinViaLink')}
         </Button>

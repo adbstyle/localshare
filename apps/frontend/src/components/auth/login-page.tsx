@@ -18,9 +18,10 @@ export function LoginPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
-    // Check if there's a pending invite token
-    const pendingToken = sessionStorage.getItem('pendingInviteToken');
-    setHasPendingInvite(!!pendingToken);
+    // Check if there's a pending invite token (community or group)
+    const communityToken = sessionStorage.getItem('pendingInviteToken');
+    const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
+    setHasPendingInvite(!!(communityToken || groupToken));
   }, []);
 
   const handleLogin = (provider: 'google' | 'microsoft') => {
@@ -32,7 +33,25 @@ export function LoginPage() {
       });
       return;
     }
-    window.location.href = `${apiUrl}/api/v1/auth/${provider}`;
+
+    // Check for pending invites in sessionStorage (SAIT pattern - Layer 3)
+    // With Layer 1 implemented, only one should exist, but handle both as fail-safe
+    const communityToken = sessionStorage.getItem('pendingInviteToken');
+    const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
+
+    // Prefer group token over community token (most specific invite type)
+    // This is a fail-safe in case both tokens somehow exist
+    const inviteToken = groupToken || communityToken;
+    const inviteType = groupToken ? 'group' : 'community';
+
+    // Build auth URL with invite context if present
+    let authUrl = `${apiUrl}/api/v1/auth/${provider}`;
+
+    if (inviteToken) {
+      authUrl += `?inviteToken=${encodeURIComponent(inviteToken)}&inviteType=${inviteType}`;
+    }
+
+    window.location.href = authUrl;
   };
 
   return (

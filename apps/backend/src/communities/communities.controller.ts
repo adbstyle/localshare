@@ -18,6 +18,20 @@ import { CommunitiesService } from './communities.service';
 import { MembershipService } from './membership.service';
 import { CreateCommunityDto, UpdateCommunityDto } from './dto';
 
+// DTO Transform: Map Prisma's listingVisibility to API's sharedListings
+function transformCommunityDto(community: any) {
+  if (!community) return community;
+
+  const { _count, ...rest } = community;
+  return {
+    ...rest,
+    _count: {
+      members: _count?.members || 0,
+      sharedListings: _count?.listingVisibility || 0,
+    },
+  };
+}
+
 @Controller('communities')
 @UseGuards(JwtAuthGuard)
 export class CommunitiesController {
@@ -33,7 +47,8 @@ export class CommunitiesController {
 
   @Get()
   async findAll(@CurrentUser() user) {
-    return this.communitiesService.findAllForUser(user.id);
+    const communities = await this.communitiesService.findAllForUser(user.id);
+    return communities.map(transformCommunityDto);
   }
 
   @Public()
@@ -44,7 +59,8 @@ export class CommunitiesController {
 
   @Get(':id')
   async findOne(@CurrentUser() user, @Param('id') id: string) {
-    return this.communitiesService.findOne(id, user.id);
+    const community = await this.communitiesService.findOne(id, user.id);
+    return transformCommunityDto(community);
   }
 
   @Patch(':id')

@@ -15,11 +15,25 @@ export default function AuthCallback() {
     if (token) {
       localStorage.setItem('accessToken', token);
       fetchUser().then(() => {
-        // Check if there's a pending invite token
-        const pendingInviteToken = sessionStorage.getItem('pendingInviteToken');
-        if (pendingInviteToken) {
+        // Check URL params first (from backend redirect - primary method)
+        const redirectTo = searchParams.get('redirectTo');
+
+        if (redirectTo) {
+          // Backend provided redirect URL - use it directly
+          router.push(redirectTo);
+          return;
+        }
+
+        // Fallback: Check sessionStorage for pending invites
+        const communityToken = sessionStorage.getItem('pendingInviteToken');
+        const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
+
+        if (communityToken) {
           sessionStorage.removeItem('pendingInviteToken');
-          router.push(`/communities/join?token=${pendingInviteToken}`);
+          router.push(`/communities/join?token=${communityToken}`);
+        } else if (groupToken) {
+          sessionStorage.removeItem('pendingGroupInviteToken');
+          router.push(`/groups/join?token=${groupToken}`);
         } else {
           router.push('/');
         }

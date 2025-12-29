@@ -38,9 +38,11 @@ type DialogStep = 'input' | 'preview';
 
 interface JoinGroupDialogProps {
   onJoinSuccess?: (groupId: string) => void;
+  className?: string;
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
 }
 
-export function JoinGroupDialog({ onJoinSuccess }: JoinGroupDialogProps = {}) {
+export function JoinGroupDialog({ onJoinSuccess, className, variant = 'default' }: JoinGroupDialogProps = {}) {
   const t = useTranslations();
   const router = useRouter();
   const { toast } = useToast();
@@ -157,7 +159,7 @@ export function JoinGroupDialog({ onJoinSuccess }: JoinGroupDialogProps = {}) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant={variant} className={className}>
           <LinkIcon className="h-4 w-4 mr-2" />
           {t('groups.joinViaLink')}
         </Button>

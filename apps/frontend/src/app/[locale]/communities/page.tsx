@@ -131,20 +131,26 @@ export default function CommunitiesPage() {
         {liveMessage}
       </div>
 
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">{t('communities.title')}</h1>
-          <p className="text-muted-foreground mt-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8 transition-all duration-200">
+        <div className="flex-shrink-0">
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {t('communities.title')} ({communities.length})
+          </h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             {communities.length === 0
               ? t('communities.empty')
               : t('communities.count', { count: communities.length })}
           </p>
         </div>
-        <div className="flex gap-2">
-          <JoinCommunityDialog onJoinSuccess={handleJoinSuccess} />
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <JoinCommunityDialog
+            onJoinSuccess={handleJoinSuccess}
+            className="w-full sm:w-auto"
+            variant="outline"
+          />
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('communities.create')}
               </Button>

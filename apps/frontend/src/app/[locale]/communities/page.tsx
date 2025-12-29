@@ -136,11 +136,6 @@ export default function CommunitiesPage() {
           <h1 className="text-2xl sm:text-3xl font-bold">
             {t('communities.title')} ({communities.length})
           </h1>
-          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            {communities.length === 0
-              ? t('communities.empty')
-              : t('communities.count', { count: communities.length })}
-          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <JoinCommunityDialog

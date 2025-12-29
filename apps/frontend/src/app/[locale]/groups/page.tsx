@@ -109,11 +109,6 @@ export default function GroupsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold">
             {t('groups.title')} ({groups.length})
           </h1>
-          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            {groups.length === 0
-              ? t('groups.empty')
-              : t('groups.count', { count: groups.length })}
-          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <JoinGroupDialog

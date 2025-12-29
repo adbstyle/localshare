@@ -19,6 +19,20 @@ import { GroupsService } from './groups.service';
 import { GroupMembershipService } from './group-membership.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
 
+// DTO Transform: Map Prisma's listingVisibility to API's sharedListings
+function transformGroupDto(group: any) {
+  if (!group) return group;
+
+  const { _count, ...rest } = group;
+  return {
+    ...rest,
+    _count: {
+      members: _count?.members || 0,
+      sharedListings: _count?.listingVisibility || 0,
+    },
+  };
+}
+
 @Controller('groups')
 @UseGuards(JwtAuthGuard)
 export class GroupsController {
@@ -37,12 +51,14 @@ export class GroupsController {
 
   @Get()
   async findAll(@CurrentUser() user) {
-    return this.groupsService.findAllForUser(user.id);
+    const groups = await this.groupsService.findAllForUser(user.id);
+    return groups.map(transformGroupDto);
   }
 
   @Get(':id')
   async findOne(@CurrentUser() user, @Param('id') id: string) {
-    return this.groupsService.findOne(id, user.id);
+    const group = await this.groupsService.findOne(id, user.id);
+    return transformGroupDto(group);
   }
 
   @Patch(':id')

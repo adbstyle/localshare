@@ -91,6 +91,7 @@ export class GroupsService {
         _count: {
           select: {
             members: true,
+            listingVisibility: true,
           },
         },
       },
@@ -136,6 +137,7 @@ export class GroupsService {
         _count: {
           select: {
             members: true,
+            listingVisibility: true,
           },
         },
       },

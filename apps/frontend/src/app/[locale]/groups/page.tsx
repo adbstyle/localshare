@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { Group } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Users, Lock, Loader2 } from 'lucide-react';
+import { Plus, Users, FileText, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -176,6 +176,10 @@ export default function GroupsPage() {
                   <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-2" />
                     {t('groups.memberCount', { count: group._count.members })}
+                  </div>
+                  <div className="flex items-center text-muted-foreground">
+                    <FileText className="h-4 w-4 mr-2" />
+                    {t('groups.listingCount', { count: group._count.sharedListings })}
                   </div>
                   <div className="text-xs text-muted-foreground mt-4">
                     <div>

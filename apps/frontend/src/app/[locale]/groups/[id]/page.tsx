@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, Link2, Copy, RefreshCw, Edit, Trash2, LogOut, Loader2, Building2 } from 'lucide-react';
+import { Users, Link2, Copy, RefreshCw, Edit, Trash2, LogOut, Loader2, Building2, FileText } from 'lucide-react';
 import { EditGroupDialog } from '@/components/groups/edit-group-dialog';
 
 interface GroupMember {
@@ -193,6 +193,10 @@ export default function GroupDetailPage() {
             <div className="flex items-center">
               <Users className="h-4 w-4 mr-2" />
               {t('groups.memberCount', { count: group._count.members })}
+            </div>
+            <div className="flex items-center">
+              <FileText className="h-4 w-4 mr-2" />
+              {t('groups.listingCount', { count: group._count.sharedListings })}
             </div>
             <div className="flex items-center">
               <Building2 className="h-4 w-4 mr-2" />

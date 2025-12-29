@@ -104,20 +104,21 @@ export default function GroupsPage() {
 
   return (
     <div className="container max-w-6xl py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">{t('groups.title')}</h1>
-          <p className="text-muted-foreground mt-2">
-            {groups.length === 0
-              ? t('groups.empty')
-              : t('groups.count', { count: groups.length })}
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8 transition-all duration-200">
+        <div className="flex-shrink-0">
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {t('groups.title')} ({groups.length})
+          </h1>
         </div>
-        <div className="flex gap-2">
-          <JoinGroupDialog onJoinSuccess={handleJoinSuccess} />
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <JoinGroupDialog
+            onJoinSuccess={handleJoinSuccess}
+            className="w-full sm:w-auto"
+            variant="outline"
+          />
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('groups.create')}
               </Button>

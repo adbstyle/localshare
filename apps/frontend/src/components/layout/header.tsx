@@ -21,7 +21,7 @@ export function Header() {
 
   return (
     <header className="border-b bg-background sticky top-0 z-50">
-      <div className="container flex items-center justify-between py-4">
+      <div className="container flex items-center gap-6 py-4">
         {/* Logo & Beta Badge */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2">
@@ -30,37 +30,44 @@ export function Header() {
           <BetaBadge />
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          {user ? (
-            <>
-              <Link href="/" className="text-sm font-medium hover:underline">
-                {t('nav.listings')}
+        {/* Desktop Navigation Links - Left aligned */}
+        {user && (
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="/communities" className="text-sm font-medium hover:underline">
+              {t('nav.communities')}
+            </Link>
+            <Link href="/groups" className="text-sm font-medium hover:underline">
+              {t('nav.groups')}
+            </Link>
+          </nav>
+        )}
+
+        {/* Spacer */}
+        <div className="flex-grow" />
+
+        {/* Desktop Action Buttons - Right aligned */}
+        {user && (
+          <div className="hidden md:flex items-center gap-6">
+            <Button variant="ghost" size="sm" onClick={handleFeedback}>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              {t('common.feedback')}
+            </Button>
+            <Button variant="default" size="sm" asChild>
+              <Link href="/listings/create">
+                <Plus className="h-4 w-4 mr-2" />
+                {t('listings.create')}
               </Link>
-              <Link href="/communities" className="text-sm font-medium hover:underline">
-                {t('nav.communities')}
-              </Link>
-              <Link href="/groups" className="text-sm font-medium hover:underline">
-                {t('nav.groups')}
-              </Link>
-              <Button variant="ghost" size="sm" onClick={handleFeedback}>
-                <MessageSquare className="h-4 w-4 mr-2" />
-                {t('common.feedback')}
-              </Button>
-              <Button variant="default" size="sm" asChild>
-                <Link href="/listings/create">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('listings.create')}
-                </Link>
-              </Button>
-              <UserMenu user={user} logout={logout} />
-            </>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              {t('auth.welcomeText')}
-            </div>
-          )}
-        </nav>
+            </Button>
+            <UserMenu user={user} logout={logout} />
+          </div>
+        )}
+
+        {/* Not logged in message */}
+        {!user && (
+          <div className="hidden md:flex text-sm text-muted-foreground">
+            {t('auth.welcomeText')}
+          </div>
+        )}
 
         {/* Mobile Action Buttons & Menu */}
         {user && (

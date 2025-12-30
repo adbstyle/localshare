@@ -56,7 +56,7 @@ export function UserMenu({ user, logout }: UserMenuProps) {
           aria-label={t('nav.userMenu')}
         >
           <Avatar className="h-9 w-9 cursor-pointer">
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+            <AvatarFallback className="bg-secondary text-secondary-foreground text-sm font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>

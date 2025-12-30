@@ -5,13 +5,19 @@ import Link from 'next/link';
 import { BetaBadge } from '@/components/beta-badge';
 import { useAuth } from '@/hooks/use-auth';
 import { UserMenu } from '@/components/layout/user-menu';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, MessageSquare, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 export function Header() {
   const t = useTranslations();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const feedbackEmail = process.env.NEXT_PUBLIC_FEEDBACK_EMAIL || 'feedback@localshare.ch';
+
+  const handleFeedback = () => {
+    window.location.href = `mailto:${feedbackEmail}?subject=LocalShare Feedback`;
+  };
 
   return (
     <header className="border-b bg-background sticky top-0 z-50">
@@ -37,6 +43,16 @@ export function Header() {
               <Link href="/groups" className="text-sm font-medium hover:underline">
                 {t('nav.groups')}
               </Link>
+              <Button variant="ghost" size="sm" onClick={handleFeedback}>
+                <MessageSquare className="h-4 w-4 mr-2" />
+                {t('common.feedback')}
+              </Button>
+              <Button variant="default" size="sm" asChild>
+                <Link href="/listings/create">
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('listings.create')}
+                </Link>
+              </Button>
               <UserMenu user={user} logout={logout} />
             </>
           ) : (
@@ -46,13 +62,39 @@ export function Header() {
           )}
         </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden p-2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {/* Mobile Action Buttons & Menu */}
+        {user && (
+          <div className="flex md:hidden items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={handleFeedback} aria-label={t('common.feedback')}>
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+            <Button variant="default" size="icon" asChild aria-label={t('listings.create')}>
+              <Link href="/listings/create">
+                <Plus className="h-5 w-5" />
+              </Link>
+            </Button>
+            <button
+              className="p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        )}
+
+        {/* Mobile Menu Button (when not logged in) */}
+        {!user && (
+          <button
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        )}
       </div>
 
       {/* Mobile Navigation */}
@@ -61,6 +103,15 @@ export function Header() {
           <nav className="container py-4 flex flex-col gap-4">
             {user ? (
               <>
+                <Link
+                  href="/listings/create"
+                  className="text-sm font-medium text-primary flex items-center gap-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Plus className="h-4 w-4" />
+                  {t('listings.create')}
+                </Link>
+                <div className="border-t my-1" />
                 <Link
                   href="/"
                   className="text-sm font-medium"

@@ -3,11 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
-import { Listing, FilterListingsDto, ListingType, ListingCategory } from '@localshare/shared';
+import { Listing, FilterListingsDto } from '@localshare/shared';
 import { ListingCard } from './listing-card';
 import { ListingFilters } from './listing-filters';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -55,18 +54,6 @@ export function ListingsPage() {
 
   return (
     <div className="container py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t('listings.title')}</h1>
-        {user && (
-          <Link href="/listings/create">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('listings.create')}
-            </Button>
-          </Link>
-        )}
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Filters Sidebar */}
         <aside className="md:col-span-1">

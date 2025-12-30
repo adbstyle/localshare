@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { ListingType } from '@localshare/shared';
+import { ListingType, PriceTimeUnit } from '@localshare/shared';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,13 +14,25 @@ export function formatDate(date: string | Date, locale: string = 'de-CH'): strin
   });
 }
 
-export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('de-CH', {
+export function formatPrice(
+  price: number,
+  priceTimeUnit?: PriceTimeUnit | null,
+  t?: (key: string) => string
+): string {
+  const formattedPrice = new Intl.NumberFormat('de-CH', {
     style: 'currency',
     currency: 'CHF',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(price);
+
+  // If priceTimeUnit exists and translation function provided, append time unit
+  if (priceTimeUnit && t) {
+    const timeUnitText = t(`listings.timeUnits.${priceTimeUnit}`);
+    return `${formattedPrice} ${timeUnitText}`;
+  }
+
+  return formattedPrice;
 }
 
 /**

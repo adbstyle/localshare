@@ -50,7 +50,7 @@ export function ListingCard({ listing }: ListingCardProps) {
 
           {listing.price !== null && shouldShowPrice(listing.type) && (
             <p className="text-xl font-bold text-primary mb-2">
-              {formatPrice(listing.price)}
+              {formatPrice(listing.price, listing.priceTimeUnit, t)}
             </p>
           )}
 

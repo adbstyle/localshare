@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Loader2, AlertCircle, Building2 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface GroupPreview {
   id: string;
@@ -23,7 +24,7 @@ interface GroupPreview {
   };
 }
 
-export default function JoinGroupPage() {
+function JoinGroupPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations();
@@ -177,5 +178,13 @@ export default function JoinGroupPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function JoinGroupPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner className="container max-w-md" />}>
+      <JoinGroupPageContent />
+    </Suspense>
   );
 }

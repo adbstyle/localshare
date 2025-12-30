@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ListingType, ListingCategory } from './types';
+import { ListingType, ListingCategory, PriceTimeUnit } from './types';
 
 // User Schemas
 export const updateUserSchema = z.object({
@@ -46,6 +46,7 @@ export const createListingSchema = z.object({
   description: z.string().max(2000).transform((val) => val.trim()).optional(),
   type: z.nativeEnum(ListingType),
   price: z.number().int().min(0).max(1000000).optional(),
+  priceTimeUnit: z.nativeEnum(PriceTimeUnit).optional(),
   category: z.nativeEnum(ListingCategory),
   communityIds: z.array(z.string().uuid()).optional(),
   groupIds: z.array(z.string().uuid()).optional(),
@@ -60,6 +61,17 @@ export const createListingSchema = z.object({
     message: 'Price is required for SELL and RENT listings',
     path: ['price'],
   }
+).refine(
+  (data) => {
+    if (data.type === ListingType.RENT) {
+      return data.priceTimeUnit !== undefined;
+    }
+    return true;
+  },
+  {
+    message: 'Price time unit is required for RENT listings',
+    path: ['priceTimeUnit'],
+  }
 );
 
 export const updateListingSchema = z.object({
@@ -67,6 +79,7 @@ export const updateListingSchema = z.object({
   description: z.string().max(2000).transform((val) => val.trim()).optional(),
   type: z.nativeEnum(ListingType).optional(),
   price: z.number().int().min(0).max(1000000).optional(),
+  priceTimeUnit: z.nativeEnum(PriceTimeUnit).optional(),
   category: z.nativeEnum(ListingCategory).optional(),
   communityIds: z.array(z.string().uuid()).optional(),
   groupIds: z.array(z.string().uuid()).optional(),

@@ -207,6 +207,14 @@
     },
     "price": "Preis (CHF)",
     "pricePlaceholder": "0",
+    "priceTimeUnit": "Zeiteinheit",
+    "selectTimeUnit": "Zeiteinheit wählen",
+    "timeUnits": {
+      "HOUR": "pro Stunde",
+      "DAY": "pro Tag",
+      "WEEK": "pro Woche",
+      "MONTH": "pro Monat"
+    },
     "images": "Bilder",
     "uploadImages": "Bilder hochladen (max. 3)",
     "imageLimit": "Maximal 3 Bilder, je 10 MB",

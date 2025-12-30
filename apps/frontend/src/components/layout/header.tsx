@@ -110,6 +110,17 @@ export function Header() {
           <nav className="container py-4 flex flex-col gap-4">
             {user ? (
               <>
+                {/* Action Section */}
+                <button
+                  onClick={() => {
+                    handleFeedback();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-sm font-medium flex items-center gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {t('common.feedback')}
+                </button>
                 <Link
                   href="/listings/create"
                   className="text-sm font-medium text-primary flex items-center gap-2"
@@ -119,6 +130,7 @@ export function Header() {
                   {t('listings.create')}
                 </Link>
                 <div className="border-t my-1" />
+                {/* Navigation Section */}
                 <Link
                   href="/"
                   className="text-sm font-medium"
@@ -147,6 +159,8 @@ export function Header() {
                 >
                   {t('nav.profile')}
                 </Link>
+                <div className="border-t my-1" />
+                {/* Account Section */}
                 <button
                   onClick={() => {
                     logout();

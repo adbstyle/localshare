@@ -27,7 +27,7 @@ export default async function LocaleLayout({
       <body className="h-screen flex flex-col overflow-hidden">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto flex flex-col">
             {children}
             <Footer />
           </main>

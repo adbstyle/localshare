@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import Image from 'next/image';
 import { BetaBadge } from '@/components/beta-badge';
 import { useAuth } from '@/hooks/use-auth';
 import { UserMenu } from '@/components/layout/user-menu';
@@ -24,8 +25,15 @@ export function Header() {
       <div className="container flex items-center gap-6 py-4">
         {/* Logo & Beta Badge */}
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+          <Link href="/" className="flex items-center gap-2" aria-label="LocalShare">
+            <Image
+              src="/logo.svg"
+              alt="LocalShare Logo"
+              width={32}
+              height={32}
+              priority
+              className="h-8 w-8"
+            />
           </Link>
           <BetaBadge />
         </div>
@@ -33,6 +41,9 @@ export function Header() {
         {/* Desktop Navigation Links - Left aligned */}
         {user && (
           <nav className="hidden md:flex items-center gap-6">
+            <Link href="/" className="text-sm font-medium hover:underline">
+              {t('nav.listings')}
+            </Link>
             <Link href="/communities" className="text-sm font-medium hover:underline">
               {t('nav.communities')}
             </Link>

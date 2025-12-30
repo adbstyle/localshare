@@ -10,7 +10,7 @@ import {
   IsUUID,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ListingType, ListingCategory } from '@prisma/client';
+import { ListingType, ListingCategory, PriceTimeUnit } from '@prisma/client';
 
 export class UpdateListingDto {
   @IsOptional()
@@ -34,6 +34,10 @@ export class UpdateListingDto {
   @Min(0)
   @Max(1000000)
   price?: number;
+
+  @IsOptional()
+  @IsEnum(PriceTimeUnit)
+  priceTimeUnit?: PriceTimeUnit;
 
   @IsOptional()
   @IsEnum(ListingCategory)

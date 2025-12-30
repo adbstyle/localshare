@@ -162,7 +162,7 @@ export default function ListingDetailPage() {
                   <CardTitle className="text-3xl mb-2">{listing.title}</CardTitle>
                   {listing.price !== null && shouldShowPrice(listing.type) && (
                     <p className="text-3xl font-bold text-primary">
-                      {formatPrice(listing.price)}
+                      {formatPrice(listing.price, listing.priceTimeUnit, t)}
                     </p>
                   )}
                 </div>

@@ -20,6 +20,7 @@ export class ListingsService {
         description: dto.description,
         type: dto.type,
         price: dto.price,
+        priceTimeUnit: dto.priceTimeUnit,
         category: dto.category,
       },
       include: {
@@ -228,6 +229,7 @@ export class ListingsService {
         description: dto.description,
         type: dto.type,
         price: dto.price,
+        priceTimeUnit: dto.priceTimeUnit,
         category: dto.category,
       },
       include: {

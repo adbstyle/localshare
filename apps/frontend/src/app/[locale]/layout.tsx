@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
@@ -15,6 +16,9 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
+  // Enable static rendering for next-intl
+  setRequestLocale(locale);
+
   let messages;
   try {
     messages = (await import(`../../../messages/${locale}.json`)).default;

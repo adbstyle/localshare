@@ -24,11 +24,13 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className="min-h-screen flex flex-col">
+      <body className="h-screen flex flex-col overflow-hidden">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <main className="flex-1 overflow-y-auto">
+            {children}
+            <Footer />
+          </main>
           <Toaster />
         </NextIntlClientProvider>
       </body>

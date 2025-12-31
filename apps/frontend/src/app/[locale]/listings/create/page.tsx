@@ -30,18 +30,20 @@ export default function CreateListingPage() {
           });
 
           toast({
+            variant: 'success',
             title: t('listings.created'),
           });
         } catch (imageError: any) {
           // Listing was created but images failed
           toast({
+            variant: 'warning',
             title: t('listings.created'),
             description: t('listings.imageUploadFailed'),
-            variant: 'default',
           });
         }
       } else {
         toast({
+          variant: 'success',
           title: t('listings.created'),
         });
       }

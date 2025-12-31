@@ -62,6 +62,7 @@ export default function ListingDetailPage() {
     try {
       await api.delete(`/listings/${params.id}`);
       toast({
+        variant: 'success',
         title: t('listings.deleted'),
       });
       router.push('/');

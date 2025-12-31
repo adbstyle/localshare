@@ -41,6 +41,7 @@ export function EditCommunityDialog({ community, onSuccess }: EditCommunityDialo
     try {
       await api.patch(`/communities/${community.id}`, data);
       toast({
+        variant: 'success',
         title: t('communities.updated'),
       });
       onSuccess();

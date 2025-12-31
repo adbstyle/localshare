@@ -72,6 +72,7 @@ function JoinCommunityPageContent() {
     try {
       await api.post(`/communities/join/${token}`);
       toast({
+        variant: 'success',
         title: t('communities.joined'),
       });
       router.push('/communities');

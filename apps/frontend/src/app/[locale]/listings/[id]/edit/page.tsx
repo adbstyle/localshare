@@ -39,6 +39,7 @@ export default function EditListingPage() {
     try {
       await api.patch(`/listings/${params.id}`, data);
       toast({
+        variant: 'success',
         title: t('listings.updated'),
       });
       router.push(`/listings/${params.id}`);

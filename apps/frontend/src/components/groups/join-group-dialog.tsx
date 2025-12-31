@@ -107,6 +107,7 @@ export function JoinGroupDialog({ onJoinSuccess, className, variant = 'default' 
       const joinedGroupId = data?.id || group?.id;
 
       toast({
+        variant: 'success',
         title: t('groups.joined'),
       });
 

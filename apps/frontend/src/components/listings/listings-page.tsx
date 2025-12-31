@@ -1,24 +1,54 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { api } from '@/lib/api';
-import { Listing, FilterListingsDto } from '@localshare/shared';
+import { Listing, FilterListingsDto, PaginatedResponse } from '@localshare/shared';
 import { ListingCard } from './listing-card';
 import { ListingFilters } from './listing-filters';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
-export function ListingsPage() {
+const ITEMS_PER_PAGE = 30;
+
+function ListingsPageContent() {
   const t = useTranslations();
   const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<FilterListingsDto>({
-    limit: 20,
+    limit: ITEMS_PER_PAGE,
     offset: 0,
   });
+
+  // Sync URL parameter to state
+  useEffect(() => {
+    const urlPage = parseInt(searchParams.get('page') || '1', 10);
+    if (urlPage > 0 && urlPage !== page) {
+      setPage(urlPage);
+      setFilters((prev) => ({
+        ...prev,
+        offset: (urlPage - 1) * ITEMS_PER_PAGE,
+      }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchListings();
@@ -37,10 +67,14 @@ export function ListingsPage() {
       }
       if (filters.search) params.append('search', filters.search);
       if (filters.limit) params.append('limit', filters.limit.toString());
-      if (filters.offset) params.append('offset', filters.offset.toString());
+      if (filters.offset !== undefined) params.append('offset', filters.offset.toString());
 
-      const { data } = await api.get<Listing[]>(`/listings?${params.toString()}`);
-      setListings(data);
+      const { data } = await api.get<PaginatedResponse<Listing>>(
+        `/listings/paginated?${params.toString()}`
+      );
+
+      setListings(data.data);
+      setTotal(data.total);
     } catch (error) {
       console.error('Failed to fetch listings:', error);
     } finally {
@@ -49,7 +83,81 @@ export function ListingsPage() {
   };
 
   const handleFilterChange = (newFilters: Partial<FilterListingsDto>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters, offset: 0 }));
+    setFilters((prev) => ({
+      ...prev,
+      ...newFilters,
+      offset: 0
+    }));
+    setPage(1);
+
+    // Update URL to page 1
+    const params = new URLSearchParams(searchParams);
+    params.set('page', '1');
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+
+    // Validate page bounds
+    if (newPage < 1) newPage = 1;
+    if (newPage > totalPages && totalPages > 0) newPage = totalPages;
+
+    setPage(newPage);
+    setFilters((prev) => ({
+      ...prev,
+      offset: (newPage - 1) * ITEMS_PER_PAGE,
+    }));
+
+    // Update URL
+    const params = new URLSearchParams(searchParams);
+    params.set('page', newPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+  const showPagination = total > ITEMS_PER_PAGE;
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+    const showEllipsis = totalPages > 7;
+
+    if (!showEllipsis) {
+      // Show all pages if <= 7
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (page > 3) {
+        pages.push('ellipsis');
+      }
+
+      // Show pages around current page
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (page < totalPages - 2) {
+        pages.push('ellipsis');
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   return (
@@ -81,14 +189,105 @@ export function ListingsPage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {listings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {listings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {showPagination && (
+                <div className="mt-8">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (page > 1) handlePageChange(page - 1);
+                          }}
+                          className={
+                            page === 1
+                              ? 'pointer-events-none opacity-50'
+                              : 'cursor-pointer'
+                          }
+                        />
+                      </PaginationItem>
+
+                      {getPageNumbers().map((pageNum, idx) => (
+                        <PaginationItem key={idx}>
+                          {pageNum === 'ellipsis' ? (
+                            <PaginationEllipsis />
+                          ) : (
+                            <PaginationLink
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(pageNum);
+                              }}
+                              isActive={pageNum === page}
+                              className="cursor-pointer"
+                            >
+                              {pageNum}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (page < totalPages) handlePageChange(page + 1);
+                          }}
+                          className={
+                            page >= totalPages
+                              ? 'pointer-events-none opacity-50'
+                              : 'cursor-pointer'
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+
+                  {/* Page info */}
+                  <div className="text-center mt-4 text-sm text-muted-foreground">
+                    {t('common.showingResults', {
+                      from: (page - 1) * ITEMS_PER_PAGE + 1,
+                      to: Math.min(page * ITEMS_PER_PAGE, total),
+                      total,
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+export function ListingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-64 bg-muted animate-pulse rounded-lg"
+              />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <ListingsPageContent />
+    </Suspense>
   );
 }

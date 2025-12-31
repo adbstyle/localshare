@@ -15,7 +15,8 @@
     "filter": "Filtrer",
     "required": "Obligatoire",
     "optional": "Optionnel",
-    "feedback": "Donner un avis"
+    "feedback": "Donner un avis",
+    "showingResults": "Affichage de {from} à {to} sur {total} résultats"
   },
   "nav": {
     "home": "Accueil",

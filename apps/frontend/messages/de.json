@@ -15,7 +15,8 @@
     "filter": "Filtern",
     "required": "Pflichtfeld",
     "optional": "Optional",
-    "feedback": "Feedback geben"
+    "feedback": "Feedback geben",
+    "showingResults": "Zeige {from} bis {to} von {total} Ergebnissen"
   },
   "nav": {
     "home": "Startseite",

@@ -61,6 +61,7 @@ export function CreateGroupDialog({ onSuccess }: CreateGroupDialogProps) {
     try {
       await api.post('/groups', data);
       toast({
+        variant: 'success',
         title: t('groups.created'),
       });
       onSuccess();

@@ -36,6 +36,7 @@ export function CreateCommunityDialog({ onSuccess }: CreateCommunityDialogProps)
     try {
       await api.post('/communities', data);
       toast({
+        variant: 'success',
         title: t('communities.created'),
       });
       onSuccess();

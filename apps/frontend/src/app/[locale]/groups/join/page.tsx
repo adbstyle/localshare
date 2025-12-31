@@ -76,6 +76,7 @@ function JoinGroupPageContent() {
     try {
       await api.post(`/groups/join?token=${token}`);
       toast({
+        variant: 'success',
         title: t('groups.joined'),
       });
       router.push('/groups');

@@ -90,6 +90,7 @@ export default function CommunityDetailPage() {
     const inviteUrl = `${window.location.origin}/communities/join?token=${community.inviteToken}`;
     navigator.clipboard.writeText(inviteUrl);
     toast({
+      variant: 'success',
       title: t('communities.linkCopied'),
     });
   };
@@ -101,6 +102,7 @@ export default function CommunityDetailPage() {
       // Update community state with new invite token
       setCommunity((prev) => (prev ? { ...prev, inviteToken: data.inviteToken } : prev));
       toast({
+        variant: 'success',
         title: t('communities.linkRefreshed'),
       });
     } catch (error: any) {
@@ -119,6 +121,7 @@ export default function CommunityDetailPage() {
     try {
       await api.delete(`/communities/${params.id}/leave`);
       toast({
+        variant: 'success',
         title: t('communities.left'),
       });
       router.push('/communities');
@@ -148,6 +151,7 @@ export default function CommunityDetailPage() {
     try {
       await api.delete(`/communities/${params.id}`);
       toast({
+        variant: 'success',
         title: t('communities.deleted'),
       });
       router.push('/communities');

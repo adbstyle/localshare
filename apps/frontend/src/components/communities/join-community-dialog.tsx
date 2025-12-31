@@ -103,6 +103,7 @@ export function JoinCommunityDialog({ onJoinSuccess, className, variant = 'defau
       const joinedCommunityId = data?.id || community?.id;
 
       toast({
+        variant: 'success',
         title: t('communities.joined'),
       });
 

@@ -89,6 +89,7 @@ export default function GroupDetailPage() {
     const inviteUrl = `${window.location.origin}/groups/join?token=${group.inviteToken}`;
     navigator.clipboard.writeText(inviteUrl);
     toast({
+      variant: 'success',
       title: t('groups.linkCopied'),
     });
   };
@@ -100,6 +101,7 @@ export default function GroupDetailPage() {
       // Update group state with new invite token
       setGroup((prev) => (prev ? { ...prev, inviteToken: data.inviteToken } : prev));
       toast({
+        variant: 'success',
         title: t('groups.linkRefreshed'),
       });
     } catch (error: any) {
@@ -118,6 +120,7 @@ export default function GroupDetailPage() {
     try {
       await api.delete(`/groups/${params.id}/leave`);
       toast({
+        variant: 'success',
         title: t('groups.left'),
       });
       router.push('/groups');
@@ -147,6 +150,7 @@ export default function GroupDetailPage() {
     try {
       await api.delete(`/groups/${params.id}`);
       toast({
+        variant: 'success',
         title: t('groups.deleted'),
       });
       router.push('/groups');

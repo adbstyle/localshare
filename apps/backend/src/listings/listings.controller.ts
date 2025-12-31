@@ -35,6 +35,11 @@ export class ListingsController {
     return this.listingsService.findAll(user.id, filters);
   }
 
+  @Get('paginated')
+  async findAllPaginated(@CurrentUser() user, @Query() filters: FilterListingsDto) {
+    return this.listingsService.findAllPaginated(user.id, filters);
+  }
+
   @Get(':id')
   async findOne(@CurrentUser() user, @Param('id') id: string) {
     return this.listingsService.findOne(id, user.id);

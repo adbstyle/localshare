@@ -189,84 +189,84 @@ function ListingsPageContent() {
               )}
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {showPagination && (
-                <div className="mt-8">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (page > 1) handlePageChange(page - 1);
-                          }}
-                          className={
-                            page === 1
-                              ? 'pointer-events-none opacity-50'
-                              : 'cursor-pointer'
-                          }
-                        />
-                      </PaginationItem>
-
-                      {getPageNumbers().map((pageNum, idx) => (
-                        <PaginationItem key={idx}>
-                          {pageNum === 'ellipsis' ? (
-                            <PaginationEllipsis />
-                          ) : (
-                            <PaginationLink
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(pageNum);
-                              }}
-                              isActive={pageNum === page}
-                              className="cursor-pointer"
-                            >
-                              {pageNum}
-                            </PaginationLink>
-                          )}
-                        </PaginationItem>
-                      ))}
-
-                      <PaginationItem>
-                        <PaginationNext
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (page < totalPages) handlePageChange(page + 1);
-                          }}
-                          className={
-                            page >= totalPages
-                              ? 'pointer-events-none opacity-50'
-                              : 'cursor-pointer'
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-
-                  {/* Page info */}
-                  <div className="text-center mt-4 text-sm text-muted-foreground">
-                    {t('common.showingResults', {
-                      from: (page - 1) * ITEMS_PER_PAGE + 1,
-                      to: Math.min(page * ITEMS_PER_PAGE, total),
-                      total,
-                    })}
-                  </div>
-                </div>
-              )}
-            </>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {listings.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
           )}
         </div>
       </div>
+
+      {/* Pagination - Full width, outside grid */}
+      {showPagination && !loading && (
+        <div className="mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  previousText={t('common.previous')}
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (page > 1) handlePageChange(page - 1);
+                  }}
+                  className={
+                    page === 1
+                      ? 'pointer-events-none opacity-50'
+                      : 'cursor-pointer'
+                  }
+                />
+              </PaginationItem>
+
+              {getPageNumbers().map((pageNum, idx) => (
+                <PaginationItem key={idx}>
+                  {pageNum === 'ellipsis' ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(pageNum);
+                      }}
+                      isActive={pageNum === page}
+                      className="cursor-pointer"
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  nextText={t('common.next')}
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (page < totalPages) handlePageChange(page + 1);
+                  }}
+                  className={
+                    page >= totalPages
+                      ? 'pointer-events-none opacity-50'
+                      : 'cursor-pointer'
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+
+          {/* Page info */}
+          <div className="text-center mt-4 text-sm text-muted-foreground">
+            {t('common.showingResults', {
+              from: (page - 1) * ITEMS_PER_PAGE + 1,
+              to: Math.min(page * ITEMS_PER_PAGE, total),
+              total,
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

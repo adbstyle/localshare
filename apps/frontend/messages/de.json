@@ -16,7 +16,9 @@
     "required": "Pflichtfeld",
     "optional": "Optional",
     "feedback": "Feedback geben",
-    "showingResults": "Zeige {from} bis {to} von {total} Ergebnissen"
+    "showingResults": "Zeige {from} bis {to} von {total} Ergebnissen",
+    "previous": "Zurück",
+    "next": "Weiter"
   },
   "nav": {
     "home": "Startseite",

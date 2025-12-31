@@ -16,7 +16,9 @@
     "required": "Obligatoire",
     "optional": "Optionnel",
     "feedback": "Donner un avis",
-    "showingResults": "Affichage de {from} à {to} sur {total} résultats"
+    "showingResults": "Affichage de {from} à {to} sur {total} résultats",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "nav": {
     "home": "Accueil",

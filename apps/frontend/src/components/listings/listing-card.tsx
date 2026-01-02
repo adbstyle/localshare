@@ -49,11 +49,11 @@ export function ListingCard({ listing }: ListingCardProps) {
 
           {/* Price or Type Indicator */}
           {shouldShowPrice(listing.type) && listing.price !== null ? (
-            <p className="text-base font-semibold text-foreground">
+            <p className="text-sm text-muted-foreground">
               {formatPrice(listing.price, listing.priceTimeUnit, t)}
             </p>
           ) : (
-            <p className="text-base font-semibold text-foreground">
+            <p className="text-sm text-muted-foreground">
               {t(`listings.types.${listing.type}`)}
             </p>
           )}

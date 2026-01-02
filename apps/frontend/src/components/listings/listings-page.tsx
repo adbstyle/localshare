@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -19,6 +19,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { parseFiltersFromURL, buildURLFromFilters, getPageFromURL } from '@/lib/utils/url-filters';
 
 const ITEMS_PER_PAGE = 30;
 
@@ -32,29 +33,18 @@ function ListingsPageContent() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<FilterListingsDto>({
-    limit: ITEMS_PER_PAGE,
-    offset: 0,
-  });
 
-  // Sync URL parameter to state
-  useEffect(() => {
-    const urlPage = parseInt(searchParams.get('page') || '1', 10);
-    if (urlPage > 0 && urlPage !== page) {
-      setPage(urlPage);
-      setFilters((prev) => ({
-        ...prev,
-        offset: (urlPage - 1) * ITEMS_PER_PAGE,
-      }));
-    }
-  }, [searchParams]);
+  // Derive page from URL (single source of truth)
+  const page = useMemo(() => getPageFromURL(searchParams), [searchParams]);
 
-  useEffect(() => {
-    fetchListings();
-  }, [filters]);
+  // Derive filters from URL (single source of truth)
+  const filters = useMemo(
+    () => parseFiltersFromURL(searchParams, ITEMS_PER_PAGE),
+    [searchParams]
+  );
 
-  const fetchListings = async () => {
+  // Fetch listings from API based on current filters
+  const fetchListings = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -80,43 +70,45 @@ function ListingsPageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const handleFilterChange = (newFilters: Partial<FilterListingsDto>) => {
-    setFilters((prev) => ({
-      ...prev,
-      ...newFilters,
-      offset: 0
-    }));
-    setPage(1);
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
 
-    // Update URL to page 1
-    const params = new URLSearchParams(searchParams);
-    params.set('page', '1');
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  // Handle filter changes - update URL (use replace to avoid history pollution)
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<FilterListingsDto>) => {
+      // Merge current filters with new filters and reset to page 1
+      const updatedFilters = { ...filters, ...newFilters };
+      const urlString = buildURLFromFilters(updatedFilters, searchParams, 1);
 
-  const handlePageChange = (newPage: number) => {
-    const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+      // Use replace for filter changes (don't add to browser history)
+      router.replace(`${pathname}?${urlString}`);
+    },
+    [filters, searchParams, pathname, router]
+  );
 
-    // Validate page bounds
-    if (newPage < 1) newPage = 1;
-    if (newPage > totalPages && totalPages > 0) newPage = totalPages;
+  // Handle page changes - update URL (use push to enable browser back/forward)
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
-    setPage(newPage);
-    setFilters((prev) => ({
-      ...prev,
-      offset: (newPage - 1) * ITEMS_PER_PAGE,
-    }));
+      // Validate page bounds
+      if (newPage < 1) newPage = 1;
+      if (newPage > totalPages && totalPages > 0) newPage = totalPages;
 
-    // Update URL
-    const params = new URLSearchParams(searchParams);
-    params.set('page', newPage.toString());
-    router.push(`${pathname}?${params.toString()}`);
+      // Build URL with new page number
+      const urlString = buildURLFromFilters(filters, searchParams, newPage);
 
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+      // Use push for pagination (enable browser back/forward navigation)
+      router.push(`${pathname}?${urlString}`);
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [filters, searchParams, pathname, router, total]
+  );
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
   const showPagination = total > ITEMS_PER_PAGE;

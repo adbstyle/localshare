@@ -66,7 +66,7 @@ export function LoginPage() {
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
                     {t('communities.invitePending')}
                   </p>

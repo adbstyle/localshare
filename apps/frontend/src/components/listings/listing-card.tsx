@@ -37,12 +37,12 @@ export function ListingCard({ listing }: ListingCardProps) {
         </div>
 
         <CardContent className="p-4">
-          <h3 className="font-semibold text-lg line-clamp-2 mb-2">
+          <h3 className="font-semibold text-lg line-clamp-2 mb-2 break-words">
             {listing.title}
           </h3>
 
           {listing.description && (
-            <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+            <p className="text-sm text-muted-foreground line-clamp-3 mb-3 break-words">
               {listing.description}
             </p>
           )}

@@ -109,7 +109,7 @@ export default function ListingDetailPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     {/* LEVEL 1: Type & Category */}
                     <div className="flex items-center gap-2 mb-3" role="group" aria-label="Listing type and category">
                       <Badge variant="secondary" className="text-sm">
@@ -122,7 +122,7 @@ export default function ListingDetailPage() {
                     </div>
 
                     {/* LEVEL 2: Title */}
-                    <h1 className="text-3xl font-bold leading-tight mb-4">
+                    <h1 className="text-3xl font-bold leading-tight mb-4 break-words">
                       {listing.title}
                     </h1>
 
@@ -218,7 +218,7 @@ export default function ListingDetailPage() {
                 {/* LEVEL 5: Description */}
                 {listing.description && (
                   <section aria-label={t('listings.description')}>
-                    <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
                       {listing.description}
                     </p>
                   </section>

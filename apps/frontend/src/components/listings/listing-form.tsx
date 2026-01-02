@@ -141,9 +141,14 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
         <CardContent className="pt-6 space-y-4">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title">
-              {t('listings.listingTitle')} <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="title">
+                {t('listings.listingTitle')} <span className="text-destructive">*</span>
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                {watch('title')?.length || 0}/60
+              </span>
+            </div>
             <Input
               id="title"
               placeholder={t('listings.titlePlaceholder')}

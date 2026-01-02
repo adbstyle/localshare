@@ -15,7 +15,7 @@ import { ListingType, ListingCategory, PriceTimeUnit } from '@prisma/client';
 
 export class CreateListingDto {
   @IsString()
-  @Length(5, 200)
+  @Length(5, 60)
   @Transform(({ value }) => value?.trim())
   title: string;
 

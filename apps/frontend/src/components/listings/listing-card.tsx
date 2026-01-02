@@ -6,7 +6,6 @@ import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
 import Image from 'next/image';
-import { MapPin } from 'lucide-react';
 
 interface ListingCardProps {
   listing: Listing;
@@ -20,7 +19,7 @@ export function ListingCard({ listing }: ListingCardProps) {
 
   return (
     <Link href={`/listings/${listing.id}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
         {/* Image */}
         <div className="relative h-48 bg-muted">
           {firstImage ? (
@@ -42,25 +41,22 @@ export function ListingCard({ listing }: ListingCardProps) {
             {listing.title}
           </h3>
 
-          {listing.price !== null && shouldShowPrice(listing.type) && (
-            <p className="text-base font-semibold text-foreground mb-2">
-              {formatPrice(listing.price, listing.priceTimeUnit, t)}
+          {listing.description && (
+            <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+              {listing.description}
             </p>
           )}
 
-          {listing.description && (
-            <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
-              {listing.description}
+          {listing.price !== null && shouldShowPrice(listing.type) && (
+            <p className="text-base font-semibold text-foreground">
+              {formatPrice(listing.price, listing.priceTimeUnit, t)}
             </p>
           )}
         </CardContent>
 
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-4 pt-0 mt-auto">
           <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              <span>{listing.creator?.firstName} {listing.creator?.lastName}</span>
-            </div>
+            <span>{listing.creator?.firstName} {listing.creator?.lastName}</span>
             <span>{formatRelativeDate(listing.createdAt, locale)}</span>
           </div>
         </CardFooter>

@@ -217,10 +217,7 @@ export default function ListingDetailPage() {
 
                 {/* LEVEL 5: Description */}
                 {listing.description && (
-                  <section aria-labelledby="description-heading">
-                    <h2 id="description-heading" className="text-base font-semibold mb-2">
-                      {t('listings.description')}
-                    </h2>
+                  <section aria-label={t('listings.description')}>
                     <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                       {listing.description}
                     </p>

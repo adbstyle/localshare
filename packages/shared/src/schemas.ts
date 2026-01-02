@@ -42,7 +42,7 @@ export const updateGroupSchema = z.object({
 
 // Listing Schemas
 export const createListingSchema = z.object({
-  title: z.string().min(5).max(200).transform((val) => val.trim()),
+  title: z.string().min(5).max(60).transform((val) => val.trim()),
   description: z.string().max(2000).transform((val) => val.trim()).optional(),
   type: z.nativeEnum(ListingType),
   price: z.number().int().min(0).max(1000000).optional(),
@@ -75,7 +75,7 @@ export const createListingSchema = z.object({
 );
 
 export const updateListingSchema = z.object({
-  title: z.string().min(5).max(200).transform((val) => val.trim()).optional(),
+  title: z.string().min(5).max(60).transform((val) => val.trim()).optional(),
   description: z.string().max(2000).transform((val) => val.trim()).optional(),
   type: z.nativeEnum(ListingType).optional(),
   price: z.number().int().min(0).max(1000000).optional(),

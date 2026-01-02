@@ -182,7 +182,7 @@ model GroupMember {
 model Listing {
   id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   creatorId     String           @map("creator_id") @db.Uuid
-  title         String           @db.VarChar(200)
+  title         String           @db.VarChar(60)
   description   String?
   type          ListingType
   price         Int?             // Price in cents

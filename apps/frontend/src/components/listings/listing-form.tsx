@@ -147,6 +147,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
             <Input
               id="title"
               placeholder={t('listings.titlePlaceholder')}
+              maxLength={60}
               {...register('title')}
             />
             {errors.title && (

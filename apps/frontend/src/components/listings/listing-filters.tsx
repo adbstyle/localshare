@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useState, useEffect, useRef } from 'react';
 
 interface ListingFiltersProps {
   filters: FilterListingsDto;
@@ -21,6 +23,34 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
 
   const types = Object.values(ListingType);
   const categories = Object.values(ListingCategory);
+
+  // Local state for immediate UI updates (debouncing only)
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+
+  // Track whether the update is from our own debounced value
+  const isInternalUpdateRef = useRef(false);
+
+  // Debounce the search value (300ms)
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+
+  // Sync debounced value to URL (only when value actually changes)
+  useEffect(() => {
+    if (debouncedSearch !== filters.search) {
+      isInternalUpdateRef.current = true;
+      onChange({ search: debouncedSearch || undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
+  // Sync external URL changes to local input (e.g., browser back/forward, clear filters)
+  useEffect(() => {
+    // Only update if this is an EXTERNAL change (not from our own debounce)
+    if (!isInternalUpdateRef.current && filters.search !== searchInput) {
+      setSearchInput(filters.search || '');
+    }
+    isInternalUpdateRef.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.search]);
 
   const handleTypeToggle = (type: ListingType) => {
     const currentTypes = filters.types || [];
@@ -39,6 +69,7 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
   };
 
   const handleClearFilters = () => {
+    setSearchInput('');
     onChange({
       types: undefined,
       categories: undefined,
@@ -71,8 +102,8 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
           <Label>{t('common.search')}</Label>
           <Input
             placeholder={t('listings.searchPlaceholder')}
-            value={filters.search || ''}
-            onChange={(e) => onChange({ search: e.target.value || undefined })}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
 

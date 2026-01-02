@@ -247,7 +247,8 @@
     "filterByType": "Nach Typ filtern",
     "filterByCategory": "Nach Kategorie filtern",
     "searchPlaceholder": "Suchen...",
-    "noSelection": "Keine Auswahl"
+    "noSelection": "Keine Auswahl",
+    "noImage": "Kein Bild"
   },
   "legal": {
     "privacy": "Datenschutzerklärung",

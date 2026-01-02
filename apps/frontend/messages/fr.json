@@ -226,7 +226,8 @@
     "filterByType": "Filtrer par type",
     "filterByCategory": "Filtrer par catégorie",
     "searchPlaceholder": "Rechercher...",
-    "noSelection": "Aucune sélection"
+    "noSelection": "Aucune sélection",
+    "noImage": "Pas d'image"
   },
   "legal": {
     "privacy": "Politique de confidentialité",

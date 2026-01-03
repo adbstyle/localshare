@@ -1,10 +1,17 @@
 import { z } from 'zod';
 import { ListingType, ListingCategory, PriceTimeUnit } from './types';
 
+// Helper: Trim string before validation
+const trimmedString = (minLength: number, maxLength: number) =>
+  z.preprocess(
+    (val) => (typeof val === 'string' ? val.trim() : val),
+    z.string().min(minLength).max(maxLength)
+  );
+
 // User Schemas
 export const updateUserSchema = z.object({
-  firstName: z.string().min(1).max(100).optional(),
-  lastName: z.string().min(1).max(100).optional(),
+  firstName: trimmedString(1, 50).optional(),
+  lastName: trimmedString(1, 50).optional(),
   homeAddress: z.string().min(1).max(500).optional(),
   phoneNumber: z
     .string()

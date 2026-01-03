@@ -61,8 +61,8 @@ export class MicrosoftStrategy extends PassportStrategy(
         provider: SsoProvider.MICROSOFT,
         providerUserId: userInfo.id,
         email: userInfo.mail || userInfo.userPrincipalName || '',
-        firstName: userInfo.givenName || '',
-        lastName: userInfo.surname || '',
+        firstName: (userInfo.givenName || '').trim().substring(0, 50),
+        lastName: (userInfo.surname || '').trim().substring(0, 50),
       });
 
       done(null, user);

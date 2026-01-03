@@ -85,8 +85,8 @@ assertEqual(test9.types, undefined, 'All invalid types should result in undefine
 // Test 10: Invalid categories
 console.log('Test 10: Invalid categories');
 const test10 = parseFiltersFromURL(new URLSearchParams('?categories=ELECTRONICS&categories=INVALID&categories=SPORTS'));
-assertTrue(test10.categories?.includes(ListingCategory.ELECTRONICS), 'Should include valid ELECTRONICS category');
-assertTrue(test10.categories?.includes(ListingCategory.SPORTS), 'Should include valid SPORTS category');
+assertTrue(test10.categories?.includes(ListingCategory.ELECTRONICS) ?? false, 'Should include valid ELECTRONICS category');
+assertTrue(test10.categories?.includes(ListingCategory.SPORTS) ?? false, 'Should include valid SPORTS category');
 assertTrue(!test10.categories?.includes('INVALID' as any), 'Should filter out INVALID category');
 
 // Test 11: myListings with various values

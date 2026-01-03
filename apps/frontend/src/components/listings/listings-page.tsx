@@ -7,8 +7,6 @@ import { api } from '@/lib/api';
 import { Listing, FilterListingsDto, PaginatedResponse } from '@localshare/shared';
 import { ListingCard } from './listing-card';
 import { ListingFilters } from './listing-filters';
-import { MobileFilterButton } from './mobile-filter-button';
-import { MobileFilterSheet } from './mobile-filter-sheet';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
@@ -35,7 +33,6 @@ function ListingsPageContent() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Derive page from URL (single source of truth)
   const page = useMemo(() => getPageFromURL(searchParams), [searchParams]);
@@ -45,16 +42,6 @@ function ListingsPageContent() {
     () => parseFiltersFromURL(searchParams, ITEMS_PER_PAGE),
     [searchParams]
   );
-
-  // Count active filters for mobile badge
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (filters.search) count++;
-    if (filters.myListings) count++;
-    if (filters.types?.length) count += filters.types.length;
-    if (filters.categories?.length) count += filters.categories.length;
-    return count;
-  }, [filters]);
 
   // Fetch listings from API based on current filters
   const fetchListings = useCallback(async () => {
@@ -100,15 +87,6 @@ function ListingsPageContent() {
       router.replace(`${pathname}?${urlString}`);
     },
     [filters, searchParams, pathname, router]
-  );
-
-  // Handle mobile filter apply - replaces all filters at once
-  const handleMobileFilterApply = useCallback(
-    (newFilters: Partial<FilterListingsDto>) => {
-      const urlString = buildURLFromFilters(newFilters, searchParams, 1);
-      router.replace(`${pathname}?${urlString}`);
-    },
-    [searchParams, pathname, router]
   );
 
   // Handle page changes - update URL (use push to enable browser back/forward)
@@ -176,24 +154,6 @@ function ListingsPageContent() {
 
   return (
     <div className="container py-8">
-      {/* Mobile Filter Button - Fixed position on mobile */}
-      <div className="md:hidden mb-4 flex justify-end">
-        <MobileFilterButton
-          activeFilterCount={activeFilterCount}
-          onClick={() => setMobileFilterOpen(true)}
-        />
-      </div>
-
-      {/* Mobile Filter Sheet - Only render when open */}
-      {mobileFilterOpen && (
-        <MobileFilterSheet
-          open={mobileFilterOpen}
-          onOpenChange={setMobileFilterOpen}
-          currentFilters={filters}
-          onApply={handleMobileFilterApply}
-        />
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Filters Sidebar - Hidden on mobile */}
         <aside className="hidden md:block md:col-span-1">

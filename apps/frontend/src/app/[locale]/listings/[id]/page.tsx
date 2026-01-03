@@ -12,7 +12,7 @@ import { ContactButtons } from '@/components/listings/contact-buttons';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
-import { Edit, Trash2, MapPin, Calendar, Share2 } from 'lucide-react';
+import { Edit, Trash2, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -109,7 +109,6 @@ export default function ListingDetailPage() {
                       <Badge variant="secondary" className="text-sm">
                         {t(`listings.types.${listing.type}`)}
                       </Badge>
-                      <span className="text-muted-foreground" aria-hidden="true">•</span>
                       <Badge variant="outline" className="text-sm">
                         {t(`listings.categories.${listing.category}`)}
                       </Badge>
@@ -221,10 +220,9 @@ export default function ListingDetailPage() {
                 {/* LEVEL 6 & 7: Metadata */}
                 <dl className="space-y-4">
                   {/* LEVEL 6: Creation Date (relative time) */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-4 border-t">
-                    <dt className="sr-only">{t('listings.createdAt')}</dt>
-                    <dd className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" aria-hidden="true" />
+                  <div className="text-sm text-muted-foreground pt-4 border-t">
+                    <dt className="inline">{t('listings.createdAt')}: </dt>
+                    <dd className="inline">
                       <time dateTime={listing.createdAt}>
                         {formatRelativeDate(listing.createdAt, locale)}
                       </time>
@@ -233,18 +231,14 @@ export default function ListingDetailPage() {
 
                   {/* LEVEL 7: Shared With */}
                   {listing.visibility && listing.visibility.length > 0 && (
-                    <div className="pt-4 border-t">
-                      <dt className="flex items-center gap-2 mb-2">
-                        <Share2 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                        <span className="text-sm font-semibold">
-                          {t('listings.sharedWith')}
-                        </span>
-                      </dt>
-                      <dd className="flex flex-wrap gap-2">
+                    <div className="text-sm text-muted-foreground">
+                      <dt className="inline">{t('listings.sharedWith')}: </dt>
+                      <dd className="inline">
                         {listing.visibility.map((vis, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
+                          <span key={index}>
                             {vis.community?.name || vis.group?.name}
-                          </Badge>
+                            {index < listing.visibility.length - 1 && ', '}
+                          </span>
                         ))}
                       </dd>
                     </div>

@@ -83,9 +83,6 @@ export function Header() {
         {/* Mobile Action Buttons & Menu */}
         {user && (
           <div className="flex md:hidden items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handleFeedback} aria-label={t('common.feedback')}>
-              <MessageSquare className="h-5 w-5" />
-            </Button>
             <Button variant="default" size="icon" asChild aria-label={t('listings.create')}>
               <Link href="/listings/create">
                 <Plus className="h-5 w-5" />

@@ -12,7 +12,7 @@ import { ContactButtons } from '@/components/listings/contact-buttons';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
-import { ArrowLeft, Edit, Trash2, MapPin, Calendar, Share2 } from 'lucide-react';
+import { Edit, Trash2, MapPin, Calendar, Share2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -96,12 +96,6 @@ export default function ListingDetailPage() {
 
   return (
     <div className="container py-8">
-      {/* Back Button */}
-      <Button variant="ghost" onClick={() => router.back()} className="mb-4">
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        {t('common.back')}
-      </Button>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2">

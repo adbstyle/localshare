@@ -13,6 +13,8 @@
     "confirm": "Bestätigen",
     "search": "Suchen",
     "filter": "Filtern",
+    "reset": "Zurücksetzen",
+    "apply": "Anwenden",
     "required": "Pflichtfeld",
     "optional": "Optional",
     "feedback": "Feedback geben",
@@ -248,7 +250,10 @@
     "filterByCategory": "Nach Kategorie filtern",
     "searchPlaceholder": "Suchen...",
     "noSelection": "Keine Auswahl",
-    "noImage": "Kein Bild"
+    "noImage": "Kein Bild",
+    "openFilters": "Filter öffnen",
+    "filterActive": "Filter aktiv",
+    "filterDescription": "Filtern Sie Anzeigen nach Typ, Kategorie und Suchbegriff"
   },
   "legal": {
     "privacy": "Datenschutzerklärung",

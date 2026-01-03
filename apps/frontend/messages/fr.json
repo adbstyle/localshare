@@ -13,6 +13,8 @@
     "confirm": "Confirmer",
     "search": "Rechercher",
     "filter": "Filtrer",
+    "reset": "Réinitialiser",
+    "apply": "Appliquer",
     "required": "Obligatoire",
     "optional": "Optionnel",
     "feedback": "Donner un avis",
@@ -227,7 +229,10 @@
     "filterByCategory": "Filtrer par catégorie",
     "searchPlaceholder": "Rechercher...",
     "noSelection": "Aucune sélection",
-    "noImage": "Pas d'image"
+    "noImage": "Pas d'image",
+    "openFilters": "Ouvrir les filtres",
+    "filterActive": "Filtre actif",
+    "filterDescription": "Filtrez les annonces par type, catégorie et terme de recherche"
   },
   "legal": {
     "privacy": "Politique de confidentialité",

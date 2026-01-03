@@ -97,7 +97,7 @@ export function MobileFilterSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="fixed inset-x-0 bottom-0 top-auto h-[85vh] max-h-[85vh] w-full max-w-full translate-x-0 translate-y-0 rounded-t-2xl p-0 flex flex-col data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:rounded-t-2xl"
+        className="fixed inset-x-0 bottom-0 top-0 h-[100dvh] max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-t-2xl p-0 flex flex-col data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:rounded-t-2xl"
         onPointerDownOutside={() => onOpenChange(false)}
         onEscapeKeyDown={() => onOpenChange(false)}
       >

@@ -3,6 +3,7 @@ import { PrismaService } from '../database/prisma.service';
 import { CreateListingDto, UpdateListingDto, FilterListingsDto } from './dto';
 import { VisibilityService } from './visibility.service';
 import { ImageService } from './image.service';
+import { PaginatedResponse } from '@localshare/shared';
 
 @Injectable()
 export class ListingsService {
@@ -20,6 +21,7 @@ export class ListingsService {
         description: dto.description,
         type: dto.type,
         price: dto.price,
+        priceTimeUnit: dto.priceTimeUnit,
         category: dto.category,
       },
       include: {
@@ -110,6 +112,86 @@ export class ListingsService {
         url: this.imageService.getImageUrl(img.filename),
       })),
     }));
+  }
+
+  // Note: Using 'any' here because list view returns a subset of Listing fields
+  // (no visibility data, limited creator fields). Consider creating a ListingListItem type.
+  async findAllPaginated(userId: string, filters: FilterListingsDto): Promise<PaginatedResponse<any>> {
+    const visibleListingIds = await this.visibilityService.getVisibleListingIds(
+      userId,
+    );
+
+    const where: any = {
+      id: { in: visibleListingIds },
+      deletedAt: null,
+    };
+
+    // Apply filters
+    if (filters.myListings) {
+      where.creatorId = userId;
+    }
+
+    if (filters.types && filters.types.length > 0) {
+      where.type = { in: filters.types };
+    }
+
+    if (filters.categories && filters.categories.length > 0) {
+      where.category = { in: filters.categories };
+    }
+
+    if (filters.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Parallel queries for performance
+    const [listings, total] = await Promise.all([
+      this.prisma.listing.findMany({
+        where,
+        include: {
+          creator: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          images: {
+            orderBy: { orderIndex: 'asc' },
+            take: 1, // Just first image for list view
+          },
+          _count: {
+            select: {
+              images: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: filters.limit || 30,
+        skip: filters.offset || 0,
+      }),
+      this.prisma.listing.count({ where }),
+    ]);
+
+    // Map image URLs
+    const mappedListings = listings.map((listing) => ({
+      ...listing,
+      images: listing.images.map((img) => ({
+        ...img,
+        url: this.imageService.getImageUrl(img.filename),
+      })),
+    }));
+
+    return {
+      data: mappedListings,
+      total,
+      limit: filters.limit || 30,
+      offset: filters.offset || 0,
+    };
   }
 
   async findOne(id: string, userId: string) {
@@ -228,6 +310,7 @@ export class ListingsService {
         description: dto.description,
         type: dto.type,
         price: dto.price,
+        priceTimeUnit: dto.priceTimeUnit,
         category: dto.category,
       },
       include: {

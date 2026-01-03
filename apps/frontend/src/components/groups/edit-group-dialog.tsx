@@ -41,6 +41,7 @@ export function EditGroupDialog({ group, onSuccess }: EditGroupDialogProps) {
     try {
       await api.patch(`/groups/${group.id}`, data);
       toast({
+        variant: 'success',
         title: t('groups.updated'),
       });
       onSuccess();

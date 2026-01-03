@@ -1,10 +1,17 @@
 import { z } from 'zod';
-import { ListingType, ListingCategory } from './types';
+import { ListingType, ListingCategory, PriceTimeUnit } from './types';
+
+// Helper: Trim string before validation
+const trimmedString = (minLength: number, maxLength: number) =>
+  z.preprocess(
+    (val) => (typeof val === 'string' ? val.trim() : val),
+    z.string().min(minLength).max(maxLength)
+  );
 
 // User Schemas
 export const updateUserSchema = z.object({
-  firstName: z.string().min(1).max(100).optional(),
-  lastName: z.string().min(1).max(100).optional(),
+  firstName: trimmedString(1, 50).optional(),
+  lastName: trimmedString(1, 50).optional(),
   homeAddress: z.string().min(1).max(500).optional(),
   phoneNumber: z
     .string()
@@ -42,10 +49,11 @@ export const updateGroupSchema = z.object({
 
 // Listing Schemas
 export const createListingSchema = z.object({
-  title: z.string().min(5).max(200).transform((val) => val.trim()),
+  title: z.string().min(5).max(60).transform((val) => val.trim()),
   description: z.string().max(2000).transform((val) => val.trim()).optional(),
   type: z.nativeEnum(ListingType),
   price: z.number().int().min(0).max(1000000).optional(),
+  priceTimeUnit: z.nativeEnum(PriceTimeUnit).optional(),
   category: z.nativeEnum(ListingCategory),
   communityIds: z.array(z.string().uuid()).optional(),
   groupIds: z.array(z.string().uuid()).optional(),
@@ -60,13 +68,25 @@ export const createListingSchema = z.object({
     message: 'Price is required for SELL and RENT listings',
     path: ['price'],
   }
+).refine(
+  (data) => {
+    if (data.type === ListingType.RENT) {
+      return data.priceTimeUnit !== undefined;
+    }
+    return true;
+  },
+  {
+    message: 'Price time unit is required for RENT listings',
+    path: ['priceTimeUnit'],
+  }
 );
 
 export const updateListingSchema = z.object({
-  title: z.string().min(5).max(200).transform((val) => val.trim()).optional(),
+  title: z.string().min(5).max(60).transform((val) => val.trim()).optional(),
   description: z.string().max(2000).transform((val) => val.trim()).optional(),
   type: z.nativeEnum(ListingType).optional(),
   price: z.number().int().min(0).max(1000000).optional(),
+  priceTimeUnit: z.nativeEnum(PriceTimeUnit).optional(),
   category: z.nativeEnum(ListingCategory).optional(),
   communityIds: z.array(z.string().uuid()).optional(),
   groupIds: z.array(z.string().uuid()).optional(),

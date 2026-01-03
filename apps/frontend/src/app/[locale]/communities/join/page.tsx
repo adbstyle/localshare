@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Loader2, AlertCircle } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface CommunityPreview {
   id: string;
@@ -19,7 +20,7 @@ interface CommunityPreview {
   };
 }
 
-export default function JoinCommunityPage() {
+function JoinCommunityPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations();
@@ -71,6 +72,7 @@ export default function JoinCommunityPage() {
     try {
       await api.post(`/communities/join/${token}`);
       toast({
+        variant: 'success',
         title: t('communities.joined'),
       });
       router.push('/communities');
@@ -161,5 +163,13 @@ export default function JoinCommunityPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function JoinCommunityPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner className="container max-w-md" />}>
+      <JoinCommunityPageContent />
+    </Suspense>
   );
 }

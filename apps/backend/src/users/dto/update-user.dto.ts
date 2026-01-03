@@ -3,12 +3,12 @@ import { IsString, IsOptional, Length, Matches, ValidateIf } from 'class-validat
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
-  @Length(1, 100)
+  @Length(1, 50)
   firstName?: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 100)
+  @Length(1, 50)
   lastName?: string;
 
   @IsOptional()

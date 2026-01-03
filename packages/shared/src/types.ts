@@ -32,6 +32,13 @@ export enum VisibilityType {
   GROUP = 'GROUP',
 }
 
+export enum PriceTimeUnit {
+  HOUR = 'HOUR',
+  DAY = 'DAY',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+}
+
 // User Types
 export interface User {
   id: string;
@@ -131,6 +138,7 @@ export interface Listing {
   description: string | null;
   type: ListingType;
   price: number | null;
+  priceTimeUnit: PriceTimeUnit | null;
   category: ListingCategory;
   creatorId: string;
   creator?: {
@@ -157,6 +165,7 @@ export interface CreateListingDto {
   description?: string;
   type: ListingType;
   price?: number;
+  priceTimeUnit?: PriceTimeUnit;
   category: ListingCategory;
   communityIds?: string[];
   groupIds?: string[];
@@ -167,6 +176,7 @@ export interface UpdateListingDto {
   description?: string;
   type?: ListingType;
   price?: number;
+  priceTimeUnit?: PriceTimeUnit;
   category?: ListingCategory;
   communityIds?: string[];
   groupIds?: string[];

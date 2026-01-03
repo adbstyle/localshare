@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-export default function AuthCallback() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { fetchUser } = useAuth();
@@ -51,5 +52,13 @@ export default function AuthCallback() {
         <p className="mt-4 text-muted-foreground">Authenticating...</p>
       </div>
     </div>
+  );
+}
+
+export default function AuthCallback() {
+  return (
+    <Suspense fallback={<LoadingSpinner fullScreen message="Loading..." />}>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }

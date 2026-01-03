@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ToastPrimitives from '@radix-ui/react-toast';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { X } from 'lucide-react';
+import { X, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ToastProvider = ToastPrimitives.Provider;
@@ -22,12 +22,14 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
+  'group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border-2 p-4 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full sm:p-6',
   {
     variants: {
       variant: {
-        default: 'border bg-background text-foreground',
-        destructive: 'destructive group border-destructive bg-destructive text-destructive-foreground',
+        default: 'border-border bg-card text-card-foreground',
+        success: 'border-success-bg-border bg-success-bg text-success-bg-foreground',
+        warning: 'border-warning-bg-border bg-warning-bg text-warning-bg-foreground',
+        destructive: 'border-destructive-bg-border bg-destructive-bg text-destructive-bg-foreground',
       },
     },
     defaultVariants: {
@@ -36,11 +38,55 @@ const toastVariants = cva(
   }
 );
 
+// Icon mapping for each toast variant
+const TOAST_ICON_MAP = {
+  success: CheckCircle2,
+  warning: AlertTriangle,
+  destructive: XCircle,
+  default: null,
+} as const;
+
+// ARIA role mapping for accessibility
+const ARIA_ROLE_MAP = {
+  success: 'status',
+  warning: 'alert',
+  destructive: 'alert',
+  default: 'status',
+} as const;
+
+// ARIA live region mapping
+const ARIA_LIVE_MAP = {
+  success: 'polite',
+  warning: 'assertive',
+  destructive: 'assertive',
+  default: 'polite',
+} as const;
+
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
-  return <ToastPrimitives.Root ref={ref} className={cn(toastVariants({ variant }), className)} {...props} />;
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
+    VariantProps<typeof toastVariants> & {
+      showIcon?: boolean;
+    }
+>(({ className, variant, showIcon = true, children, ...props }, ref) => {
+  const IconComponent = variant && TOAST_ICON_MAP[variant] ? TOAST_ICON_MAP[variant] : null;
+  const ariaRole = variant ? ARIA_ROLE_MAP[variant] : 'status';
+  const ariaLive = variant ? ARIA_LIVE_MAP[variant] : 'polite';
+
+  return (
+    <ToastPrimitives.Root
+      ref={ref}
+      role={ariaRole}
+      aria-live={ariaLive}
+      className={cn(toastVariants({ variant }), className)}
+      {...props}
+    >
+      <div className="flex items-start gap-3 flex-1">
+        {showIcon && IconComponent && <IconComponent className="h-5 w-5 flex-shrink-0 mt-0.5" aria-hidden="true" />}
+        <div className="flex-1 min-w-0">{children}</div>
+      </div>
+    </ToastPrimitives.Root>
+  );
 });
 Toast.displayName = ToastPrimitives.Root.displayName;
 

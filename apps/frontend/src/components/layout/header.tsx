@@ -2,57 +2,165 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { BetaBadge } from '@/components/beta-badge';
 import { useAuth } from '@/hooks/use-auth';
 import { UserMenu } from '@/components/layout/user-menu';
-import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Menu, X, MessageSquare, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState, useMemo, useCallback, Suspense } from 'react';
+import { MobileFilterButton } from '@/components/listings/mobile-filter-button';
+import { MobileFilterSheet } from '@/components/listings/mobile-filter-sheet';
+import { FilterListingsDto } from '@localshare/shared';
+import { parseFiltersFromURL, buildURLFromFilters } from '@/lib/utils/url-filters';
 
-export function Header() {
+const ITEMS_PER_PAGE = 30;
+
+function HeaderContent() {
   const t = useTranslations();
   const { user, logout } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const feedbackEmail = process.env.NEXT_PUBLIC_FEEDBACK_EMAIL || 'feedback@localshare.ch';
+
+  // Calculate active filter count from URL (for badge)
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (searchParams.get('search')) count++;
+    if (searchParams.get('myListings') === 'true') count++;
+    const types = searchParams.getAll('types');
+    const categories = searchParams.getAll('categories');
+    count += types.length + categories.length;
+    return count;
+  }, [searchParams]);
+
+  // Get current filters from URL for the sheet
+  const currentFilters = useMemo(
+    () => parseFiltersFromURL(searchParams, ITEMS_PER_PAGE),
+    [searchParams]
+  );
+
+  // Handle filter apply - navigate to /listings with new filter params
+  const handleFilterApply = useCallback(
+    (filters: Partial<FilterListingsDto>) => {
+      const urlString = buildURLFromFilters(filters, searchParams, 1);
+      router.push(`/?${urlString}`);
+      setMobileFilterOpen(false);
+    },
+    [searchParams, router]
+  );
+
+  const handleFeedback = () => {
+    window.location.href = `mailto:${feedbackEmail}?subject=LocalShare Feedback`;
+  };
 
   return (
     <header className="border-b bg-background sticky top-0 z-50">
-      <div className="container flex items-center justify-between py-4">
+      <div className="container flex items-center gap-6 py-4">
         {/* Logo & Beta Badge */}
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+          <Link href="/" className="flex items-center gap-2" aria-label="LocalShare">
+            <Image
+              src="/logo.svg"
+              alt="LocalShare Logo"
+              width={32}
+              height={32}
+              priority
+              className="h-8 w-8"
+            />
           </Link>
           <BetaBadge />
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          {user ? (
-            <>
-              <Link href="/" className="text-sm font-medium hover:underline">
-                {t('nav.listings')}
-              </Link>
-              <Link href="/communities" className="text-sm font-medium hover:underline">
-                {t('nav.communities')}
-              </Link>
-              <Link href="/groups" className="text-sm font-medium hover:underline">
-                {t('nav.groups')}
-              </Link>
-              <UserMenu user={user} logout={logout} />
-            </>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              {t('auth.welcomeText')}
-            </div>
-          )}
-        </nav>
+        {/* Desktop Navigation Links - Left aligned */}
+        {user && (
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="/" className="text-sm font-medium hover:underline">
+              {t('nav.listings')}
+            </Link>
+            <Link href="/communities" className="text-sm font-medium hover:underline">
+              {t('nav.communities')}
+            </Link>
+            <Link href="/groups" className="text-sm font-medium hover:underline">
+              {t('nav.groups')}
+            </Link>
+          </nav>
+        )}
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden p-2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {/* Spacer */}
+        <div className="flex-grow" />
+
+        {/* Desktop Action Buttons - Right aligned */}
+        {user && (
+          <div className="hidden md:flex items-center gap-6">
+            <Button variant="ghost" size="sm" onClick={handleFeedback}>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              {t('common.feedback')}
+            </Button>
+            <Button variant="default" size="sm" asChild>
+              <Link href="/listings/create">
+                <Plus className="h-4 w-4 mr-2" />
+                {t('listings.create')}
+              </Link>
+            </Button>
+            <UserMenu user={user} logout={logout} />
+          </div>
+        )}
+
+        {/* Not logged in message */}
+        {!user && (
+          <div className="hidden md:flex text-sm text-muted-foreground">
+            {t('auth.welcomeText')}
+          </div>
+        )}
+
+        {/* Mobile Action Buttons & Menu: [Filter] [Create] [Menu] */}
+        {user && (
+          <div className="flex md:hidden items-center gap-2">
+            <MobileFilterButton
+              activeFilterCount={activeFilterCount}
+              onClick={() => setMobileFilterOpen(true)}
+            />
+            <Button variant="default" size="icon" asChild aria-label={t('listings.create')}>
+              <Link href="/listings/create">
+                <Plus className="h-5 w-5" />
+              </Link>
+            </Button>
+            <button
+              className="p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        )}
+
+        {/* Mobile Filter Sheet */}
+        {mobileFilterOpen && (
+          <MobileFilterSheet
+            open={mobileFilterOpen}
+            onOpenChange={setMobileFilterOpen}
+            currentFilters={currentFilters}
+            onApply={handleFilterApply}
+          />
+        )}
+
+        {/* Mobile Menu Button (when not logged in) */}
+        {!user && (
+          <button
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        )}
       </div>
 
       {/* Mobile Navigation */}
@@ -61,6 +169,27 @@ export function Header() {
           <nav className="container py-4 flex flex-col gap-4">
             {user ? (
               <>
+                {/* Action Section */}
+                <button
+                  onClick={() => {
+                    handleFeedback();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-sm font-medium flex items-center gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {t('common.feedback')}
+                </button>
+                <Link
+                  href="/listings/create"
+                  className="text-sm font-medium text-primary flex items-center gap-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Plus className="h-4 w-4" />
+                  {t('listings.create')}
+                </Link>
+                <div className="border-t my-1" />
+                {/* Navigation Section */}
                 <Link
                   href="/"
                   className="text-sm font-medium"
@@ -89,6 +218,8 @@ export function Header() {
                 >
                   {t('nav.profile')}
                 </Link>
+                <div className="border-t my-1" />
+                {/* Account Section */}
                 <button
                   onClick={() => {
                     logout();
@@ -104,5 +235,33 @@ export function Header() {
         </div>
       )}
     </header>
+  );
+}
+
+// Skeleton for header during SSR/loading
+function HeaderSkeleton() {
+  return (
+    <header className="border-b bg-background sticky top-0 z-50">
+      <div className="container flex items-center gap-6 py-4">
+        <div className="flex items-center gap-4">
+          <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+          <div className="h-5 w-12 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="flex-grow" />
+        <div className="flex md:hidden items-center gap-2">
+          <div className="h-10 w-10 bg-muted animate-pulse rounded" />
+          <div className="h-10 w-10 bg-muted animate-pulse rounded" />
+          <div className="h-10 w-10 bg-muted animate-pulse rounded" />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export function Header() {
+  return (
+    <Suspense fallback={<HeaderSkeleton />}>
+      <HeaderContent />
+    </Suspense>
   );
 }

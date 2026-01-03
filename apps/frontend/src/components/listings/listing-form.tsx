@@ -10,6 +10,7 @@ import {
   UpdateListingDto,
   ListingType,
   ListingCategory,
+  PriceTimeUnit,
   Community,
   Group,
 } from '@localshare/shared';
@@ -59,6 +60,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
       description: listing.description || '',
       type: listing.type,
       price: listing.price || undefined,
+      priceTimeUnit: listing.priceTimeUnit || undefined,
       category: listing.category,
       communityIds: listing.visibility
         .filter((v) => v.type === 'COMMUNITY')
@@ -120,8 +122,10 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
 
   const listingTypes = Object.values(ListingType);
   const listingCategories = Object.values(ListingCategory);
+  const priceTimeUnits = Object.values(PriceTimeUnit);
 
   const showPriceField = selectedType === ListingType.SELL || selectedType === ListingType.RENT;
+  const showPriceTimeUnit = selectedType === ListingType.RENT;
 
   if (loadingData) {
     return (
@@ -137,12 +141,18 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
         <CardContent className="pt-6 space-y-4">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title">
-              {t('listings.listingTitle')} <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="title">
+                {t('listings.listingTitle')} <span className="text-destructive">*</span>
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                {watch('title')?.length || 0}/60
+              </span>
+            </div>
             <Input
               id="title"
               placeholder={t('listings.titlePlaceholder')}
+              maxLength={60}
               {...register('title')}
             />
             {errors.title && (
@@ -211,6 +221,39 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               />
               {errors.price && (
                 <p className="text-sm text-destructive">{errors.price.message}</p>
+              )}
+            </div>
+          )}
+
+          {/* Price Time Unit (conditional - only for RENT) */}
+          {showPriceTimeUnit && (
+            <div className="space-y-2">
+              <Label htmlFor="priceTimeUnit">
+                {t('listings.priceTimeUnit')} <span className="text-destructive">*</span>
+              </Label>
+              <Controller
+                name="priceTimeUnit"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('listings.selectTimeUnit')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {priceTimeUnits.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {t(`listings.timeUnits.${unit}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.priceTimeUnit && (
+                <p className="text-sm text-destructive">{errors.priceTimeUnit.message}</p>
               )}
             </div>
           )}

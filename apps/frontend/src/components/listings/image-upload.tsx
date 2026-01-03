@@ -137,6 +137,7 @@ export function ImageUpload({
       }
 
       toast({
+        variant: 'success',
         title: t('listings.imagesUploaded'),
       });
     } catch (error: any) {
@@ -164,6 +165,7 @@ export function ImageUpload({
       }
 
       toast({
+        variant: 'success',
         title: t('listings.imageDeleted'),
       });
     } catch (error: any) {

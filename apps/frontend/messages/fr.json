@@ -13,9 +13,14 @@
     "confirm": "Confirmer",
     "search": "Rechercher",
     "filter": "Filtrer",
+    "reset": "Réinitialiser",
+    "apply": "Appliquer",
     "required": "Obligatoire",
     "optional": "Optionnel",
-    "feedback": "Donner un avis"
+    "feedback": "Donner un avis",
+    "showingResults": "Affichage de {from} à {to} sur {total} résultats",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "nav": {
     "home": "Accueil",
@@ -186,6 +191,14 @@
     },
     "price": "Prix (CHF)",
     "pricePlaceholder": "0",
+    "priceTimeUnit": "Unité de temps",
+    "selectTimeUnit": "Sélectionner l'unité de temps",
+    "timeUnits": {
+      "HOUR": "par heure",
+      "DAY": "par jour",
+      "WEEK": "par semaine",
+      "MONTH": "par mois"
+    },
     "images": "Images",
     "uploadImages": "Télécharger des images (max. 3)",
     "imageLimit": "Maximum 3 images de 10 Mo chacune",
@@ -200,7 +213,7 @@
     "author": "Créateur",
     "address": "Adresse",
     "phone": "Téléphone",
-    "createdAt": "Créé le",
+    "createdAt": "Créé",
     "edit": "Modifier",
     "delete": "Supprimer",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette annonce?",
@@ -215,7 +228,11 @@
     "filterByType": "Filtrer par type",
     "filterByCategory": "Filtrer par catégorie",
     "searchPlaceholder": "Rechercher...",
-    "noSelection": "Aucune sélection"
+    "noSelection": "Aucune sélection",
+    "noImage": "Pas d'image",
+    "openFilters": "Ouvrir les filtres",
+    "filterActive": "Filtre actif",
+    "filterDescription": "Filtrez les annonces par type, catégorie et terme de recherche"
   },
   "legal": {
     "privacy": "Politique de confidentialité",

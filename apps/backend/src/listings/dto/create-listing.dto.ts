@@ -11,11 +11,11 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ListingType, ListingCategory } from '@prisma/client';
+import { ListingType, ListingCategory, PriceTimeUnit } from '@prisma/client';
 
 export class CreateListingDto {
   @IsString()
-  @Length(5, 200)
+  @Length(5, 60)
   @Transform(({ value }) => value?.trim())
   title: string;
 
@@ -33,6 +33,10 @@ export class CreateListingDto {
   @Min(0)
   @Max(1000000)
   price?: number;
+
+  @ValidateIf((o) => o.type === 'RENT')
+  @IsEnum(PriceTimeUnit)
+  priceTimeUnit?: PriceTimeUnit;
 
   @IsEnum(ListingCategory)
   category: ListingCategory;

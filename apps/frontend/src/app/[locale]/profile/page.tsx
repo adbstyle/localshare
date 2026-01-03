@@ -161,6 +161,7 @@ export default function ProfilePage() {
                   <Label htmlFor="firstName">{t('profile.firstName')} *</Label>
                   <Input
                     id="firstName"
+                    maxLength={50}
                     {...register('firstName')}
                     className={errors.firstName ? 'border-destructive' : ''}
                   />
@@ -174,6 +175,7 @@ export default function ProfilePage() {
                   <Label htmlFor="lastName">{t('profile.lastName')} *</Label>
                   <Input
                     id="lastName"
+                    maxLength={50}
                     {...register('lastName')}
                     className={errors.lastName ? 'border-destructive' : ''}
                   />

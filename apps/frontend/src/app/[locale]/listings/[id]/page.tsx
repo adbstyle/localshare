@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { api } from '@/lib/api';
 import { Listing } from '@localshare/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { ContactButtons } from '@/components/listings/contact-buttons';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { formatPrice, formatDate, shouldShowPrice } from '@/lib/utils';
-import { ArrowLeft, Edit, Trash2, MapPin, Calendar, Tag, Share2 } from 'lucide-react';
+import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
+import { Edit, Trash2, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -31,6 +31,7 @@ export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations();
+  const locale = useLocale();
   const { user } = useAuth();
   const { toast } = useToast();
   const [listing, setListing] = useState<Listing | null>(null);
@@ -38,11 +39,7 @@ export default function ListingDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  useEffect(() => {
-    fetchListing();
-  }, [params.id]);
-
-  const fetchListing = async () => {
+  const fetchListing = useCallback(async () => {
     try {
       const { data } = await api.get<Listing>(`/listings/${params.id}`);
       setListing(data);
@@ -56,12 +53,17 @@ export default function ListingDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id, toast, t, router]);
+
+  useEffect(() => {
+    fetchListing();
+  }, [fetchListing]);
 
   const handleDelete = async () => {
     try {
       await api.delete(`/listings/${params.id}`);
       toast({
+        variant: 'success',
         title: t('listings.deleted'),
       });
       router.push('/');
@@ -94,158 +96,160 @@ export default function ListingDetailPage() {
 
   return (
     <div className="container py-8">
-      {/* Back Button */}
-      <Button variant="ghost" onClick={() => router.back()} className="mb-4">
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        {t('common.back')}
-      </Button>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Image Gallery */}
-          <Card>
-            <CardContent className="p-0">
-              {images.length > 0 ? (
-                <div>
-                  {/* Main Image */}
-                  <div className="relative h-96 bg-muted">
-                    <Image
-                      src={`${apiUrl}${images[selectedImageIndex].url}`}
-                      alt={listing.title}
-                      fill
-                      className="object-contain"
-                      priority
-                    />
+        <div className="lg:col-span-2">
+          <article>
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    {/* LEVEL 1: Type & Category */}
+                    <div className="flex items-center gap-2 mb-3" role="group" aria-label="Listing type and category">
+                      <Badge variant="secondary" className="text-sm">
+                        {t(`listings.types.${listing.type}`)}
+                      </Badge>
+                      <Badge variant="outline" className="text-sm">
+                        {t(`listings.categories.${listing.category}`)}
+                      </Badge>
+                    </div>
+
+                    {/* LEVEL 2: Title */}
+                    <h1 className="text-3xl font-bold leading-tight mb-4 break-words">
+                      {listing.title}
+                    </h1>
+
+                    {/* LEVEL 3: Price (muted, not primary) */}
+                    {listing.price !== null && shouldShowPrice(listing.type) && (
+                      <p
+                        className="text-xl font-semibold text-muted-foreground mb-6"
+                        aria-label={`Preis: ${formatPrice(listing.price, listing.priceTimeUnit, t)}`}
+                      >
+                        {formatPrice(listing.price, listing.priceTimeUnit, t)}
+                      </p>
+                    )}
                   </div>
-                  {/* Thumbnail Strip */}
-                  {images.length > 1 && (
-                    <div className="grid grid-cols-3 gap-2 p-4">
-                      {images.map((image, index) => (
-                        <button
-                          key={image.id}
-                          onClick={() => setSelectedImageIndex(index)}
-                          className={`relative h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                            selectedImageIndex === index
-                              ? 'border-primary'
-                              : 'border-transparent'
-                          }`}
-                        >
-                          <Image
-                            src={`${apiUrl}${image.url}`}
-                            alt={`${listing.title} - ${index + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </button>
-                      ))}
+
+                  {/* Edit/Delete buttons (owner only) */}
+                  {isOwner && (
+                    <div className="flex gap-2">
+                      <Link href={`/listings/${listing.id}/edit`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4 mr-2" />
+                          {t('common.edit')}
+                        </Button>
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            {t('common.delete')}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t('listings.deleteConfirm')}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+                              {t('common.delete')}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="h-96 flex items-center justify-center bg-muted">
-                  <p className="text-muted-foreground">No images</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardHeader>
 
-          {/* Listing Details */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge>{t(`listings.types.${listing.type}`)}</Badge>
-                    <Badge variant="outline">{t(`listings.categories.${listing.category}`)}</Badge>
-                  </div>
-                  <CardTitle className="text-3xl mb-2">{listing.title}</CardTitle>
-                  {listing.price !== null && shouldShowPrice(listing.type) && (
-                    <p className="text-3xl font-bold text-primary">
-                      {formatPrice(listing.price)}
-                    </p>
-                  )}
-                </div>
-                {isOwner && (
-                  <div className="flex gap-2">
-                    <Link href={`/listings/${listing.id}/edit`}>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        {t('common.edit')}
-                      </Button>
-                    </Link>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          {t('common.delete')}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>{t('listings.deleteConfirm')}</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleDelete} className="bg-destructive">
-                            {t('common.delete')}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+              <CardContent className="space-y-6">
+                {/* LEVEL 4: Images - CONDITIONAL (only if exists) */}
+                {images.length > 0 && (
+                  <figure aria-label="Produktbilder">
+                    {/* Main Image */}
+                    <div className="relative h-96 bg-muted rounded-lg overflow-hidden">
+                      <Image
+                        src={`${apiUrl}${images[selectedImageIndex].url}`}
+                        alt={`${listing.title} - Ansicht ${selectedImageIndex + 1} von ${images.length}`}
+                        fill
+                        className="object-contain"
+                        priority
+                      />
+                    </div>
+
+                    {/* Thumbnail Strip */}
+                    {images.length > 1 && (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mt-4">
+                        {images.map((image, index) => (
+                          <button
+                            key={image.id}
+                            onClick={() => setSelectedImageIndex(index)}
+                            className={`relative h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                              selectedImageIndex === index
+                                ? 'border-primary'
+                                : 'border-transparent'
+                            }`}
+                            aria-label={`Bild ${index + 1} von ${images.length} anzeigen`}
+                          >
+                            <Image
+                              src={`${apiUrl}${image.url}`}
+                              alt={`${listing.title} - Vorschau ${index + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </figure>
                 )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {listing.description && (
-                <div>
-                  <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap">
-                    {listing.description}
-                  </p>
-                </div>
-              )}
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    {formatDate(listing.createdAt)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Tag className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    {t(`listings.categories.${listing.category}`)}
-                  </span>
-                </div>
-              </div>
+                {/* LEVEL 5: Description */}
+                {listing.description && (
+                  <section aria-label={t('listings.description')}>
+                    <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
+                      {listing.description}
+                    </p>
+                  </section>
+                )}
 
-              {/* Shared With */}
-              {listing.visibility && listing.visibility.length > 0 && (
-                <div className="pt-4 border-t">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Share2 className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="font-semibold text-sm">{t('listings.sharedWith')}</h3>
+                {/* LEVEL 6 & 7: Metadata */}
+                <dl className="space-y-4">
+                  {/* LEVEL 6: Creation Date (relative time) */}
+                  <div className="text-sm text-muted-foreground pt-4 border-t">
+                    <dt className="inline">{t('listings.createdAt')}: </dt>
+                    <dd className="inline">
+                      <time dateTime={listing.createdAt}>
+                        {formatRelativeDate(listing.createdAt, locale)}
+                      </time>
+                    </dd>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {listing.visibility.map((vis, index) => (
-                      <Badge key={index} variant="secondary">
-                        {vis.community?.name || vis.group?.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+                  {/* LEVEL 7: Shared With */}
+                  {listing.visibility && listing.visibility.length > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      <dt className="inline">{t('listings.sharedWith')}: </dt>
+                      <dd className="inline">
+                        {listing.visibility.map((vis, index) => (
+                          <span key={index}>
+                            {vis.community?.name || vis.group?.name}
+                            {index < listing.visibility.length - 1 && ', '}
+                          </span>
+                        ))}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </CardContent>
+            </Card>
+          </article>
         </div>
 
-        {/* Sidebar - Contact Info */}
+        {/* Sidebar - Contact Info (UNCHANGED) */}
         <div className="lg:col-span-1">
           <Card className="sticky top-20">
             <CardHeader>

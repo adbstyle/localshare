@@ -31,8 +31,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       provider: SsoProvider.GOOGLE,
       providerUserId: id,
       email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
+      firstName: (name.givenName || '').trim().substring(0, 50),
+      lastName: (name.familyName || '').trim().substring(0, 50),
     });
 
     done(null, user);

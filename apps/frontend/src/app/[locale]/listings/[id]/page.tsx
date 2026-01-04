@@ -102,10 +102,10 @@ export default function ListingDetailPage() {
           <article>
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
+                <div className="relative">
+                  <div>
                     {/* LEVEL 1: Type & Category */}
-                    <div className="flex items-center gap-2 mb-3" role="group" aria-label="Listing type and category">
+                    <div className="flex items-center gap-2 mb-6" role="group" aria-label="Listing type and category">
                       <Badge variant="secondary" className="text-sm">
                         {t(`listings.types.${listing.type}`)}
                       </Badge>
@@ -132,7 +132,7 @@ export default function ListingDetailPage() {
 
                   {/* Edit/Delete buttons (owner only) */}
                   {isOwner && (
-                    <div className="flex gap-2">
+                    <div className="absolute top-0 right-0 flex gap-2 z-10">
                       <Link href={`/listings/${listing.id}/edit`}>
                         <Button variant="outline" size="sm">
                           <Edit className="h-4 w-4 mr-2" />
@@ -141,7 +141,7 @@ export default function ListingDetailPage() {
                       </Link>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="outline" size="sm">
                             <Trash2 className="h-4 w-4 mr-2" />
                             {t('common.delete')}
                           </Button>

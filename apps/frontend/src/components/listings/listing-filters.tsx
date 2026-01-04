@@ -7,7 +7,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useState, useEffect, useRef } from 'react';
@@ -85,15 +84,19 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
     filters.myListings;
 
   return (
-    <Card className="sticky top-20">
+    <Card className="sticky top-8">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{t('common.filter')}</CardTitle>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+          <Button
+            variant="link"
+            size="sm"
+            onClick={handleClearFilters}
+            disabled={!hasActiveFilters}
+            className={`h-auto p-0 text-sm ${!hasActiveFilters ? 'invisible' : ''}`}
+          >
+            {t('common.reset')}
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">

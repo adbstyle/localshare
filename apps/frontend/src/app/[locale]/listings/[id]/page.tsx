@@ -303,9 +303,9 @@ export default function ListingDetailPage() {
           </article>
         </div>
 
-        {/* Sidebar - Contact Info (UNCHANGED) */}
+        {/* Sidebar - Contact Info */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-20">
+          <Card className="sticky top-8">
             <CardHeader>
               <CardTitle>{isOwner ? 'Your Listing' : t('listings.contact')}</CardTitle>
             </CardHeader>

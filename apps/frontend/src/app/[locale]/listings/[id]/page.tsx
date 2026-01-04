@@ -12,7 +12,7 @@ import { ContactButtons } from '@/components/listings/contact-buttons';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
-import { Edit, Trash2, MapPin } from 'lucide-react';
+import { Edit, Trash2, MapPin, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -26,6 +26,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -132,35 +138,83 @@ export default function ListingDetailPage() {
 
                   {/* Edit/Delete buttons (owner only) */}
                   {isOwner && (
-                    <div className="absolute top-0 right-0 flex gap-2 z-10">
-                      <Link href={`/listings/${listing.id}/edit`}>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4 mr-2" />
-                          {t('common.edit')}
-                        </Button>
-                      </Link>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                    <div className="absolute top-0 right-0 z-10">
+                      {/* Desktop: Direct buttons */}
+                      <div className="hidden md:flex gap-2">
+                        <Link href={`/listings/${listing.id}/edit`}>
                           <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            {t('common.delete')}
+                            <Edit className="h-4 w-4 mr-2" />
+                            {t('common.edit')}
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>{t('listings.deleteConfirm')}</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+                        </Link>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4 mr-2" />
                               {t('common.delete')}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('listings.deleteConfirm')}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('common.actionCannotBeUndone')}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+                                {t('common.delete')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+
+                      {/* Mobile: Dropdown menu */}
+                      <div className="md:hidden">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon">
+                              <MoreVertical className="h-5 w-5" />
+                              <span className="sr-only">{t('common.actions')}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild className="py-3">
+                              <Link href={`/listings/${listing.id}/edit`} className="cursor-pointer">
+                                <Edit className="h-4 w-4 mr-2" />
+                                {t('common.edit')}
+                              </Link>
+                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="cursor-pointer text-destructive focus:text-destructive py-3"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  {t('common.delete')}
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>{t('listings.deleteConfirm')}</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {t('common.actionCannotBeUndone')}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                                  <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+                                    {t('common.delete')}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   )}
                 </div>

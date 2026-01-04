@@ -20,7 +20,9 @@
     "feedback": "Feedback geben",
     "showingResults": "Zeige {from} bis {to} von {total} Ergebnissen",
     "previous": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "actions": "Aktionen",
+    "actionCannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "nav": {
     "home": "Startseite",

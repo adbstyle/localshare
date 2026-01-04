@@ -52,7 +52,7 @@ export default function ListingDetailPage() {
     } catch (error) {
       toast({
         title: t('errors.notFound'),
-        description: 'Listing not found',
+        description: t('listings.notFoundDescription'),
         variant: 'destructive',
       });
       router.push('/');
@@ -307,7 +307,7 @@ export default function ListingDetailPage() {
         <div className="lg:col-span-1">
           <Card className="sticky top-8">
             <CardHeader>
-              <CardTitle>{isOwner ? 'Your Listing' : t('listings.contact')}</CardTitle>
+              <CardTitle>{isOwner ? t('listings.yourListing') : t('listings.contact')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {!isOwner && listing.creator ? (
@@ -340,13 +340,13 @@ export default function ListingDetailPage() {
                 </>
               ) : (
                 <div className="text-sm text-muted-foreground">
-                  <p>This is your listing. Other users will see your contact information here.</p>
+                  <p>{t('listings.yourListingDescription')}</p>
                   <div className="mt-4 pt-4 border-t">
-                    <p className="font-semibold mb-2">Visible to others:</p>
+                    <p className="font-semibold mb-2">{t('listings.visibleToOthers')}:</p>
                     <ul className="space-y-1 text-xs">
-                      <li>• Email: {user?.email}</li>
-                      <li>• Address: {user?.homeAddress}</li>
-                      {user?.phoneNumber && <li>• Phone: {user.phoneNumber}</li>}
+                      <li>• {t('listings.email')}: {user?.email}</li>
+                      <li>• {t('listings.address')}: {user?.homeAddress}</li>
+                      {user?.phoneNumber && <li>• {t('listings.phone')}: {user.phoneNumber}</li>}
                     </ul>
                   </div>
                 </div>

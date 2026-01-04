@@ -20,7 +20,9 @@
     "feedback": "Donner un avis",
     "showingResults": "Affichage de {from} à {to} sur {total} résultats",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "actions": "Actions",
+    "actionCannotBeUndone": "Cette action est irréversible."
   },
   "nav": {
     "home": "Accueil",

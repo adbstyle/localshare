@@ -36,14 +36,28 @@ interface JoinCommunityDialogProps {
   onJoinSuccess?: (communityId: string) => void;
   className?: string;
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideDefaultTrigger?: boolean;
 }
 
-export function JoinCommunityDialog({ onJoinSuccess, className, variant = 'default' }: JoinCommunityDialogProps = {}) {
+export function JoinCommunityDialog({
+  onJoinSuccess,
+  className,
+  variant = 'default',
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+  hideDefaultTrigger = false,
+}: JoinCommunityDialogProps = {}) {
   const t = useTranslations();
   const router = useRouter();
   const { toast } = useToast();
 
-  const [open, setOpen] = useState(false);
+  // Support both controlled and uncontrolled modes
+  const isControlled = typeof openProp !== 'undefined';
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? openProp : internalOpen;
+  const setOpen = isControlled ? (onOpenChangeProp || (() => {})) : setInternalOpen;
   const [step, setStep] = useState<DialogStep>('input');
   const [input, setInput] = useState('');
   const [token, setToken] = useState<string | null>(null);
@@ -155,12 +169,14 @@ export function JoinCommunityDialog({ onJoinSuccess, className, variant = 'defau
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant={variant} className={className}>
-          <LinkIcon className="h-4 w-4 mr-2" />
-          {t('communities.joinViaLink')}
-        </Button>
-      </DialogTrigger>
+      {!hideDefaultTrigger && (
+        <DialogTrigger asChild>
+          <Button variant={variant} className={className}>
+            <LinkIcon className="h-4 w-4 mr-2" />
+            {t('communities.joinViaLink')}
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t('communities.joinDialogTitle')}</DialogTitle>

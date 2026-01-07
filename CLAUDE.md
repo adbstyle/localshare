@@ -163,6 +163,19 @@ Frontend supports German (de) and French (fr). Translations in `apps/frontend/me
 2. Set redirect URIs to `http://localhost:3001/api/v1/auth/{google|microsoft}/callback`
 3. Add credentials to `.env`
 
+## E2E Testing with OAuth
+
+For automated QA/Playwright tests using real OAuth flow:
+
+1. Create a dedicated test Google account (e.g., `localshare.test@gmail.com`)
+2. Add to `.env`:
+   ```
+   TEST_USER_EMAIL=localshare.test@gmail.com
+   TEST_USER_PASSWORD=your-test-password
+   ```
+3. QA skill/Playwright reads these env vars to perform real login
+4. **Important**: Disable 2FA on the test account or use App Passwords
+
 ### CLAUDE.md Updates Required
 
 | Change Type              | Sections to Update                                        |

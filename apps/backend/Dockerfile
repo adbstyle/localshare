@@ -37,5 +37,5 @@ COPY --from=builder /app/dist ./dist
 # Expose port
 EXPOSE 3001
 
-# Start the application with migrations
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+# Start the application with migrations (with retry for private network)
+CMD ["sh", "-c", "sleep 5 && npx prisma migrate deploy && node dist/main"]

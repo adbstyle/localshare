@@ -3,14 +3,7 @@ import { PrismaService } from '../database/prisma.service';
 import { CreateListingDto, UpdateListingDto, FilterListingsDto } from './dto';
 import { VisibilityService } from './visibility.service';
 import { ImageService } from './image.service';
-
-// Inline type to avoid monorepo dependency in Docker build
-interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  limit: number;
-  offset: number;
-}
+import { PaginatedResponse } from '../common/types';
 
 @Injectable()
 export class ListingsService {

@@ -20,7 +20,9 @@
     "feedback": "Feedback geben",
     "showingResults": "Zeige {from} bis {to} von {total} Ergebnissen",
     "previous": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "actions": "Aktionen",
+    "actionCannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "nav": {
     "home": "Startseite",
@@ -253,7 +255,11 @@
     "noImage": "Kein Bild",
     "openFilters": "Filter öffnen",
     "filterActive": "Filter aktiv",
-    "filterDescription": "Filtern Sie Anzeigen nach Typ, Kategorie und Suchbegriff"
+    "filterDescription": "Filtern Sie Anzeigen nach Typ, Kategorie und Suchbegriff",
+    "yourListing": "Ihre Anzeige",
+    "yourListingDescription": "Dies ist Ihre Anzeige. Andere Benutzer sehen hier Ihre Kontaktinformationen.",
+    "visibleToOthers": "Für andere sichtbar",
+    "notFoundDescription": "Anzeige nicht gefunden"
   },
   "legal": {
     "privacy": "Datenschutzerklärung",

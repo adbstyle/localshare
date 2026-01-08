@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { Group } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Users, FileText, Loader2 } from 'lucide-react';
+import { Plus, Users, FileText, MoreVertical, LinkIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,12 @@ import {
 } from '@/components/ui/dialog';
 import { CreateGroupDialog } from '@/components/groups/create-group-dialog';
 import { JoinGroupDialog } from '@/components/groups/join-group-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function GroupsPage() {
   const t = useTranslations();
@@ -27,7 +33,9 @@ export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [liveMessage, setLiveMessage] = useState('');
 
   useEffect(() => {
     if (!authLoading) {
@@ -63,7 +71,7 @@ export default function GroupsPage() {
 
     try {
       // Fetch updated groups list
-      await fetchGroups();
+      const updatedGroups = await fetchGroups();
 
       // Scroll to new group after a brief delay (allow render)
       setTimeout(() => {
@@ -77,9 +85,16 @@ export default function GroupsPage() {
         }
       }, 100);
 
+      // Screen reader announcement using fresh data
+      const newGroup = updatedGroups.find(g => g.id === groupId);
+      if (newGroup) {
+        setLiveMessage(t('groups.joinedAnnouncement', { name: newGroup.name }));
+      }
+
       // Clear highlight after animation completes
       setTimeout(() => {
         setHighlightId(null);
+        setLiveMessage('');
       }, 2000);
     } catch (error) {
       // Clear highlight on error
@@ -104,21 +119,32 @@ export default function GroupsPage() {
 
   return (
     <div className="container max-w-6xl py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8 transition-all duration-200">
+      {/* ARIA Live Region for Screen Readers */}
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {liveMessage}
+      </div>
+
+      <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8 transition-all duration-200">
         <div className="flex-shrink-0">
           <h1 className="text-2xl sm:text-3xl font-bold">
             {t('groups.title')} ({groups.length})
           </h1>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+
+        {/* Desktop: Direct buttons */}
+        <div className="hidden md:flex gap-2">
           <JoinGroupDialog
             onJoinSuccess={handleJoinSuccess}
-            className="w-full sm:w-auto"
             variant="outline"
           />
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
+              <Button variant="outline">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('groups.create')}
               </Button>
@@ -133,6 +159,42 @@ export default function GroupsPage() {
               <CreateGroupDialog onSuccess={handleGroupCreated} />
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* Mobile: Dropdown menu */}
+        <div className="md:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreVertical className="h-5 w-5" />
+                <span className="sr-only">{t('common.actions')}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setJoinDialogOpen(true)}
+                className="cursor-pointer py-3"
+              >
+                <LinkIcon className="h-4 w-4 mr-2" />
+                {t('groups.joinViaLink')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setCreateDialogOpen(true)}
+                className="cursor-pointer py-3"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {t('groups.create')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Controlled dialogs for mobile (without triggers) */}
+          <JoinGroupDialog
+            open={joinDialogOpen}
+            onOpenChange={setJoinDialogOpen}
+            hideDefaultTrigger
+            onJoinSuccess={handleJoinSuccess}
+          />
         </div>
       </div>
 

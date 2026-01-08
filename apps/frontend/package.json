@@ -6,7 +6,7 @@
     "dev": "npm run generate:icons && next dev -p 3000",
     "build": "next build",
     "prebuild": "npm run generate:icons",
-    "start": "next start -p 3000",
+    "start": "./start.sh",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "generate:icons": "tsx scripts/generate-icons.ts"

@@ -20,7 +20,9 @@
     "feedback": "Donner un avis",
     "showingResults": "Affichage de {from} à {to} sur {total} résultats",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "actions": "Actions",
+    "actionCannotBeUndone": "Cette action est irréversible."
   },
   "nav": {
     "home": "Accueil",
@@ -232,7 +234,11 @@
     "noImage": "Pas d'image",
     "openFilters": "Ouvrir les filtres",
     "filterActive": "Filtre actif",
-    "filterDescription": "Filtrez les annonces par type, catégorie et terme de recherche"
+    "filterDescription": "Filtrez les annonces par type, catégorie et terme de recherche",
+    "yourListing": "Votre annonce",
+    "yourListingDescription": "Ceci est votre annonce. Les autres utilisateurs verront vos coordonnées ici.",
+    "visibleToOthers": "Visible par les autres",
+    "notFoundDescription": "Annonce non trouvée"
   },
   "legal": {
     "privacy": "Politique de confidentialité",

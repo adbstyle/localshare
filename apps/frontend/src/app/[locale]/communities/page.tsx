@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { Community } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Users, FileText, Loader2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Plus, Users, MoreVertical, LinkIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,12 @@ import {
 import { CreateCommunityDialog } from '@/components/communities/create-community-dialog';
 import { JoinCommunityDialog } from '@/components/communities/join-community-dialog';
 import { CommunityCard } from '@/components/communities/community-card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function CommunitiesPage() {
   const t = useTranslations();
@@ -30,6 +36,7 @@ export default function CommunitiesPage() {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [liveMessage, setLiveMessage] = useState('');
 
@@ -131,21 +138,22 @@ export default function CommunitiesPage() {
         {liveMessage}
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8 transition-all duration-200">
+      <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8 transition-all duration-200">
         <div className="flex-shrink-0">
           <h1 className="text-2xl sm:text-3xl font-bold">
             {t('communities.title')} ({communities.length})
           </h1>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+
+        {/* Desktop: Direct buttons */}
+        <div className="hidden md:flex gap-2">
           <JoinCommunityDialog
             onJoinSuccess={handleJoinSuccess}
-            className="w-full sm:w-auto"
             variant="outline"
           />
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
+              <Button variant="outline">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('communities.create')}
               </Button>
@@ -160,6 +168,42 @@ export default function CommunitiesPage() {
               <CreateCommunityDialog onSuccess={handleCommunityCreated} />
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* Mobile: Dropdown menu */}
+        <div className="md:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreVertical className="h-5 w-5" />
+                <span className="sr-only">{t('common.actions')}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setJoinDialogOpen(true)}
+                className="cursor-pointer py-3"
+              >
+                <LinkIcon className="h-4 w-4 mr-2" />
+                {t('communities.joinViaLink')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setCreateDialogOpen(true)}
+                className="cursor-pointer py-3"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {t('communities.create')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Controlled dialogs for mobile (without triggers) */}
+          <JoinCommunityDialog
+            open={joinDialogOpen}
+            onOpenChange={setJoinDialogOpen}
+            hideDefaultTrigger
+            onJoinSuccess={handleJoinSuccess}
+          />
         </div>
       </div>
 

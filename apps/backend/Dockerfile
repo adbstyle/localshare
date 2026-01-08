@@ -24,8 +24,8 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # Copy package files and install production dependencies
-COPY package*.json ./
-RUN npm install --omit=dev
+COPY package.json ./
+RUN npm install --omit=dev --ignore-scripts
 
 # Copy prisma schema and generate client
 COPY prisma ./prisma/

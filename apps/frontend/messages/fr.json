@@ -109,7 +109,26 @@
     "deleted": "Communauté supprimée avec succès",
     "joined": "Rejointe avec succès",
     "left": "Communauté quittée",
-    "cannotLeaveAsOwner": "En tant que propriétaire, vous ne pouvez pas quitter la communauté. Supprimez-la à la place."
+    "cannotLeaveAsOwner": "En tant que propriétaire, vous ne pouvez pas quitter la communauté. Supprimez-la à la place.",
+    "joinViaLink": "Rejoindre",
+    "joinDialogTitle": "Rejoindre une communauté",
+    "pastePrompt": "Insérer le lien ou le token:",
+    "inputPlaceholder": "https://... ou token",
+    "inputHelper": "Vous pouvez coller le lien complet ou seulement le token",
+    "next": "Suivant",
+    "alreadyMember": "Déjà membre",
+    "alreadyMemberMessage": "Vous êtes déjà membre de cette communauté.",
+    "viewCommunity": "Voir la communauté",
+    "retry": "Réessayer",
+    "errors": {
+      "invalidFormat": "Format invalide. Veuillez insérer un lien ou un token.",
+      "invalidUrl": "Lien invalide. Veuillez vérifier l'URL.",
+      "invalidToken": "Token invalide. Veuillez vérifier la saisie.",
+      "tokenNotFound": "Lien d'invitation invalide. Le lien a expiré ou est invalide.",
+      "alreadyMember": "Vous êtes déjà membre de cette communauté."
+    },
+    "joinedAnnouncement": "La communauté {name} a été ajoutée à votre liste",
+    "refreshFailed": "Impossible de mettre à jour la liste. Veuillez recharger la page."
   },
   "groups": {
     "title": "Groupes",
@@ -152,7 +171,7 @@
     "left": "Groupe quitté",
     "cannotLeaveAsOwner": "En tant que propriétaire, vous ne pouvez pas quitter le groupe. Supprimez-le à la place.",
     "secret": "Groupe secret",
-    "joinViaLink": "Insérer une invitation",
+    "joinViaLink": "Rejoindre",
     "joinDialogTitle": "Rejoindre un groupe",
     "pastePrompt": "Insérer le lien ou le token:",
     "inputPlaceholder": "https://... ou token",

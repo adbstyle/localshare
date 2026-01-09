@@ -250,19 +250,19 @@ export default function GroupDetailPage() {
 
       {/* Action Bar */}
       <div className="flex flex-wrap items-center gap-2 mb-8 pb-6 border-b">
-        <Button variant="outline" size="sm" onClick={copyInviteLink}>
+        <Button variant="outline" onClick={copyInviteLink}>
           <Link2 className="h-4 w-4 mr-2" />
           {t('groups.invite')}
         </Button>
         {isOwner && (
-          <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+          <Button variant="outline" onClick={() => setShowEditDialog(true)}>
             <Edit className="h-4 w-4 mr-2" />
             {t('common.edit')}
           </Button>
         )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="h-9 w-9">
+            <Button variant="outline" size="icon">
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">{t('common.actions')}</span>
             </Button>

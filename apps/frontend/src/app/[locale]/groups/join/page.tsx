@@ -79,7 +79,7 @@ function JoinGroupPageContent() {
         variant: 'success',
         title: t('groups.joined'),
       });
-      router.push('/groups');
+      router.push(`/groups/${group!.id}`);
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
@@ -111,8 +111,8 @@ function JoinGroupPageContent() {
             <p className="text-muted-foreground text-center mb-6">
               {error || 'This invite link is invalid or has expired'}
             </p>
-            <Button onClick={() => router.push('/groups')}>
-              {t('groups.title')}
+            <Button onClick={() => router.push('/listings')}>
+              {t('nav.listings')}
             </Button>
           </CardContent>
         </Card>
@@ -170,7 +170,7 @@ function JoinGroupPageContent() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => router.push('/groups')}
+              onClick={() => router.push(`/communities/${group.community.id}`)}
               className="w-full"
             >
               {t('common.cancel')}

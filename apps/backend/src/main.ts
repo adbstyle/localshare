@@ -36,6 +36,16 @@ async function bootstrap() {
   // API prefix
   app.setGlobalPrefix('api/v1');
 
+  // Graceful shutdown
+  const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT'];
+  signals.forEach((signal) => {
+    process.on(signal, async () => {
+      console.log(`Received ${signal}, shutting down gracefully...`);
+      await app.close();
+      process.exit(0);
+    });
+  });
+
   const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`🚀 Backend running on http://localhost:${port}`);

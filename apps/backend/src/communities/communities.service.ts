@@ -269,7 +269,7 @@ export class CommunitiesService {
     });
 
     // Transform to flat structure with role
-    return members.map((member) => ({
+    const transformed = members.map((member) => ({
       id: member.user.id,
       firstName: member.user.firstName,
       lastName: member.user.lastName,
@@ -277,5 +277,12 @@ export class CommunitiesService {
       joinedAt: member.joinedAt,
       role: member.userId === community.ownerId ? 'owner' : 'member',
     }));
+
+    // Sort owner first, preserve joinedAt order for rest
+    return transformed.sort((a, b) => {
+      if (a.role === 'owner') return -1;
+      if (b.role === 'owner') return 1;
+      return 0;
+    });
   }
 }

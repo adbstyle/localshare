@@ -72,7 +72,8 @@
     "deleteAccountWarning": "Ihr Account und alle Anzeigen werden gelöscht.",
     "exportData": "Daten exportieren (DSGVO)",
     "profileUpdated": "Profil erfolgreich aktualisiert",
-    "accountDeleted": "Account erfolgreich gelöscht"
+    "accountDeleted": "Account erfolgreich gelöscht",
+    "dataExported": "Daten erfolgreich exportiert"
   },
   "communities": {
     "title": "Gemeinschaften",
@@ -286,6 +287,34 @@
     "forbidden": "Keine Berechtigung",
     "notFound": "Nicht gefunden",
     "validation": "Validierungsfehler",
-    "network": "Netzwerkfehler"
+    "network": "Netzwerkfehler",
+    "noInviteToken": "Kein Einladungs-Token angegeben",
+    "invalidInviteLink": "Dieser Einladungslink ist ungültig oder abgelaufen",
+    "failedToJoinCommunity": "Gemeinschaft beitreten fehlgeschlagen",
+    "failedToJoinGroup": "Gruppe beitreten fehlgeschlagen"
+  },
+  "pages": {
+    "offline": {
+      "title": "Sie sind offline",
+      "description": "Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+      "retry": "Erneut versuchen"
+    },
+    "error": {
+      "title": "Ein Fehler ist aufgetreten",
+      "description": "Entschuldigung, etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "retry": "Erneut versuchen",
+      "backHome": "Zur Startseite"
+    },
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "description": "Die Seite, nach der Sie suchen, existiert nicht oder wurde verschoben.",
+      "backHome": "Zur Startseite",
+      "viewListings": "Anzeigen ansehen"
+    }
+  },
+  "invite": {
+    "communityInvite": "Sie wurden zu einer Gemeinschaft eingeladen",
+    "groupInvite": "Sie wurden zu einer Gruppe eingeladen",
+    "groupJoinNote": "Der Beitritt zu dieser Gruppe fügt Sie auch zur Gemeinschaft <strong>{communityName}</strong> hinzu, falls Sie noch kein Mitglied sind."
   }
 }

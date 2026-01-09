@@ -48,7 +48,7 @@ function JoinCommunityPageContent() {
       } else if (token) {
         fetchCommunityPreview();
       } else {
-        setError('No invite token provided');
+        setError(t('errors.noInviteToken'));
         setLoading(false);
       }
     }
@@ -59,7 +59,7 @@ function JoinCommunityPageContent() {
       const { data } = await api.get<CommunityPreview>(`/communities/preview/${token}`);
       setCommunity(data);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Invalid or expired invite link');
+      setError(error.response?.data?.message || t('errors.invalidInviteLink'));
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ function JoinCommunityPageContent() {
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to join community',
+        description: error.response?.data?.message || t('errors.failedToJoinCommunity'),
         variant: 'destructive',
       });
     } finally {
@@ -105,7 +105,7 @@ function JoinCommunityPageContent() {
             <AlertCircle className="h-16 w-16 text-destructive mb-4" />
             <h2 className="text-xl font-semibold mb-2">{t('errors.notFound')}</h2>
             <p className="text-muted-foreground text-center mb-6">
-              {error || 'This invite link is invalid or has expired'}
+              {error || t('errors.invalidInviteLink')}
             </p>
             <Button onClick={() => router.push('/communities')}>
               {t('communities.title')}
@@ -125,7 +125,7 @@ function JoinCommunityPageContent() {
           </div>
           <CardTitle className="text-2xl">{t('communities.join')}</CardTitle>
           <CardDescription>
-            You've been invited to join a community
+            {t('invite.communityInvite')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

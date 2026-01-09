@@ -72,7 +72,8 @@
     "deleteAccountWarning": "Votre compte et toutes vos annonces seront supprimés.",
     "exportData": "Exporter les données (RGPD)",
     "profileUpdated": "Profil mis à jour avec succès",
-    "accountDeleted": "Compte supprimé avec succès"
+    "accountDeleted": "Compte supprimé avec succès",
+    "dataExported": "Données exportées avec succès"
   },
   "communities": {
     "title": "Communautés",
@@ -94,6 +95,8 @@
     "refreshInviteLink": "Renouveler le lien",
     "editDescription": "Mettez à jour les informations de votre communauté",
     "linkRefreshed": "Nouveau lien d'invitation créé",
+    "invitePending": "Invitation à la communauté",
+    "invitePendingText": "Vous avez été invité à rejoindre une communauté. Connectez-vous pour la rejoindre.",
     "join": "Rejoindre",
     "leave": "Quitter",
     "leaveConfirm": "Êtes-vous sûr de vouloir quitter cette communauté?",
@@ -284,6 +287,34 @@
     "forbidden": "Pas d'autorisation",
     "notFound": "Non trouvé",
     "validation": "Erreur de validation",
-    "network": "Erreur réseau"
+    "network": "Erreur réseau",
+    "noInviteToken": "Aucun jeton d'invitation fourni",
+    "invalidInviteLink": "Ce lien d'invitation est invalide ou a expiré",
+    "failedToJoinCommunity": "Impossible de rejoindre la communauté",
+    "failedToJoinGroup": "Impossible de rejoindre le groupe"
+  },
+  "pages": {
+    "offline": {
+      "title": "Vous êtes hors ligne",
+      "description": "Veuillez vérifier votre connexion internet et réessayer.",
+      "retry": "Réessayer"
+    },
+    "error": {
+      "title": "Une erreur s'est produite",
+      "description": "Désolé, quelque chose s'est mal passé. Veuillez réessayer.",
+      "retry": "Réessayer",
+      "backHome": "Retour à l'accueil"
+    },
+    "notFound": {
+      "title": "Page non trouvée",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+      "backHome": "Retour à l'accueil",
+      "viewListings": "Voir les annonces"
+    }
+  },
+  "invite": {
+    "communityInvite": "Vous avez été invité à rejoindre une communauté",
+    "groupInvite": "Vous avez été invité à rejoindre un groupe",
+    "groupJoinNote": "Rejoindre ce groupe vous ajoutera également à la communauté <strong>{communityName}</strong> si vous n'êtes pas encore membre."
   }
 }

@@ -52,7 +52,7 @@ function JoinGroupPageContent() {
       } else if (token) {
         fetchGroupPreview();
       } else {
-        setError('No invite token provided');
+        setError(t('errors.noInviteToken'));
         setLoading(false);
       }
     }
@@ -63,7 +63,7 @@ function JoinGroupPageContent() {
       const { data } = await api.get<GroupPreview>(`/groups/preview/${token}`);
       setGroup(data);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Invalid or expired invite link');
+      setError(error.response?.data?.message || t('errors.invalidInviteLink'));
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ function JoinGroupPageContent() {
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to join group',
+        description: error.response?.data?.message || t('errors.failedToJoinGroup'),
         variant: 'destructive',
       });
     } finally {
@@ -109,7 +109,7 @@ function JoinGroupPageContent() {
             <AlertCircle className="h-16 w-16 text-destructive mb-4" />
             <h2 className="text-xl font-semibold mb-2">{t('errors.notFound')}</h2>
             <p className="text-muted-foreground text-center mb-6">
-              {error || 'This invite link is invalid or has expired'}
+              {error || t('errors.invalidInviteLink')}
             </p>
             <Button onClick={() => router.push('/listings')}>
               {t('nav.listings')}
@@ -129,7 +129,7 @@ function JoinGroupPageContent() {
           </div>
           <CardTitle className="text-2xl">{t('groups.join')}</CardTitle>
           <CardDescription>
-            You've been invited to join a group
+            {t('invite.groupInvite')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -154,7 +154,10 @@ function JoinGroupPageContent() {
 
           <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm">
             <p className="text-blue-900 dark:text-blue-100">
-              Joining this group will also add you to the <strong>{group.community.name}</strong> community if you're not already a member.
+              {t.rich('invite.groupJoinNote', {
+                communityName: group.community.name,
+                strong: (chunks) => <strong>{chunks}</strong>
+              })}
             </p>
           </div>
 

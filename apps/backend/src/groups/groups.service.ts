@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
-  BadRequestException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
@@ -70,6 +69,44 @@ export class GroupsService {
     const groups = await this.prisma.group.findMany({
       where: {
         deletedAt: null,
+        members: {
+          some: { userId },
+        },
+      },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        community: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+            listingVisibility: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return groups;
+  }
+
+  async findAllForCommunity(userId: string, communityId: string) {
+    const groups = await this.prisma.group.findMany({
+      where: {
+        deletedAt: null,
+        communityId,
         members: {
           some: { userId },
         },

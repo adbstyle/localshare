@@ -22,7 +22,10 @@
     "previous": "Précédent",
     "next": "Suivant",
     "actions": "Actions",
-    "actionCannotBeUndone": "Cette action est irréversible."
+    "actionCannotBeUndone": "Cette action est irréversible.",
+    "showAll": "Afficher tous les {count}",
+    "showLess": "Afficher moins",
+    "typeToConfirm": "Tapez '{name}' pour confirmer"
   },
   "nav": {
     "home": "Accueil",
@@ -87,7 +90,9 @@
     "inviteLink": "Lien d'invitation",
     "copyInviteLink": "Copier le lien",
     "linkCopied": "Lien copié!",
+    "invite": "Inviter",
     "refreshInviteLink": "Renouveler le lien",
+    "editDescription": "Mettez à jour les informations de votre communauté",
     "linkRefreshed": "Nouveau lien d'invitation créé",
     "join": "Rejoindre",
     "leave": "Quitter",
@@ -108,7 +113,9 @@
   },
   "groups": {
     "title": "Groupes",
+    "myGroups": "Mes groupes",
     "create": "Créer un groupe",
+    "createDescription": "Créez un nouveau groupe dans cette communauté",
     "name": "Nom",
     "namePlaceholder": "p.ex. Passionnés de jardinage",
     "description": "Description",

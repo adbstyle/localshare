@@ -69,7 +69,7 @@ export default function GroupDetailPage() {
         title: t('errors.notFound'),
         variant: 'destructive',
       });
-      router.push('/groups');
+      router.push('/communities');
     } finally {
       setLoading(false);
     }
@@ -123,7 +123,7 @@ export default function GroupDetailPage() {
         variant: 'success',
         title: t('groups.left'),
       });
-      router.push('/groups');
+      router.push(`/communities/${group?.community?.id || ''}`);
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
@@ -153,7 +153,7 @@ export default function GroupDetailPage() {
         variant: 'success',
         title: t('groups.deleted'),
       });
-      router.push('/groups');
+      router.push(`/communities/${group?.community?.id || ''}`);
     } catch (error: any) {
       toast({
         title: t('errors.generic'),

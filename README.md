@@ -5,10 +5,11 @@ PWA für Nachbarschafts-Communities zum Teilen von Anzeigen (verkaufen, vermiete
 ## Features
 
 - **SSO Authentication**: Google & Microsoft OAuth2
-- **Communities**: Nachbarschafts-Communities erstellen/verwalten
-- **Secret Groups**: Private Gruppen innerhalb von Communities
+- **Gemeinschaften**: Nachbarschafts-Communities erstellen/verwalten
+- **Gruppen**: Gruppen werden innerhalb von Communities verwaltet
+- **Breadcrumb Navigation**: Übersichtliche Navigation zwischen Communities und Gruppen
 - **Listings**: Anzeigen mit Bildern (max 3), Kategorien und Filtern
-- **Multilingual**: Deutsch & Französisch
+- **Multilingual**: Deutsch & Französisch (vollständig übersetzt)
 - **PWA**: Installierbar auf allen Geräten
 
 ## Tech Stack
@@ -64,13 +65,17 @@ apps/
 └── frontend/          # Next.js 14 (port 3000)
     └── src/
         ├── app/[locale]/  # i18n routing
-        │   ├── auth/
+        │   ├── auth/       # OAuth callback
         │   ├── communities/
-        │   ├── groups/
+        │   │   └── [id]/   # inkl. Gruppen-Verwaltung
+        │   ├── groups/[id]/ # Gruppen-Detailseite
         │   ├── listings/
-        │   └── profile/
+        │   ├── profile/
+        │   ├── privacy/    # Datenschutz
+        │   ├── terms/      # AGB
+        │   └── imprint/    # Impressum
         ├── components/
-        │   ├── ui/        # shadcn (16 components)
+        │   ├── ui/        # shadcn + breadcrumb, collapsible
         │   ├── communities/
         │   ├── groups/
         │   └── listings/
@@ -88,8 +93,8 @@ All routes prefixed with `/api/v1/`:
 |--------|-----------|
 | Auth | `GET /auth/google`, `/auth/microsoft`, `POST /auth/refresh`, `/auth/logout` |
 | Users | `GET/PATCH/DELETE /users/me` |
-| Communities | CRUD + `/join?token=`, `/leave`, `/refresh-invite` |
-| Groups | CRUD + `/join?token=`, `/leave` |
+| Communities | CRUD + `/join?token=`, `/leave`, `/refresh-invite`, `/members` |
+| Groups | CRUD + `/join?token=`, `/leave`, `/preview/:token` (Filter: `?communityId=`) |
 | Listings | CRUD + `POST /:id/images` |
 
 ## Environment Variables
@@ -114,6 +119,23 @@ docker compose up -d
 ```
 
 Services: postgres (5433), backend (3001), frontend (3000)
+
+## Scripts
+
+```bash
+npm run dev              # Start frontend + backend
+npm run build            # Build all packages
+npm run lint             # Lint all packages
+scripts/kill-port.sh     # Kill process on port (default: 3001)
+```
+
+## Recent Changes (v1.1)
+
+- **Groups Hierarchy**: Gruppen werden jetzt unter Communities verwaltet (standalone `/groups` entfernt)
+- **Breadcrumb Navigation**: Neue Navigation auf Community- und Gruppen-Seiten
+- **Member Sorting**: Owner erscheint zuerst in Mitgliederlisten
+- **i18n Complete**: Alle Seiten vollständig übersetzt (de/fr)
+- **Graceful Shutdown**: Backend fährt sauber herunter bei SIGTERM/SIGINT
 
 ## License
 

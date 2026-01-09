@@ -28,7 +28,15 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, Link2, Copy, RefreshCw, Edit, Trash2, LogOut, Loader2, Building2, FileText } from 'lucide-react';
+import { Users, Link2, Copy, RefreshCw, Edit, Trash2, LogOut, Loader2, FileText } from 'lucide-react';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { EditGroupDialog } from '@/components/groups/edit-group-dialog';
 
 interface GroupMember {
@@ -187,6 +195,27 @@ export default function GroupDetailPage() {
 
   return (
     <div className="container max-w-4xl py-8">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/communities">
+              {t('nav.communities')}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href={`/communities/${group.community.id}`}>
+              {group.community.name}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{group.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">{group.name}</h1>
@@ -201,10 +230,6 @@ export default function GroupDetailPage() {
             <div className="flex items-center">
               <FileText className="h-4 w-4 mr-2" />
               {t('groups.listingCount', { count: group._count.sharedListings })}
-            </div>
-            <div className="flex items-center">
-              <Building2 className="h-4 w-4 mr-2" />
-              {group.community.name}
             </div>
           </div>
         </div>

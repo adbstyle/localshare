@@ -6,9 +6,9 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
-import { Community } from '@localshare/shared';
+import { Community, Group } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,10 +26,44 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, Link2, Copy, RefreshCw, Edit, Trash2, LogOut, Loader2, FileText } from 'lucide-react';
+import {
+  Users,
+  Link2,
+  Edit,
+  Trash2,
+  LogOut,
+  Loader2,
+  FileText,
+  Plus,
+  MoreVertical,
+  RefreshCw,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 import { EditCommunityDialog } from '@/components/communities/edit-community-dialog';
+import { CreateGroupDialog } from '@/components/groups/create-group-dialog';
+import { JoinGroupDialog } from '@/components/groups/join-group-dialog';
 
 interface CommunityMember {
   id: string;
@@ -40,6 +74,8 @@ interface CommunityMember {
   role: 'owner' | 'member';
 }
 
+const INITIAL_MEMBERS_SHOWN = 10;
+
 export default function CommunityDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -48,17 +84,23 @@ export default function CommunityDetailPage() {
   const { user } = useAuth();
   const [community, setCommunity] = useState<Community | null>(null);
   const [members, setMembers] = useState<CommunityMember[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
+  const [showJoinGroupDialog, setShowJoinGroupDialog] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [groupsOpen, setGroupsOpen] = useState(true);
+  const [membersOpen, setMembersOpen] = useState(true);
+  const [showAllMembers, setShowAllMembers] = useState(false);
 
   useEffect(() => {
     fetchCommunity();
     fetchMembers();
+    fetchGroups();
   }, [params.id]);
 
   const fetchCommunity = async () => {
@@ -85,6 +127,15 @@ export default function CommunityDetailPage() {
     }
   };
 
+  const fetchGroups = async () => {
+    try {
+      const { data } = await api.get<Group[]>(`/groups?communityId=${params.id}`);
+      setGroups(data);
+    } catch (error) {
+      console.error('Failed to fetch groups:', error);
+    }
+  };
+
   const copyInviteLink = () => {
     if (!community) return;
     const inviteUrl = `${window.location.origin}/communities/join?token=${community.inviteToken}`;
@@ -99,7 +150,6 @@ export default function CommunityDetailPage() {
     setActionLoading(true);
     try {
       const { data } = await api.post<{ inviteToken: string }>(`/communities/${params.id}/refresh-invite`);
-      // Update community state with new invite token
       setCommunity((prev) => (prev ? { ...prev, inviteToken: data.inviteToken } : prev));
       toast({
         variant: 'success',
@@ -172,6 +222,16 @@ export default function CommunityDetailPage() {
     fetchCommunity();
   };
 
+  const handleGroupCreated = () => {
+    setShowCreateGroupDialog(false);
+    fetchGroups();
+  };
+
+  const handleJoinGroupSuccess = () => {
+    setShowJoinGroupDialog(false);
+    fetchGroups();
+  };
+
   if (loading || !community) {
     return (
       <div className="container max-w-4xl py-8">
@@ -184,118 +244,152 @@ export default function CommunityDetailPage() {
   }
 
   const isOwner = user?.id === community.ownerId;
-  const inviteUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/communities/join?token=${community.inviteToken}`;
+  const displayedMembers = showAllMembers ? members : members.slice(0, INITIAL_MEMBERS_SHOWN);
 
   return (
     <div className="container max-w-4xl py-8">
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">{community.name}</h1>
-          {community.description && (
-            <p className="text-muted-foreground">{community.description}</p>
-          )}
-          <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <Users className="h-4 w-4 mr-2" />
-              {t('communities.memberCount', { count: community._count.members })}
-            </div>
-            <div className="flex items-center">
-              <FileText className="h-4 w-4 mr-2" />
-              {t('communities.listingCount', { count: community._count.sharedListings })}
-            </div>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/communities">
+              {t('nav.communities')}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{community.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Header Section */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">{community.name}</h1>
+        {community.description && (
+          <p className="text-muted-foreground">{community.description}</p>
+        )}
+        <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
+          <div className="flex items-center">
+            <Users className="h-4 w-4 mr-2" />
+            {t('communities.memberCount', { count: community._count.members })}
+          </div>
+          <div className="flex items-center">
+            <FileText className="h-4 w-4 mr-2" />
+            {t('communities.listingCount', { count: community._count.sharedListings })}
           </div>
         </div>
-        <div className="flex gap-2">
-          {isOwner ? (
-            <>
-              <Button variant="outline" onClick={() => setShowEditDialog(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                {t('common.edit')}
-              </Button>
-              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+      </div>
+
+      {/* Action Bar */}
+      <div className="flex flex-wrap items-center gap-2 mb-8 pb-6 border-b">
+        <Button variant="outline" onClick={copyInviteLink}>
+          <Link2 className="h-4 w-4 mr-2" />
+          {t('communities.invite')}
+        </Button>
+        {isOwner && (
+          <Button variant="outline" onClick={() => setShowEditDialog(true)}>
+            <Edit className="h-4 w-4 mr-2" />
+            {t('common.edit')}
+          </Button>
+        )}
+        <Button variant="outline" onClick={() => setShowCreateGroupDialog(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          {t('groups.create')}
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setShowJoinGroupDialog(true)}>
+              <Link2 className="h-4 w-4 mr-2" />
+              {t('groups.joinViaLink')}
+            </DropdownMenuItem>
+            {isOwner && (
+              <DropdownMenuItem onClick={handleRefreshInviteLink} disabled={actionLoading}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {t('communities.refreshInviteLink')}
+              </DropdownMenuItem>
+            )}
+            {!isOwner && (
+              <DropdownMenuItem
+                onClick={() => setShowLeaveDialog(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {t('communities.leave')}
+              </DropdownMenuItem>
+            )}
+            {isOwner && (
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive focus:text-destructive"
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 {t('common.delete')}
-              </Button>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => setShowLeaveDialog(true)}>
-              <LogOut className="h-4 w-4 mr-2" />
-              {t('communities.leave')}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Invite Link Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Link2 className="h-5 w-5 mr-2" />
-              {t('communities.inviteLink')}
-            </CardTitle>
-            <CardDescription>
-              Share this link to invite others to join
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input value={inviteUrl} readOnly className="flex-1" />
-              <Button variant="outline" size="icon" onClick={copyInviteLink}>
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-            {isOwner && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefreshInviteLink}
-                disabled={actionLoading}
-                className="w-full"
-              >
-                {actionLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                {t('communities.refreshInviteLink')}
-              </Button>
+              </DropdownMenuItem>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Community Info Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('communities.owner')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div>
-                <p className="font-medium">
-                  {community.owner.firstName} {community.owner.lastName}
-                </p>
-                {isOwner && <p className="text-sm text-muted-foreground">({t('profile.email')}: You)</p>}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {t('communities.createdAt')}: {new Date(community.createdAt).toLocaleDateString()}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {/* Members List */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Users className="h-5 w-5 mr-2" />
+      {/* Groups Accordion */}
+      <Collapsible open={groupsOpen} onOpenChange={setGroupsOpen} className="mb-6">
+        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-2">
+          {groupsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {t('groups.myGroups')} ({groups.length})
+          </span>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          {groups.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">
+              {t('groups.empty')}
+            </p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 py-4">
+              {groups.map((group) => (
+                <Card
+                  key={group.id}
+                  className="cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  onClick={() => router.push(`/groups/${group.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      router.push(`/groups/${group.id}`);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${group.name} - ${t('groups.memberCount', { count: group._count?.members || 0 })}`}
+                >
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-1">{group.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t('groups.memberCount', { count: group._count?.members || 0 })}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Members Accordion */}
+      <Collapsible open={membersOpen} onOpenChange={setMembersOpen}>
+        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-2">
+          {membersOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             {t('communities.members')} ({members.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {members.map((member) => (
+          </span>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-2 py-4">
+            {displayedMembers.map((member) => (
               <div
                 key={member.id}
                 className="flex items-center justify-between p-3 rounded-lg border"
@@ -312,13 +406,25 @@ export default function CommunityDetailPage() {
                   <p className="text-sm text-muted-foreground">{member.email}</p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Joined {new Date(member.joinedAt).toLocaleDateString()}
+                  {new Date(member.joinedAt).toLocaleDateString()}
                 </p>
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+          {members.length > INITIAL_MEMBERS_SHOWN && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAllMembers(!showAllMembers)}
+              className="w-full"
+            >
+              {showAllMembers
+                ? t('common.showLess')
+                : t('common.showAll', { count: members.length })}
+            </Button>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
@@ -326,7 +432,7 @@ export default function CommunityDetailPage() {
           <DialogHeader>
             <DialogTitle>{t('communities.edit')}</DialogTitle>
             <DialogDescription>
-              Update your community information
+              {t('communities.editDescription')}
             </DialogDescription>
           </DialogHeader>
           <EditCommunityDialog
@@ -335,6 +441,30 @@ export default function CommunityDetailPage() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Create Group Dialog */}
+      <Dialog open={showCreateGroupDialog} onOpenChange={setShowCreateGroupDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('groups.create')}</DialogTitle>
+            <DialogDescription>
+              {t('groups.createDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <CreateGroupDialog
+            onSuccess={handleGroupCreated}
+            preselectedCommunityId={community.id}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Join Group Dialog */}
+      <JoinGroupDialog
+        open={showJoinGroupDialog}
+        onOpenChange={setShowJoinGroupDialog}
+        hideDefaultTrigger
+        onJoinSuccess={handleJoinGroupSuccess}
+      />
 
       {/* Leave Dialog */}
       <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
@@ -372,7 +502,7 @@ export default function CommunityDetailPage() {
           </AlertDialogHeader>
           <div className="py-4">
             <Label htmlFor="confirm-delete">
-              Type <strong>{community.name}</strong> to confirm
+              {t('common.typeToConfirm', { name: community.name })}
             </Label>
             <Input
               id="confirm-delete"

@@ -84,9 +84,6 @@ function HeaderContent() {
             <Link href="/communities" className="text-sm font-medium hover:underline">
               {t('nav.communities')}
             </Link>
-            <Link href="/groups" className="text-sm font-medium hover:underline">
-              {t('nav.groups')}
-            </Link>
           </nav>
         )}
 
@@ -203,13 +200,6 @@ function HeaderContent() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('nav.communities')}
-                </Link>
-                <Link
-                  href="/groups"
-                  className="text-sm font-medium"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {t('nav.groups')}
                 </Link>
                 <Link
                   href="/profile"

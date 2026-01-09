@@ -23,14 +23,15 @@ import { Loader2 } from 'lucide-react';
 
 interface CreateGroupDialogProps {
   onSuccess: () => void;
+  preselectedCommunityId?: string;
 }
 
-export function CreateGroupDialog({ onSuccess }: CreateGroupDialogProps) {
+export function CreateGroupDialog({ onSuccess, preselectedCommunityId }: CreateGroupDialogProps) {
   const t = useTranslations();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [communities, setCommunities] = useState<Community[]>([]);
-  const [loadingCommunities, setLoadingCommunities] = useState(true);
+  const [loadingCommunities, setLoadingCommunities] = useState(!preselectedCommunityId);
 
   const {
     register,
@@ -39,11 +40,16 @@ export function CreateGroupDialog({ onSuccess }: CreateGroupDialogProps) {
     formState: { errors },
   } = useForm<CreateGroupDto>({
     resolver: zodResolver(createGroupSchema),
+    defaultValues: {
+      communityId: preselectedCommunityId,
+    },
   });
 
   useEffect(() => {
-    fetchCommunities();
-  }, []);
+    if (!preselectedCommunityId) {
+      fetchCommunities();
+    }
+  }, [preselectedCommunityId]);
 
   const fetchCommunities = async () => {
     try {
@@ -84,7 +90,7 @@ export function CreateGroupDialog({ onSuccess }: CreateGroupDialogProps) {
     );
   }
 
-  if (communities.length === 0) {
+  if (!preselectedCommunityId && communities.length === 0) {
     return (
       <div className="py-4 text-center text-muted-foreground">
         <p className="mb-2">{t('communities.empty')}</p>
@@ -122,35 +128,37 @@ export function CreateGroupDialog({ onSuccess }: CreateGroupDialogProps) {
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="communityId">
-          {t('groups.community')} <span className="text-destructive">*</span>
-        </Label>
-        <Controller
-          name="communityId"
-          control={control}
-          render={({ field }) => (
-            <Select
-              value={field.value}
-              onValueChange={field.onChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('groups.selectCommunity')} />
-              </SelectTrigger>
-              <SelectContent>
-                {communities.map((community) => (
-                  <SelectItem key={community.id} value={community.id}>
-                    {community.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {!preselectedCommunityId && (
+        <div className="space-y-2">
+          <Label htmlFor="communityId">
+            {t('groups.community')} <span className="text-destructive">*</span>
+          </Label>
+          <Controller
+            name="communityId"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('groups.selectCommunity')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {communities.map((community) => (
+                    <SelectItem key={community.id} value={community.id}>
+                      {community.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.communityId && (
+            <p className="text-sm text-destructive">{errors.communityId.message}</p>
           )}
-        />
-        {errors.communityId && (
-          <p className="text-sm text-destructive">{errors.communityId.message}</p>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={loading}>

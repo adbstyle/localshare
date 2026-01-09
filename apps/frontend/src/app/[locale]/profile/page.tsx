@@ -129,7 +129,7 @@ export default function ProfilePage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast({
-        title: 'Data exported successfully',
+        title: t('profile.dataExported'),
       });
     } catch (error) {
       toast({

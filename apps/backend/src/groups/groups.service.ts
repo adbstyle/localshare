@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
-  BadRequestException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
@@ -70,6 +69,44 @@ export class GroupsService {
     const groups = await this.prisma.group.findMany({
       where: {
         deletedAt: null,
+        members: {
+          some: { userId },
+        },
+      },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        community: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+            listingVisibility: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return groups;
+  }
+
+  async findAllForCommunity(userId: string, communityId: string) {
+    const groups = await this.prisma.group.findMany({
+      where: {
+        deletedAt: null,
+        communityId,
         members: {
           some: { userId },
         },
@@ -289,7 +326,7 @@ export class GroupsService {
     });
 
     // Transform to flat structure with role
-    return members.map((member) => ({
+    const transformed = members.map((member) => ({
       id: member.user.id,
       firstName: member.user.firstName,
       lastName: member.user.lastName,
@@ -297,5 +334,12 @@ export class GroupsService {
       joinedAt: member.joinedAt,
       role: member.userId === group.ownerId ? 'owner' : 'member',
     }));
+
+    // Sort owner first, preserve joinedAt order for rest
+    return transformed.sort((a, b) => {
+      if (a.role === 'owner') return -1;
+      if (b.role === 'owner') return 1;
+      return 0;
+    });
   }
 }

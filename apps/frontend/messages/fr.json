@@ -22,7 +22,10 @@
     "previous": "Précédent",
     "next": "Suivant",
     "actions": "Actions",
-    "actionCannotBeUndone": "Cette action est irréversible."
+    "actionCannotBeUndone": "Cette action est irréversible.",
+    "showAll": "Afficher tous les {count}",
+    "showLess": "Afficher moins",
+    "typeToConfirm": "Tapez '{name}' pour confirmer"
   },
   "nav": {
     "home": "Accueil",
@@ -69,7 +72,8 @@
     "deleteAccountWarning": "Votre compte et toutes vos annonces seront supprimés.",
     "exportData": "Exporter les données (RGPD)",
     "profileUpdated": "Profil mis à jour avec succès",
-    "accountDeleted": "Compte supprimé avec succès"
+    "accountDeleted": "Compte supprimé avec succès",
+    "dataExported": "Données exportées avec succès"
   },
   "communities": {
     "title": "Communautés",
@@ -87,8 +91,12 @@
     "inviteLink": "Lien d'invitation",
     "copyInviteLink": "Copier le lien",
     "linkCopied": "Lien copié!",
+    "invite": "Inviter",
     "refreshInviteLink": "Renouveler le lien",
+    "editDescription": "Mettez à jour les informations de votre communauté",
     "linkRefreshed": "Nouveau lien d'invitation créé",
+    "invitePending": "Invitation à la communauté",
+    "invitePendingText": "Vous avez été invité à rejoindre une communauté. Connectez-vous pour la rejoindre.",
     "join": "Rejoindre",
     "leave": "Quitter",
     "leaveConfirm": "Êtes-vous sûr de vouloir quitter cette communauté?",
@@ -104,11 +112,34 @@
     "deleted": "Communauté supprimée avec succès",
     "joined": "Rejointe avec succès",
     "left": "Communauté quittée",
-    "cannotLeaveAsOwner": "En tant que propriétaire, vous ne pouvez pas quitter la communauté. Supprimez-la à la place."
+    "cannotLeaveAsOwner": "En tant que propriétaire, vous ne pouvez pas quitter la communauté. Supprimez-la à la place.",
+    "joinViaLink": "Rejoindre",
+    "joinDialogTitle": "Rejoindre une communauté",
+    "pastePrompt": "Insérer le lien ou le token:",
+    "inputPlaceholder": "https://... ou token",
+    "inputHelper": "Vous pouvez coller le lien complet ou seulement le token",
+    "next": "Suivant",
+    "alreadyMember": "Déjà membre",
+    "alreadyMemberMessage": "Vous êtes déjà membre de cette communauté.",
+    "viewCommunity": "Voir la communauté",
+    "retry": "Réessayer",
+    "errors": {
+      "invalidFormat": "Format invalide. Veuillez insérer un lien ou un token.",
+      "invalidUrl": "Lien invalide. Veuillez vérifier l'URL.",
+      "invalidToken": "Token invalide. Veuillez vérifier la saisie.",
+      "tokenNotFound": "Lien d'invitation invalide. Le lien a expiré ou est invalide.",
+      "alreadyMember": "Vous êtes déjà membre de cette communauté."
+    },
+    "joinedAnnouncement": "La communauté {name} a été ajoutée à votre liste",
+    "refreshFailed": "Impossible de mettre à jour la liste. Veuillez recharger la page."
   },
   "groups": {
     "title": "Groupes",
+    "myGroups": "Mes groupes",
     "create": "Créer un groupe",
+    "invite": "Inviter",
+    "createDescription": "Créez un nouveau groupe dans cette communauté",
+    "editDescription": "Mettez à jour les informations de votre groupe",
     "name": "Nom",
     "namePlaceholder": "p.ex. Passionnés de jardinage",
     "description": "Description",
@@ -143,7 +174,7 @@
     "left": "Groupe quitté",
     "cannotLeaveAsOwner": "En tant que propriétaire, vous ne pouvez pas quitter le groupe. Supprimez-le à la place.",
     "secret": "Groupe secret",
-    "joinViaLink": "Insérer une invitation",
+    "joinViaLink": "Rejoindre",
     "joinDialogTitle": "Rejoindre un groupe",
     "pastePrompt": "Insérer le lien ou le token:",
     "inputPlaceholder": "https://... ou token",
@@ -256,6 +287,34 @@
     "forbidden": "Pas d'autorisation",
     "notFound": "Non trouvé",
     "validation": "Erreur de validation",
-    "network": "Erreur réseau"
+    "network": "Erreur réseau",
+    "noInviteToken": "Aucun jeton d'invitation fourni",
+    "invalidInviteLink": "Ce lien d'invitation est invalide ou a expiré",
+    "failedToJoinCommunity": "Impossible de rejoindre la communauté",
+    "failedToJoinGroup": "Impossible de rejoindre le groupe"
+  },
+  "pages": {
+    "offline": {
+      "title": "Vous êtes hors ligne",
+      "description": "Veuillez vérifier votre connexion internet et réessayer.",
+      "retry": "Réessayer"
+    },
+    "error": {
+      "title": "Une erreur s'est produite",
+      "description": "Désolé, quelque chose s'est mal passé. Veuillez réessayer.",
+      "retry": "Réessayer",
+      "backHome": "Retour à l'accueil"
+    },
+    "notFound": {
+      "title": "Page non trouvée",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+      "backHome": "Retour à l'accueil",
+      "viewListings": "Voir les annonces"
+    }
+  },
+  "invite": {
+    "communityInvite": "Vous avez été invité à rejoindre une communauté",
+    "groupInvite": "Vous avez été invité à rejoindre un groupe",
+    "groupJoinNote": "Rejoindre ce groupe vous ajoutera également à la communauté <strong>{communityName}</strong> si vous n'êtes pas encore membre."
   }
 }

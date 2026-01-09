@@ -50,8 +50,13 @@ export class GroupsController {
   }
 
   @Get()
-  async findAll(@CurrentUser() user) {
-    const groups = await this.groupsService.findAllForUser(user.id);
+  async findAll(
+    @CurrentUser() user,
+    @Query('communityId') communityId?: string,
+  ) {
+    const groups = communityId
+      ? await this.groupsService.findAllForCommunity(user.id, communityId)
+      : await this.groupsService.findAllForUser(user.id);
     return groups.map(transformGroupDto);
   }
 

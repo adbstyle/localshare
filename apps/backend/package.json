@@ -6,6 +6,7 @@
     "postinstall": "prisma generate",
     "build": "nest build",
     "start": "node dist/main",
+    "predev": "../../scripts/kill-port.sh 3001",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "lint": "eslint \"{src,test}/**/*.ts\"",

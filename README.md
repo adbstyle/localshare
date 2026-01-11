@@ -109,7 +109,17 @@ GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 MICROSOFT_CLIENT_ID=...
 MICROSOFT_CLIENT_SECRET=...
-NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Image Storage (local or r2)
+STORAGE_PROVIDER=local
+
+# Cloudflare R2 (only if STORAGE_PROVIDER=r2)
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=localshare-images
+R2_PUBLIC_URL=https://pub-xxx.r2.dev
 ```
 
 ## Docker Deployment
@@ -128,6 +138,10 @@ npm run build            # Build all packages
 npm run lint             # Lint all packages
 scripts/kill-port.sh     # Kill process on port (default: 3001)
 ```
+
+## Recent Changes (v1.2)
+
+- **Cloudflare R2 Storage**: Hybrid image storage - lokal für Entwicklung, R2 für Produktion (`STORAGE_PROVIDER`)
 
 ## Recent Changes (v1.1)
 

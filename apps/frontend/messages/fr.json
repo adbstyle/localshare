@@ -47,7 +47,15 @@
     "termsOfService": "conditions d'utilisation",
     "and": "et",
     "privacyPolicy": "politique de confidentialité",
-    "mustAcceptTerms": "Vous devez accepter les conditions d'utilisation et la politique de confidentialité"
+    "mustAcceptTerms": "Vous devez accepter les conditions d'utilisation et la politique de confidentialité",
+    "headline": "Partagez en toute confidentialité",
+    "subline": "Comme les groupes WhatsApp, mais pour les annonces",
+    "valueProp1Title": "Visible uniquement par les membres",
+    "valueProp1Text": "Vos annonces restent privées",
+    "valueProp2Title": "Emprunter au lieu d'acheter",
+    "valueProp2Text": "Économisez de l'argent et des ressources",
+    "valueProp3Title": "Vous décidez qui participe",
+    "valueProp3Text": "Partagez uniquement avec votre voisinage"
   },
   "profile": {
     "title": "Profil",

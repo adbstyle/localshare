@@ -107,13 +107,6 @@ function HeaderContent() {
           </div>
         )}
 
-        {/* Not logged in message */}
-        {!user && (
-          <div className="hidden md:flex text-sm text-muted-foreground">
-            {t('auth.welcomeText')}
-          </div>
-        )}
-
         {/* Mobile Action Buttons & Menu: [Filter] [Create] [Menu] */}
         {user && (
           <div className="flex md:hidden items-center gap-2">

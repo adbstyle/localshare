@@ -9,10 +9,12 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Serve static files for uploads
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads',
-  });
+  // Serve static files for local uploads (only when not using R2)
+  if (process.env.STORAGE_PROVIDER !== 'r2') {
+    app.useStaticAssets(join(process.cwd(), 'uploads'), {
+      prefix: '/uploads',
+    });
+  }
 
   // Security
   app.use(helmet());

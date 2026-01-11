@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -7,11 +8,42 @@ import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class ImageService {
-  private readonly uploadDir = path.join(process.cwd(), 'uploads', 'listings');
+  private readonly useR2: boolean;
+  private readonly s3Client: S3Client | null = null;
+  private readonly bucketName: string;
+  private readonly publicUrl: string;
+  private readonly uploadDir: string;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {
+    this.useR2 = process.env.STORAGE_PROVIDER === 'r2';
+    this.uploadDir = path.join(process.cwd(), 'uploads', 'listings');
 
-  async ensureUploadDir() {
+    if (this.useR2) {
+      if (!process.env.R2_ACCOUNT_ID || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
+        console.warn('R2 credentials not configured - image uploads will fail');
+      }
+
+      this.bucketName = process.env.R2_BUCKET_NAME || 'localshare-images';
+      this.publicUrl = process.env.R2_PUBLIC_URL || '';
+
+      this.s3Client = new S3Client({
+        region: 'auto',
+        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+        },
+      });
+
+      console.log('ImageService: Using R2 storage');
+    } else {
+      this.bucketName = '';
+      this.publicUrl = '';
+      console.log('ImageService: Using local storage');
+    }
+  }
+
+  private async ensureUploadDir(): Promise<void> {
     await fs.mkdir(this.uploadDir, { recursive: true });
   }
 
@@ -19,23 +51,39 @@ export class ImageService {
     listingId: string,
     files: Express.Multer.File[],
   ): Promise<void> {
-    await this.ensureUploadDir();
-
     for (const [index, file] of files.entries()) {
       const filename = `${uuidv4()}.jpg`;
-      const filepath = path.join(this.uploadDir, filename);
 
       // Process image with Sharp
-      await sharp(file.buffer)
+      const processedBuffer = await sharp(file.buffer)
         .resize(1280, null, {
           fit: 'inside',
           withoutEnlargement: true,
         })
         .jpeg({ quality: 85 })
-        .toFile(filepath);
+        .toBuffer();
 
-      // Get file size
-      const stats = await fs.stat(filepath);
+      let sizeBytes: number;
+
+      if (this.useR2 && this.s3Client) {
+        // Upload to R2
+        await this.s3Client.send(
+          new PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: filename,
+            Body: processedBuffer,
+            ContentType: 'image/jpeg',
+          }),
+        );
+        sizeBytes = processedBuffer.length;
+      } else {
+        // Save to local filesystem
+        await this.ensureUploadDir();
+        const filepath = path.join(this.uploadDir, filename);
+        await fs.writeFile(filepath, processedBuffer);
+        const stats = await fs.stat(filepath);
+        sizeBytes = stats.size;
+      }
 
       // Save metadata to database
       await this.prisma.listingImage.create({
@@ -44,7 +92,7 @@ export class ImageService {
           filename,
           originalName: file.originalname,
           mimeType: 'image/jpeg',
-          sizeBytes: stats.size,
+          sizeBytes,
           orderIndex: index,
         },
       });
@@ -57,8 +105,22 @@ export class ImageService {
     });
 
     if (image) {
-      const filepath = path.join(this.uploadDir, image.filename);
-      await fs.unlink(filepath).catch(() => {}); // Ignore if file doesn't exist
+      if (this.useR2 && this.s3Client) {
+        // Delete from R2
+        await this.s3Client
+          .send(
+            new DeleteObjectCommand({
+              Bucket: this.bucketName,
+              Key: image.filename,
+            }),
+          )
+          .catch(() => {}); // Ignore if file doesn't exist
+      } else {
+        // Delete from local filesystem
+        const filepath = path.join(this.uploadDir, image.filename);
+        await fs.unlink(filepath).catch(() => {});
+      }
+
       await this.prisma.listingImage.delete({ where: { id: imageId } });
     }
   }
@@ -68,15 +130,30 @@ export class ImageService {
       where: { listingId },
     });
 
-    for (const image of images) {
-      const filepath = path.join(this.uploadDir, image.filename);
-      await fs.unlink(filepath).catch(() => {});
+    if (this.useR2 && this.s3Client) {
+      // Delete from R2 in parallel
+      await Promise.all(
+        images.map((image) =>
+          this.s3Client!
+            .send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: image.filename }))
+            .catch(() => {}),
+        ),
+      );
+    } else {
+      // Delete from local filesystem
+      for (const image of images) {
+        const filepath = path.join(this.uploadDir, image.filename);
+        await fs.unlink(filepath).catch(() => {});
+      }
     }
 
     await this.prisma.listingImage.deleteMany({ where: { listingId } });
   }
 
   getImageUrl(filename: string): string {
+    if (this.useR2) {
+      return `${this.publicUrl}/${filename}`;
+    }
     return `/uploads/listings/${filename}`;
   }
 }

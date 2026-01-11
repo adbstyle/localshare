@@ -6,47 +6,48 @@ export class VisibilityService {
   constructor(private prisma: PrismaService) {}
 
   async canUserViewListing(userId: string, listingId: string): Promise<boolean> {
-    // Creator can always view
+    // Query 1: Listing + Visibility in single query (Prisma Include)
     const listing = await this.prisma.listing.findUnique({
       where: { id: listingId, deletedAt: null },
-      select: { creatorId: true },
+      select: {
+        creatorId: true,
+        visibility: {
+          select: { communityId: true, groupId: true },
+        },
+      },
     });
 
     if (!listing) return false;
     if (listing.creatorId === userId) return true;
 
-    // Check if user has access via community or group membership
-    const visibility = await this.prisma.listingVisibility.findMany({
-      where: { listingId },
-    });
+    // Extract IDs (no DB call)
+    const communityIds = listing.visibility
+      .filter((v) => v.communityId)
+      .map((v) => v.communityId!);
+    const groupIds = listing.visibility
+      .filter((v) => v.groupId)
+      .map((v) => v.groupId!);
 
-    for (const vis of visibility) {
-      if (vis.communityId) {
-        const isMember = await this.prisma.communityMember.findUnique({
-          where: {
-            communityId_userId: {
-              communityId: vis.communityId,
-              userId,
-            },
-          },
-        });
-        if (isMember) return true;
-      }
+    // Early return if no visibility rules
+    if (communityIds.length === 0 && groupIds.length === 0) return false;
 
-      if (vis.groupId) {
-        const isMember = await this.prisma.groupMember.findUnique({
-          where: {
-            groupId_userId: {
-              groupId: vis.groupId,
-              userId,
-            },
-          },
-        });
-        if (isMember) return true;
-      }
-    }
+    // Query 2+3: Parallel batch membership check
+    const [communityMember, groupMember] = await Promise.all([
+      communityIds.length > 0
+        ? this.prisma.communityMember.findFirst({
+            where: { userId, communityId: { in: communityIds } },
+            select: { id: true },
+          })
+        : null,
+      groupIds.length > 0
+        ? this.prisma.groupMember.findFirst({
+            where: { userId, groupId: { in: groupIds } },
+            select: { id: true },
+          })
+        : null,
+    ]);
 
-    return false;
+    return !!communityMember || !!groupMember;
   }
 
   async getVisibleListingIds(userId: string): Promise<string[]> {

@@ -90,21 +90,46 @@ apps/
 │   │   ├── communities/  # Community CRUD + membership
 │   │   ├── groups/   # Groups within communities
 │   │   ├── listings/ # Listings + images + visibility
-│   │   ├── common/   # Decorators (@CurrentUser, @Public)
+│   │   ├── common/   # Decorators, types, utils
+│   │   │   ├── decorators/  # @CurrentUser, @Public
+│   │   │   ├── types/       # Pagination types
+│   │   │   └── utils/       # Prisma utilities
 │   │   └── database/ # Prisma service
 │   └── prisma/       # Schema + migrations + seed
 └── frontend/         # Next.js 14 (port 3000)
     └── src/
         ├── app/[locale]/  # i18n routing (de/fr)
-        ├── components/    # UI components (shadcn/ui)
-        ├── hooks/         # use-auth, use-toast
+        │   ├── auth/callback/  # OAuth callback
+        │   ├── communities/    # Community pages
+        │   ├── groups/         # Group pages
+        │   ├── listings/       # Listing CRUD pages
+        │   ├── profile/        # User profile
+        │   ├── imprint/        # Legal: Impressum
+        │   ├── privacy/        # Legal: Privacy policy
+        │   ├── terms/          # Legal: Terms of service
+        │   └── offline/        # PWA offline page
+        ├── components/
+        │   ├── ui/           # shadcn/ui components
+        │   ├── auth/         # Login components
+        │   ├── layout/       # Header, Footer, UserMenu
+        │   ├── communities/  # Community cards, dialogs
+        │   ├── groups/       # Group dialogs
+        │   └── listings/     # Listing cards, forms, filters
+        ├── hooks/         # use-auth, use-toast, use-media-query
         └── lib/           # API client, utilities
+            └── utils/     # url-filters, parse-invite
 packages/
 └── shared/           # Shared types (future)
 ```
 
 ### Database Schema (Prisma)
-Key models: `User`, `SsoAccount`, `Community`, `CommunityMember`, `Group`, `GroupMember`, `Listing`, `ListingImage`, `ListingVisibility`
+Key models: `User`, `SsoAccount`, `RefreshToken`, `Community`, `CommunityMember`, `Group`, `GroupMember`, `Listing`, `ListingImage`, `ListingVisibility`
+
+Key enums:
+- `ListingType`: SELL, RENT, LEND, SEARCH
+- `ListingCategory`: ELECTRONICS, FURNITURE, SPORTS, CLOTHING, HOUSEHOLD, GARDEN, BOOKS, TOYS, TOOLS, FOOD, SERVICES, VEHICLES, OTHER
+- `PriceTimeUnit`: HOUR, DAY, WEEK, MONTH
+- `VisibilityType`: COMMUNITY, GROUP
 
 Listings have visibility rules - they can be shared with specific communities or groups. The `VisibilityService` handles access control.
 
@@ -144,14 +169,22 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 
 Copy `.env.example` to `.env` at root level. Key variables:
 - `DATABASE_URL` - PostgreSQL connection (use port 5433 for local Docker)
+- `JWT_SECRET` / `JWT_REFRESH_SECRET` - JWT signing keys
 - `GOOGLE_CLIENT_ID/SECRET` - Google OAuth credentials
 - `MICROSOFT_CLIENT_ID/SECRET` - Microsoft OAuth credentials
 - `NEXT_PUBLIC_API_URL` - Backend URL for frontend
+- `STORAGE_PROVIDER` - `local` or `r2` for image storage
+- `R2_*` - Cloudflare R2 credentials (only if STORAGE_PROVIDER=r2)
 
 Local database uses port 5433 (not 5432) to avoid conflicts:
 ```
 DATABASE_URL=postgresql://localshare:changeme_in_production@localhost:5433/localshare
 ```
+
+### Image Storage
+Two storage backends supported:
+- **local**: Files saved to `/uploads/listings/` (default for dev)
+- **r2**: Cloudflare R2 bucket (for production)
 
 ## i18n (Internationalization)
 

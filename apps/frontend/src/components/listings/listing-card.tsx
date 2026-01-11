@@ -17,6 +17,11 @@ export function ListingCard({ listing }: ListingCardProps) {
   const firstImage = listing.images[0];
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+  const getImageUrl = (url: string) => {
+    if (url.startsWith('http')) return url;
+    return `${apiUrl}${url}`;
+  };
+
   return (
     <Link href={`/listings/${listing.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
@@ -24,7 +29,7 @@ export function ListingCard({ listing }: ListingCardProps) {
         <div className="relative h-48 bg-muted">
           {firstImage ? (
             <Image
-              src={`${apiUrl}${firstImage.url}`}
+              src={getImageUrl(firstImage.url)}
               alt={listing.title}
               fill
               className="object-cover"

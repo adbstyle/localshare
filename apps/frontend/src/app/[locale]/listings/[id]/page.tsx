@@ -45,6 +45,13 @@ export default function ListingDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+  const getImageUrl = (url: string) => {
+    // R2 URLs are already absolute
+    if (url.startsWith('http')) return url;
+    // Local uploads need API URL prefix
+    return `${apiUrl}${url}`;
+  };
+
   const fetchListing = useCallback(async () => {
     try {
       const { data } = await api.get<Listing>(`/listings/${params.id}`);
@@ -227,7 +234,7 @@ export default function ListingDetailPage() {
                     {/* Main Image */}
                     <div className="relative h-96 bg-muted rounded-lg overflow-hidden">
                       <Image
-                        src={`${apiUrl}${images[selectedImageIndex].url}`}
+                        src={getImageUrl(images[selectedImageIndex].url)}
                         alt={`${listing.title} - Ansicht ${selectedImageIndex + 1} von ${images.length}`}
                         fill
                         className="object-contain"
@@ -250,7 +257,7 @@ export default function ListingDetailPage() {
                             aria-label={`Bild ${index + 1} von ${images.length} anzeigen`}
                           >
                             <Image
-                              src={`${apiUrl}${image.url}`}
+                              src={getImageUrl(image.url)}
                               alt={`${listing.title} - Vorschau ${index + 1}`}
                               fill
                               className="object-cover"

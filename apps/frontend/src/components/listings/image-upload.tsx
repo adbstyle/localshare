@@ -47,6 +47,11 @@ export function ImageUpload({
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+  const getImageUrl = (url: string) => {
+    if (url.startsWith('http')) return url;
+    return `${apiUrl}${url}`;
+  };
+
   // Sync images state when existingImages prop changes
   useEffect(() => {
     setImages(existingImages);
@@ -209,7 +214,7 @@ export function ImageUpload({
             <div key={image.id} className="relative group">
               <div className="relative h-32 rounded-lg overflow-hidden border">
                 <Image
-                  src={`${apiUrl}${image.url}`}
+                  src={getImageUrl(image.url)}
                   alt={image.originalName}
                   fill
                   className="object-cover"

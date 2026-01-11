@@ -52,15 +52,16 @@ export class ImageService {
     files: Express.Multer.File[],
   ): Promise<void> {
     for (const [index, file] of files.entries()) {
-      const filename = `${uuidv4()}.jpg`;
+      const filename = `${uuidv4()}.webp`;
 
-      // Process image with Sharp
+      // Process image with Sharp - WebP for ~30% smaller files at same quality
       const processedBuffer = await sharp(file.buffer)
+        .rotate() // Auto-rotate based on EXIF and strip metadata (privacy)
         .resize(1280, null, {
           fit: 'inside',
           withoutEnlargement: true,
         })
-        .jpeg({ quality: 85 })
+        .webp({ quality: 80 })
         .toBuffer();
 
       let sizeBytes: number;
@@ -72,7 +73,7 @@ export class ImageService {
             Bucket: this.bucketName,
             Key: filename,
             Body: processedBuffer,
-            ContentType: 'image/jpeg',
+            ContentType: 'image/webp',
           }),
         );
         sizeBytes = processedBuffer.length;
@@ -91,7 +92,7 @@ export class ImageService {
           listingId,
           filename,
           originalName: file.originalname,
-          mimeType: 'image/jpeg',
+          mimeType: 'image/webp',
           sizeBytes,
           orderIndex: index,
         },

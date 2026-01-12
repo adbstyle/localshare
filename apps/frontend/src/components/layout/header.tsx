@@ -140,17 +140,6 @@ function HeaderContent() {
           />
         )}
 
-        {/* Mobile Menu Button (when not logged in) */}
-        {!user && (
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        )}
       </div>
 
       {/* Mobile Navigation */}

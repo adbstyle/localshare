@@ -61,8 +61,8 @@ export function LoginPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 lg:p-8 max-w-7xl mx-auto">
+    <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 lg:p-8 max-w-7xl mx-auto items-center">
         {/* Value Proposition Section */}
         <div className="flex flex-col justify-center space-y-8 lg:pr-8">
           <div className="space-y-4">

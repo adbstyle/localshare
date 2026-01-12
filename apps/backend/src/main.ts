@@ -18,24 +18,8 @@ async function bootstrap() {
 
   // Security
   app.use(helmet());
-  // CORS: support multiple origins (comma-separated in FRONTEND_URLS)
-  const allowedOrigins = (
-    process.env.FRONTEND_URLS ||
-    process.env.FRONTEND_URL ||
-    'http://localhost:3000'
-  )
-    .split(',')
-    .map((url) => url.trim());
-
   app.enableCors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   });
 

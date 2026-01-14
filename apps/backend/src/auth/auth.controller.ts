@@ -59,15 +59,25 @@ export class AuthController {
       req.user,
     );
 
+    // Set refresh token as HTTPOnly cookie (restricted to auth endpoints)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 90 * 24 * 60 * 60 * 1000,
+      path: '/api/v1/auth',
     });
 
-    // Build redirect URL with invite context if present
-    let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?token=${accessToken}`;
+    // Set access token as HTTPOnly cookie (available for all API calls)
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    // Build redirect URL WITHOUT token in URL (security best practice)
+    let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback`;
 
     // Check for pending invite in cookie (primary method)
     const pendingInvite = req.cookies['pendingInvite'];
@@ -79,7 +89,7 @@ export class AuthController {
             token,
             type,
           );
-          redirectUrl += `&redirectTo=${encodeURIComponent(joinPath)}`;
+          redirectUrl += `?redirectTo=${encodeURIComponent(joinPath)}`;
         }
       } catch (error) {
         // Invalid cookie data, ignore
@@ -126,15 +136,25 @@ export class AuthController {
       req.user,
     );
 
+    // Set refresh token as HTTPOnly cookie (restricted to auth endpoints)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 90 * 24 * 60 * 60 * 1000,
+      path: '/api/v1/auth',
     });
 
-    // Build redirect URL with invite context if present
-    let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?token=${accessToken}`;
+    // Set access token as HTTPOnly cookie (available for all API calls)
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    // Build redirect URL WITHOUT token in URL (security best practice)
+    let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback`;
 
     // Check for pending invite in cookie (primary method)
     const pendingInvite = req.cookies['pendingInvite'];
@@ -146,7 +166,7 @@ export class AuthController {
             token,
             type,
           );
-          redirectUrl += `&redirectTo=${encodeURIComponent(joinPath)}`;
+          redirectUrl += `?redirectTo=${encodeURIComponent(joinPath)}`;
         }
       } catch (error) {
         // Invalid cookie data, ignore
@@ -166,14 +186,24 @@ export class AuthController {
     const { accessToken, refreshToken: newRefreshToken } =
       await this.authService.refreshTokens(refreshToken);
 
+    // Set new refresh token as HTTPOnly cookie
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 90 * 24 * 60 * 60 * 1000,
+      path: '/api/v1/auth',
     });
 
-    return res.json({ accessToken });
+    // Set new access token as HTTPOnly cookie
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    return res.json({ success: true });
   }
 
   @Post('logout')
@@ -181,7 +211,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(@CurrentUser() user, @Res() res: Response) {
     await this.authService.logout(user.id);
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', { path: '/api/v1/auth' });
+    res.clearCookie('accessToken');
     return res.json({ message: 'Logged out successfully' });
   }
 

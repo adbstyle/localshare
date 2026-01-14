@@ -89,7 +89,7 @@ export class AuthController {
             token,
             type,
           );
-          redirectUrl += `&redirectTo=${encodeURIComponent(joinPath)}`;
+          redirectUrl += `?redirectTo=${encodeURIComponent(joinPath)}`;
         }
       } catch (error) {
         // Invalid cookie data, ignore
@@ -166,7 +166,7 @@ export class AuthController {
             token,
             type,
           );
-          redirectUrl += `&redirectTo=${encodeURIComponent(joinPath)}`;
+          redirectUrl += `?redirectTo=${encodeURIComponent(joinPath)}`;
         }
       } catch (error) {
         // Invalid cookie data, ignore

@@ -144,12 +144,13 @@ All backend routes are prefixed with `/api/v1/`:
 ### Auth Flow
 1. User clicks OAuth login → redirected to Google/Microsoft
 2. Callback returns to backend → validates & creates/links user
-3. Backend issues JWT (15min) + refresh token (90d, httpOnly cookie)
-4. Frontend stores access token in localStorage
-5. API client auto-refreshes on 401
+3. Backend issues JWT (15min) + refresh token (90d) as HTTPOnly cookies
+4. Frontend redirects to `/auth/callback` (no token in URL)
+5. API client sends cookies automatically (`withCredentials: true`)
+6. On 401, client calls `/auth/refresh` to get new tokens via cookies
 
 ### Frontend State
-Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand). The `api.ts` client handles auth headers and token refresh automatically.
+Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand). The `api.ts` client handles token refresh automatically via HTTPOnly cookies.
 
 ## Key Patterns
 

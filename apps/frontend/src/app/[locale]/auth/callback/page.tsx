@@ -5,6 +5,20 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
+function isSafeRedirect(url: string): boolean {
+  // Must start with single slash and not contain protocol-relative patterns
+  if (!url.startsWith('/') || url.startsWith('//')) {
+    return false;
+  }
+  // Block any attempt to include protocol or external domain
+  try {
+    const parsed = new URL(url, 'http://localhost');
+    return parsed.host === 'localhost';
+  } catch {
+    return false;
+  }
+}
+
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -17,8 +31,7 @@ function AuthCallbackContent() {
       // Check URL params for redirect (from backend invite flow)
       const redirectTo = searchParams.get('redirectTo');
 
-      if (redirectTo) {
-        // Backend provided redirect URL - use it directly
+      if (redirectTo && isSafeRedirect(redirectTo)) {
         router.push(redirectTo);
         return;
       }

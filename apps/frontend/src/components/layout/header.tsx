@@ -32,7 +32,7 @@ function HeaderContent() {
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const feedbackEmail = process.env.NEXT_PUBLIC_FEEDBACK_EMAIL || 'feedback@localshare.ch';
+  const feedbackEmail = process.env.NEXT_PUBLIC_FEEDBACK_EMAIL || 'localshare.repossess838@passmail.com';
 
   // Calculate active filter count from URL (for badge)
   const activeFilterCount = useMemo(() => {

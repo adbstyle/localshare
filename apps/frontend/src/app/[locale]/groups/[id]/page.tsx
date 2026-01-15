@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, Link2, RefreshCw, Edit, Trash2, LogOut, Loader2, FileText, MoreVertical, ChevronDown, ChevronRight } from 'lucide-react';
+import { Users, Link2, RefreshCw, Edit, Trash2, LogOut, Loader2, FileText, MoreVertical, ChevronDown, ChevronRight, X } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -76,6 +76,8 @@ export default function GroupDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [membersOpen, setMembersOpen] = useState(true);
   const [showAllMembers, setShowAllMembers] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null);
+  const [showRemoveMemberDialog, setShowRemoveMemberDialog] = useState(false);
 
   useEffect(() => {
     fetchGroup();
@@ -191,6 +193,29 @@ export default function GroupDetailPage() {
   const handleGroupUpdated = () => {
     setShowEditDialog(false);
     fetchGroup();
+  };
+
+  const handleRemoveMember = async () => {
+    if (!memberToRemove) return;
+    setActionLoading(true);
+    try {
+      await api.delete(`/groups/${params.id}/members/${memberToRemove.id}`);
+      toast({
+        variant: 'success',
+        title: t('groups.memberRemoved'),
+      });
+      fetchMembers();
+    } catch (error: any) {
+      toast({
+        title: t('errors.generic'),
+        description: error.response?.data?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(false);
+      setShowRemoveMemberDialog(false);
+      setMemberToRemove(null);
+    }
   };
 
   if (loading || !group) {
@@ -309,7 +334,7 @@ export default function GroupDetailPage() {
             {displayedMembers.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex items-center justify-between p-3 rounded-lg border group"
               >
                 <div>
                   <p className="font-medium">
@@ -322,9 +347,25 @@ export default function GroupDetailPage() {
                   </p>
                   <p className="text-sm text-muted-foreground">{member.email}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(member.joinedAt).toLocaleDateString()}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(member.joinedAt).toLocaleDateString()}
+                  </p>
+                  {isOwner && member.role !== 'owner' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        setMemberToRemove(member);
+                        setShowRemoveMemberDialog(true);
+                      }}
+                      aria-label={`${t('groups.removeMember')} ${member.firstName} ${member.lastName}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -415,6 +456,33 @@ export default function GroupDetailPage() {
             >
               {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Member Dialog */}
+      <AlertDialog open={showRemoveMemberDialog} onOpenChange={setShowRemoveMemberDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('groups.removeMemberConfirm')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('groups.removeMemberWarning', {
+                name: `${memberToRemove?.firstName} ${memberToRemove?.lastName}`,
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveMember}
+              disabled={actionLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('groups.removeMember')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

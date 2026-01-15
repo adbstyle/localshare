@@ -60,6 +60,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronRight,
+  X,
 } from 'lucide-react';
 import { EditCommunityDialog } from '@/components/communities/edit-community-dialog';
 import { CreateGroupDialog } from '@/components/groups/create-group-dialog';
@@ -96,6 +97,8 @@ export default function CommunityDetailPage() {
   const [groupsOpen, setGroupsOpen] = useState(true);
   const [membersOpen, setMembersOpen] = useState(true);
   const [showAllMembers, setShowAllMembers] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<CommunityMember | null>(null);
+  const [showRemoveMemberDialog, setShowRemoveMemberDialog] = useState(false);
 
   useEffect(() => {
     fetchCommunity();
@@ -230,6 +233,29 @@ export default function CommunityDetailPage() {
   const handleJoinGroupSuccess = () => {
     setShowJoinGroupDialog(false);
     fetchGroups();
+  };
+
+  const handleRemoveMember = async () => {
+    if (!memberToRemove) return;
+    setActionLoading(true);
+    try {
+      await api.delete(`/communities/${params.id}/members/${memberToRemove.id}`);
+      toast({
+        variant: 'success',
+        title: t('communities.memberRemoved'),
+      });
+      fetchMembers();
+    } catch (error: any) {
+      toast({
+        title: t('errors.generic'),
+        description: error.response?.data?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(false);
+      setShowRemoveMemberDialog(false);
+      setMemberToRemove(null);
+    }
   };
 
   if (loading || !community) {
@@ -392,7 +418,7 @@ export default function CommunityDetailPage() {
             {displayedMembers.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex items-center justify-between p-3 rounded-lg border group"
               >
                 <div>
                   <p className="font-medium">
@@ -405,9 +431,25 @@ export default function CommunityDetailPage() {
                   </p>
                   <p className="text-sm text-muted-foreground">{member.email}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(member.joinedAt).toLocaleDateString()}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(member.joinedAt).toLocaleDateString()}
+                  </p>
+                  {isOwner && member.role !== 'owner' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        setMemberToRemove(member);
+                        setShowRemoveMemberDialog(true);
+                      }}
+                      aria-label={`${t('communities.removeMember')} ${member.firstName} ${member.lastName}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -522,6 +564,33 @@ export default function CommunityDetailPage() {
             >
               {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Member Dialog */}
+      <AlertDialog open={showRemoveMemberDialog} onOpenChange={setShowRemoveMemberDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('communities.removeMemberConfirm')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('communities.removeMemberWarning', {
+                name: `${memberToRemove?.firstName} ${memberToRemove?.lastName}`,
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveMember}
+              disabled={actionLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('communities.removeMember')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

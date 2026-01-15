@@ -141,7 +141,11 @@
       "alreadyMember": "Vous êtes déjà membre de cette communauté."
     },
     "joinedAnnouncement": "La communauté {name} a été ajoutée à votre liste",
-    "refreshFailed": "Impossible de mettre à jour la liste. Veuillez recharger la page."
+    "refreshFailed": "Impossible de mettre à jour la liste. Veuillez recharger la page.",
+    "removeMember": "Supprimer",
+    "removeMemberConfirm": "Supprimer le membre?",
+    "removeMemberWarning": "\"{name}\" sera retiré de la communauté et de tous les groupes.",
+    "memberRemoved": "Membre supprimé"
   },
   "groups": {
     "title": "Groupes",
@@ -199,7 +203,11 @@
       "invalidToken": "Token invalide. Veuillez vérifier la saisie.",
       "tokenNotFound": "Lien d'invitation invalide. Le lien a expiré ou est invalide.",
       "alreadyMember": "Vous êtes déjà membre de ce groupe."
-    }
+    },
+    "removeMember": "Supprimer",
+    "removeMemberConfirm": "Supprimer le membre?",
+    "removeMemberWarning": "\"{name}\" sera retiré du groupe.",
+    "memberRemoved": "Membre supprimé"
   },
   "listings": {
     "title": "Annonces",
@@ -246,7 +254,8 @@
     "uploadImages": "Télécharger des images (max. 3)",
     "imageLimit": "Maximum 3 images de 10 Mo chacune",
     "sharedWith": "Partagé avec",
-    "selectCommunities": "Sélectionner des communautés",
+    "shareWith": "Partager avec",
+    "selectCommunities": "Choisis qui peut voir ton annonce.",
     "selectGroups": "Sélectionner des groupes",
     "contact": "Contacter",
     "contactVia": "Contacter via",
@@ -257,7 +266,7 @@
     "address": "Adresse",
     "phone": "Téléphone",
     "createdAt": "Créé",
-    "edit": "Modifier",
+    "edit": "Modifier l'annonce",
     "delete": "Supprimer",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette annonce?",
     "deleteImage": "Supprimer l'image",

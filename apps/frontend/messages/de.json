@@ -141,7 +141,11 @@
       "alreadyMember": "Du bist bereits Mitglied dieser Gemeinschaft."
     },
     "joinedAnnouncement": "Gemeinschaft {name} wurde zu deiner Liste hinzugefügt",
-    "refreshFailed": "Liste konnte nicht aktualisiert werden. Bitte Seite neu laden."
+    "refreshFailed": "Liste konnte nicht aktualisiert werden. Bitte Seite neu laden.",
+    "removeMember": "Entfernen",
+    "removeMemberConfirm": "Mitglied entfernen?",
+    "removeMemberWarning": "\"{name}\" wird aus der Gemeinschaft und allen Gruppen entfernt.",
+    "memberRemoved": "Mitglied entfernt"
   },
   "groups": {
     "title": "Gruppen",
@@ -199,7 +203,11 @@
       "invalidToken": "Ungültiger Token. Bitte überprüfe die Eingabe.",
       "tokenNotFound": "Ungültiger Einladungslink. Link ist abgelaufen oder ungültig.",
       "alreadyMember": "Du bist bereits Mitglied dieser Gruppe."
-    }
+    },
+    "removeMember": "Entfernen",
+    "removeMemberConfirm": "Mitglied entfernen?",
+    "removeMemberWarning": "\"{name}\" wird aus der Gruppe entfernt.",
+    "memberRemoved": "Mitglied entfernt"
   },
   "listings": {
     "title": "Anzeigen",
@@ -246,7 +254,8 @@
     "uploadImages": "Bilder hochladen (max. 3)",
     "imageLimit": "Maximal 3 Bilder, je 10 MB",
     "sharedWith": "Geteilt mit",
-    "selectCommunities": "Gemeinschaften auswählen",
+    "shareWith": "Teilen mit",
+    "selectCommunities": "Wähle, wer deine Anzeige sehen kann.",
     "selectGroups": "Gruppen auswählen",
     "contact": "Kontaktieren",
     "contactVia": "Kontaktieren via",
@@ -257,7 +266,7 @@
     "address": "Adresse",
     "phone": "Telefon",
     "createdAt": "Erstellt",
-    "edit": "Bearbeiten",
+    "edit": "Anzeige bearbeiten",
     "delete": "Löschen",
     "deleteConfirm": "Sind Sie sicher, dass Sie diese Anzeige löschen möchten?",
     "deleteImage": "Bild löschen",

@@ -34,7 +34,9 @@
     "groups": "Groupes",
     "profile": "Profil",
     "logout": "Déconnexion",
-    "userMenu": "Menu utilisateur"
+    "userMenu": "Menu utilisateur",
+    "menu": "Menu",
+    "menuDescription": "Menu de navigation avec liens et actions"
   },
   "auth": {
     "login": "Se connecter",

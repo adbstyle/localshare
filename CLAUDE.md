@@ -137,8 +137,8 @@ Listings have visibility rules - they can be shared with specific communities or
 All backend routes are prefixed with `/api/v1/`:
 - `/auth/*` - OAuth flows, token refresh, logout
 - `/users/me` - Profile management
-- `/communities/*` - Community CRUD, join/leave
-- `/groups/*` - Group CRUD within communities
+- `/communities/*` - Community CRUD, join/leave, member management (owner can remove members)
+- `/groups/*` - Group CRUD within communities, member management (owner can remove members)
 - `/listings/*` - Listing CRUD with image upload
 
 ### Auth Flow

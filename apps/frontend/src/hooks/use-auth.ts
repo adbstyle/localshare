@@ -56,6 +56,7 @@ export function useAuth() {
       // Clear invite tokens from sessionStorage (SAIT pattern - Layer 2)
       sessionStorage.removeItem('pendingInviteToken');
       sessionStorage.removeItem('pendingGroupInviteToken');
+      sessionStorage.removeItem('pendingInviteName');
 
       setGlobalAuthState({ user: null, loading: false });
       window.location.href = '/';

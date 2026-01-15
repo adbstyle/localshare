@@ -38,24 +38,35 @@ function JoinGroupPageContent() {
   const token = searchParams.get('token');
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        // Store the invite token before redirecting to login
-        if (token) {
-          // Clear ALL invite tokens first (SAIT pattern - Single Active Invite Token)
-          sessionStorage.removeItem('pendingInviteToken');
-          sessionStorage.removeItem('pendingGroupInviteToken');
-          // Set the new group invite token
-          sessionStorage.setItem('pendingGroupInviteToken', token);
+    const handleInvite = async () => {
+      if (!authLoading) {
+        if (!user) {
+          // Store the invite token before redirecting to login
+          if (token) {
+            // Clear ALL invite tokens first (SAIT pattern - Single Active Invite Token)
+            sessionStorage.removeItem('pendingInviteToken');
+            sessionStorage.removeItem('pendingGroupInviteToken');
+            sessionStorage.removeItem('pendingInviteName');
+            // Fetch group name for login page display
+            try {
+              const { data } = await api.get<GroupPreview>(`/groups/preview/${token}`);
+              sessionStorage.setItem('pendingInviteName', data.name);
+            } catch {
+              // Ignore - name is optional for display
+            }
+            // Set the new group invite token
+            sessionStorage.setItem('pendingGroupInviteToken', token);
+          }
+          router.push('/');
+        } else if (token) {
+          fetchGroupPreview();
+        } else {
+          setError(t('errors.noInviteToken'));
+          setLoading(false);
         }
-        router.push('/');
-      } else if (token) {
-        fetchGroupPreview();
-      } else {
-        setError(t('errors.noInviteToken'));
-        setLoading(false);
       }
-    }
+    };
+    handleInvite();
   }, [user, authLoading, token, router]);
 
   const fetchGroupPreview = async () => {

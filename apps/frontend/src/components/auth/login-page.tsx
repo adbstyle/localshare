@@ -15,6 +15,8 @@ export function LoginPage() {
   const { toast } = useToast();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [hasPendingInvite, setHasPendingInvite] = useState(false);
+  const [inviteName, setInviteName] = useState<string | null>(null);
+  const [inviteType, setInviteType] = useState<'community' | 'group'>('community');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
@@ -22,6 +24,10 @@ export function LoginPage() {
     const communityToken = sessionStorage.getItem('pendingInviteToken');
     const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
     setHasPendingInvite(!!(communityToken || groupToken));
+    setInviteType(groupToken ? 'group' : 'community');
+
+    const name = sessionStorage.getItem('pendingInviteName');
+    setInviteName(name);
   }, []);
 
   const handleLogin = (provider: 'google' | 'microsoft') => {
@@ -107,7 +113,7 @@ export function LoginPage() {
                     <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
-                        {t('communities.invitePending')}
+                        {t(inviteType === 'group' ? 'communities.invitePendingGroup' : 'communities.invitePendingCommunity', { name: inviteName || '' })}
                       </p>
                       <p className="text-blue-700 dark:text-blue-300 text-xs mt-1">
                         {t('communities.invitePendingText')}

@@ -106,4 +106,15 @@ export class GroupsController {
   async getMembers(@CurrentUser() user, @Param('id') id: string) {
     return this.groupsService.getMembers(id, user.id);
   }
+
+  @Delete(':id/members/:memberId')
+  @UseGuards(OwnershipGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeMember(
+    @CurrentUser() user,
+    @Param('id') id: string,
+    @Param('memberId') memberId: string,
+  ) {
+    await this.membershipService.removeMember(user.id, id, memberId);
+  }
 }

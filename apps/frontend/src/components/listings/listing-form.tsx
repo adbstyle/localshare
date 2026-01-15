@@ -295,7 +295,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
       <Card>
         <CardContent className="pt-6 space-y-4">
           <div>
-            <Label className="text-base font-semibold">{t('listings.sharedWith')}</Label>
+            <Label className="text-base font-semibold">{t('listings.shareWith')}</Label>
             <p className="text-sm text-muted-foreground mt-1">
               {t('listings.selectCommunities')}
             </p>

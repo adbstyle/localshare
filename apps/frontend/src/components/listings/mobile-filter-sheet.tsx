@@ -102,7 +102,7 @@ export function MobileFilterSheet({
         onEscapeKeyDown={() => onOpenChange(false)}
       >
         {/* Sticky Header */}
-        <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between border-b bg-background px-4 py-4">
+        <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between border-b bg-background px-4 py-3">
           <div className="flex items-center gap-4">
             <DialogTitle className="text-lg font-semibold">
               {t('common.filter')}

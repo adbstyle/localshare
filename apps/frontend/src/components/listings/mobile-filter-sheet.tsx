@@ -129,7 +129,6 @@ export function MobileFilterSheet({
           <div className="space-y-6">
             {/* Search */}
             <div>
-              <Label>{t('common.search')}</Label>
               <Input
                 placeholder={t('listings.searchPlaceholder')}
                 value={tempFilters.search || ''}

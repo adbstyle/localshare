@@ -101,7 +101,9 @@ export class AuthController {
         // Invalid cookie data, ignore
       }
       // Clear the cookie after use
-      res.clearCookie('pendingInvite');
+      res.clearCookie('pendingInvite', {
+        domain: process.env.COOKIE_DOMAIN || undefined,
+      });
     }
 
     res.redirect(redirectUrl);
@@ -167,7 +169,9 @@ export class AuthController {
         // Invalid cookie data, ignore
       }
       // Clear the cookie after use
-      res.clearCookie('pendingInvite');
+      res.clearCookie('pendingInvite', {
+        domain: process.env.COOKIE_DOMAIN || undefined,
+      });
     }
 
     res.redirect(redirectUrl);

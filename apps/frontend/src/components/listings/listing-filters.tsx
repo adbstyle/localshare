@@ -134,9 +134,9 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
           <h3 className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">
             {t('listings.filterByType')}
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-0">
             {types.map((type) => (
-              <div key={type} className="flex items-center space-x-2 ml-2">
+              <div key={type} className="flex items-center space-x-2 min-h-11 ml-2">
                 <Checkbox
                   id={`type-${type}`}
                   checked={filters.types?.includes(type) || false}
@@ -157,9 +157,9 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
           <h3 className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">
             {t('listings.filterByCategory')}
           </h3>
-          <div className="space-y-1 max-h-64 overflow-y-auto">
+          <div className="space-y-0 max-h-64 overflow-y-auto">
             {categories.map((category) => (
-              <div key={category} className="flex items-center space-x-2 ml-2">
+              <div key={category} className="flex items-center space-x-2 min-h-11 ml-2">
                 <Checkbox
                   id={`cat-${category}`}
                   checked={filters.categories?.includes(category) || false}

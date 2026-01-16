@@ -102,7 +102,7 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
       <CardContent className="space-y-6">
         {/* Search */}
         <div>
-          <Label>{t('common.search')}</Label>
+          <Label className="sr-only">{t('common.search')}</Label>
           <Input
             placeholder={t('listings.searchPlaceholder')}
             value={searchInput}

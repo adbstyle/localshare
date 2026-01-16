@@ -117,8 +117,8 @@ export function MobileFilterSheet({
             )}
           </div>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <X className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-10 w-10">
+              <X className="h-5 w-5" />
               <span className="sr-only">{t('common.close')}</span>
             </Button>
           </DialogClose>
@@ -129,7 +129,6 @@ export function MobileFilterSheet({
           <div className="space-y-6">
             {/* Search */}
             <div>
-              <Label>{t('common.search')}</Label>
               <Input
                 placeholder={t('listings.searchPlaceholder')}
                 value={tempFilters.search || ''}
@@ -144,7 +143,7 @@ export function MobileFilterSheet({
 
             {/* My Listings */}
             {user && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 min-h-10">
                 <Checkbox
                   id="mobile-myListings"
                   checked={tempFilters.myListings || false}
@@ -164,9 +163,9 @@ export function MobileFilterSheet({
             {/* Type Filter */}
             <div>
               <Label className="mb-2 block">{t('listings.filterByType')}</Label>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {types.map((type) => (
-                  <div key={type} className="flex items-center space-x-2">
+                  <div key={type} className="flex items-center space-x-2 min-h-10">
                     <Checkbox
                       id={`mobile-type-${type}`}
                       checked={tempFilters.types?.includes(type) || false}
@@ -183,9 +182,9 @@ export function MobileFilterSheet({
             {/* Category Filter */}
             <div>
               <Label className="mb-2 block">{t('listings.filterByCategory')}</Label>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {categories.map((category) => (
-                  <div key={category} className="flex items-center space-x-2">
+                  <div key={category} className="flex items-center space-x-2 min-h-10">
                     <Checkbox
                       id={`mobile-cat-${category}`}
                       checked={tempFilters.categories?.includes(category) || false}

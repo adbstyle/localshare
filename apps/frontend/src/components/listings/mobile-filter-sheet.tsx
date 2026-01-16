@@ -170,7 +170,7 @@ export function MobileFilterSheet({
               </h3>
               <div className="space-y-0">
                 {types.map((type) => (
-                  <div key={type} className="flex items-center space-x-2 min-h-11 ml-2">
+                  <div key={type} className="flex items-center space-x-2 min-h-11">
                     <Checkbox
                       id={`mobile-type-${type}`}
                       checked={tempFilters.types?.includes(type) || false}
@@ -193,7 +193,7 @@ export function MobileFilterSheet({
               </h3>
               <div className="space-y-0">
                 {categories.map((category) => (
-                  <div key={category} className="flex items-center space-x-2 min-h-11 ml-2">
+                  <div key={category} className="flex items-center space-x-2 min-h-11">
                     <Checkbox
                       id={`mobile-cat-${category}`}
                       checked={tempFilters.categories?.includes(category) || false}

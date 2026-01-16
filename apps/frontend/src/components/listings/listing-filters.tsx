@@ -136,7 +136,7 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
           </h3>
           <div className="space-y-0">
             {types.map((type) => (
-              <div key={type} className="flex items-center space-x-2 min-h-11 ml-2">
+              <div key={type} className="flex items-center space-x-2 min-h-9">
                 <Checkbox
                   id={`type-${type}`}
                   checked={filters.types?.includes(type) || false}
@@ -159,7 +159,7 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
           </h3>
           <div className="space-y-0 max-h-64 overflow-y-auto">
             {categories.map((category) => (
-              <div key={category} className="flex items-center space-x-2 min-h-11 ml-2">
+              <div key={category} className="flex items-center space-x-2 min-h-9">
                 <Checkbox
                   id={`cat-${category}`}
                   checked={filters.categories?.includes(category) || false}

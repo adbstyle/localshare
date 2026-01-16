@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/use-auth';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useState, useEffect, useRef } from 'react';
@@ -126,12 +127,16 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
           </div>
         )}
 
+        <Separator />
+
         {/* Type Filter */}
         <div>
-          <Label className="mb-2 block">{t('listings.filterByType')}</Label>
-          <div className="space-y-2">
+          <h3 className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">
+            {t('listings.filterByType')}
+          </h3>
+          <div className="space-y-1">
             {types.map((type) => (
-              <div key={type} className="flex items-center space-x-2">
+              <div key={type} className="flex items-center space-x-2 ml-2">
                 <Checkbox
                   id={`type-${type}`}
                   checked={filters.types?.includes(type) || false}
@@ -145,18 +150,22 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
           </div>
         </div>
 
+        <Separator />
+
         {/* Category Filter */}
         <div>
-          <Label className="mb-2 block">{t('listings.filterByCategory')}</Label>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
+          <h3 className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">
+            {t('listings.filterByCategory')}
+          </h3>
+          <div className="space-y-1 max-h-64 overflow-y-auto">
             {categories.map((category) => (
-              <div key={category} className="flex items-center space-x-2">
+              <div key={category} className="flex items-center space-x-2 ml-2">
                 <Checkbox
                   id={`cat-${category}`}
                   checked={filters.categories?.includes(category) || false}
                   onCheckedChange={() => handleCategoryToggle(category)}
                 />
-                <Label htmlFor={`cat-${category}`} className="cursor-pointer text-sm">
+                <Label htmlFor={`cat-${category}`} className="cursor-pointer">
                   {t(`listings.categories.${category}`)}
                 </Label>
               </div>

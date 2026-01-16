@@ -133,4 +133,55 @@ export class GroupMembershipService {
 
     return { message: 'Successfully left group' };
   }
+
+  async removeMember(ownerId: string, groupId: string, memberToRemoveId: string) {
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId, deletedAt: null },
+    });
+
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    if (group.ownerId !== ownerId) {
+      throw new ForbiddenException('Only the owner can remove members');
+    }
+
+    if (memberToRemoveId === ownerId) {
+      throw new BadRequestException('Owner cannot remove themselves');
+    }
+
+    const membership = await this.prisma.groupMember.findUnique({
+      where: {
+        groupId_userId: {
+          groupId,
+          userId: memberToRemoveId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('Member not found in this group');
+    }
+
+    // Remove from group
+    await this.prisma.groupMember.delete({
+      where: {
+        groupId_userId: {
+          groupId,
+          userId: memberToRemoveId,
+        },
+      },
+    });
+
+    // Hide member's listings from this group
+    await this.prisma.listingVisibility.deleteMany({
+      where: {
+        groupId,
+        listing: { creatorId: memberToRemoveId },
+      },
+    });
+
+    return { message: 'Member removed successfully' };
+  }
 }

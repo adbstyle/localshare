@@ -9,6 +9,14 @@ import { useAuth } from '@/hooks/use-auth';
 import { UserMenu } from '@/components/layout/user-menu';
 import { Menu, X, MessageSquare, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { useState, useMemo, useCallback, Suspense } from 'react';
 import { MobileFilterButton } from '@/components/listings/mobile-filter-button';
 import { MobileFilterSheet } from '@/components/listings/mobile-filter-sheet';
@@ -24,7 +32,7 @@ function HeaderContent() {
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const feedbackEmail = process.env.NEXT_PUBLIC_FEEDBACK_EMAIL || 'feedback@localshare.ch';
+  const feedbackEmail = process.env.NEXT_PUBLIC_FEEDBACK_EMAIL || 'localshare.repossess838@passmail.com';
 
   // Calculate active filter count from URL (for badge)
   const activeFilterCount = useMemo(() => {
@@ -142,12 +150,33 @@ function HeaderContent() {
 
       </div>
 
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background">
-          <nav className="container py-4 flex flex-col gap-4">
-            {user ? (
-              <>
+      {/* Mobile Navigation Modal */}
+      <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <DialogContent
+          className="fixed inset-x-0 bottom-0 top-0 h-[100dvh] max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-t-2xl p-0 flex flex-col data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:rounded-t-2xl"
+          onPointerDownOutside={() => setMobileMenuOpen(false)}
+          onEscapeKeyDown={() => setMobileMenuOpen(false)}
+        >
+          {/* Sticky Header */}
+          <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between border-b bg-background px-4 py-3">
+            <DialogTitle className="text-lg font-semibold">
+              {t('nav.menu')}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {t('nav.menuDescription')}
+            </DialogDescription>
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <X className="h-4 w-4" />
+                <span className="sr-only">{t('common.close')}</span>
+              </Button>
+            </DialogClose>
+          </DialogHeader>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            {user && (
+              <nav className="flex flex-col gap-4">
                 {/* Action Section */}
                 <button
                   onClick={() => {
@@ -201,11 +230,11 @@ function HeaderContent() {
                 >
                   {t('nav.logout')}
                 </button>
-              </>
-            ) : null}
-          </nav>
-        </div>
-      )}
+              </nav>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }

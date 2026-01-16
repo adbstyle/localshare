@@ -4,25 +4,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
-  withCredentials: true,
+  withCredentials: true, // Required to send HTTPOnly cookies
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
 // Response interceptor for token refresh
+// No request interceptor needed - HTTPOnly cookies are sent automatically
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -33,21 +22,17 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const response = await axios.post(
+        // Refresh will set new HTTPOnly cookies automatically
+        await axios.post(
           `${API_URL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true }
         );
 
-        const { accessToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
-
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        // Retry original request - new cookie is already set
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, logout user
-        localStorage.removeItem('accessToken');
+        // Refresh failed, redirect to home (logout)
         // Only redirect if not already on home page to prevent loops
         if (!window.location.pathname.startsWith('/de') && !window.location.pathname.startsWith('/fr') && window.location.pathname !== '/') {
           window.location.href = '/';

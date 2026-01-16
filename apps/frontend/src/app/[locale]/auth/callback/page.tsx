@@ -11,38 +11,35 @@ function AuthCallbackContent() {
   const { fetchUser } = useAuth();
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    // No token in URL needed - HTTPOnly cookies are set by backend
+    // Just fetch user to verify auth and get user data
+    fetchUser().then(() => {
+      // Check URL params for redirect (from backend invite flow)
+      const redirectTo = searchParams.get('redirectTo');
 
-    if (token) {
-      localStorage.setItem('accessToken', token);
-      fetchUser().then(() => {
-        // Check URL params first (from backend redirect - primary method)
-        const redirectTo = searchParams.get('redirectTo');
+      if (redirectTo) {
+        // Backend provided redirect URL - use it directly
+        router.push(redirectTo);
+        return;
+      }
 
-        if (redirectTo) {
-          // Backend provided redirect URL - use it directly
-          router.push(redirectTo);
-          return;
-        }
+      // Fallback: Check sessionStorage for pending invites
+      const communityToken = sessionStorage.getItem('pendingInviteToken');
+      const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
 
-        // Fallback: Check sessionStorage for pending invites
-        const communityToken = sessionStorage.getItem('pendingInviteToken');
-        const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
-
-        if (communityToken) {
-          sessionStorage.removeItem('pendingInviteToken');
-          router.push(`/communities/join?token=${communityToken}`);
-        } else if (groupToken) {
-          sessionStorage.removeItem('pendingGroupInviteToken');
-          router.push(`/groups/join?token=${groupToken}`);
-        } else {
-          router.push('/');
-        }
-      });
-    } else {
-      // No token, redirect to home
+      if (communityToken) {
+        sessionStorage.removeItem('pendingInviteToken');
+        router.push(`/communities/join?token=${communityToken}`);
+      } else if (groupToken) {
+        sessionStorage.removeItem('pendingGroupInviteToken');
+        router.push(`/groups/join?token=${groupToken}`);
+      } else {
+        router.push('/');
+      }
+    }).catch(() => {
+      // Auth failed, redirect to home
       router.push('/');
-    }
+    });
   }, [searchParams, router, fetchUser]);
 
   return (

@@ -50,3 +50,6 @@ apps/backend/uploads/
 
 # Docker
 docker-compose.override.yml
+
+# Claude Code (local settings only, commands are tracked)
+.claude/settings.local.json

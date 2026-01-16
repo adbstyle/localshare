@@ -119,4 +119,68 @@ export class MembershipService {
 
     return { message: 'Successfully left community' };
   }
+
+  async removeMember(ownerId: string, communityId: string, memberToRemoveId: string) {
+    const community = await this.prisma.community.findUnique({
+      where: { id: communityId, deletedAt: null },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Community not found');
+    }
+
+    if (community.ownerId !== ownerId) {
+      throw new ForbiddenException('Only the owner can remove members');
+    }
+
+    if (memberToRemoveId === ownerId) {
+      throw new BadRequestException('Owner cannot remove themselves');
+    }
+
+    const membership = await this.prisma.communityMember.findUnique({
+      where: {
+        communityId_userId: {
+          communityId,
+          userId: memberToRemoveId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('Member not found in this community');
+    }
+
+    // Remove from community
+    await this.prisma.communityMember.delete({
+      where: {
+        communityId_userId: {
+          communityId,
+          userId: memberToRemoveId,
+        },
+      },
+    });
+
+    // Remove from all groups in community
+    const groups = await this.prisma.group.findMany({
+      where: { communityId, deletedAt: null },
+      select: { id: true },
+    });
+
+    await this.prisma.groupMember.deleteMany({
+      where: {
+        userId: memberToRemoveId,
+        groupId: { in: groups.map((g) => g.id) },
+      },
+    });
+
+    // Hide member's listings from this community
+    await this.prisma.listingVisibility.deleteMany({
+      where: {
+        communityId,
+        listing: { creatorId: memberToRemoveId },
+      },
+    });
+
+    return { message: 'Member removed successfully' };
+  }
 }

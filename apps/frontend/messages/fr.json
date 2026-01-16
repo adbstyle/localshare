@@ -34,7 +34,9 @@
     "groups": "Groupes",
     "profile": "Profil",
     "logout": "Déconnexion",
-    "userMenu": "Menu utilisateur"
+    "userMenu": "Menu utilisateur",
+    "menu": "Menu",
+    "menuDescription": "Menu de navigation avec liens et actions"
   },
   "auth": {
     "login": "Se connecter",
@@ -103,8 +105,9 @@
     "refreshInviteLink": "Renouveler le lien",
     "editDescription": "Mettez à jour les informations de votre communauté",
     "linkRefreshed": "Nouveau lien d'invitation créé",
-    "invitePending": "Invitation à la communauté",
-    "invitePendingText": "Vous avez été invité à rejoindre une communauté. Connectez-vous pour la rejoindre.",
+    "invitePendingCommunity": "Invitation à la communauté {name}",
+    "invitePendingGroup": "Invitation au groupe {name}",
+    "invitePendingText": "Connecte-toi pour rejoindre.",
     "join": "Rejoindre",
     "leave": "Quitter",
     "leaveConfirm": "Êtes-vous sûr de vouloir quitter cette communauté?",
@@ -139,7 +142,11 @@
       "alreadyMember": "Vous êtes déjà membre de cette communauté."
     },
     "joinedAnnouncement": "La communauté {name} a été ajoutée à votre liste",
-    "refreshFailed": "Impossible de mettre à jour la liste. Veuillez recharger la page."
+    "refreshFailed": "Impossible de mettre à jour la liste. Veuillez recharger la page.",
+    "removeMember": "Supprimer",
+    "removeMemberConfirm": "Supprimer le membre?",
+    "removeMemberWarning": "\"{name}\" sera retiré de la communauté et de tous les groupes.",
+    "memberRemoved": "Membre supprimé"
   },
   "groups": {
     "title": "Groupes",
@@ -197,7 +204,11 @@
       "invalidToken": "Token invalide. Veuillez vérifier la saisie.",
       "tokenNotFound": "Lien d'invitation invalide. Le lien a expiré ou est invalide.",
       "alreadyMember": "Vous êtes déjà membre de ce groupe."
-    }
+    },
+    "removeMember": "Supprimer",
+    "removeMemberConfirm": "Supprimer le membre?",
+    "removeMemberWarning": "\"{name}\" sera retiré du groupe.",
+    "memberRemoved": "Membre supprimé"
   },
   "listings": {
     "title": "Annonces",
@@ -244,7 +255,8 @@
     "uploadImages": "Télécharger des images (max. 3)",
     "imageLimit": "Maximum 3 images de 10 Mo chacune",
     "sharedWith": "Partagé avec",
-    "selectCommunities": "Sélectionner des communautés",
+    "shareWith": "Partager avec",
+    "selectCommunities": "Choisis qui peut voir ton annonce.",
     "selectGroups": "Sélectionner des groupes",
     "contact": "Contacter",
     "contactVia": "Contacter via",
@@ -255,7 +267,7 @@
     "address": "Adresse",
     "phone": "Téléphone",
     "createdAt": "Créé",
-    "edit": "Modifier",
+    "edit": "Modifier l'annonce",
     "delete": "Supprimer",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette annonce?",
     "deleteImage": "Supprimer l'image",

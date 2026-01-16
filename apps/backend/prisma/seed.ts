@@ -71,7 +71,7 @@ async function main() {
       description: 'Gut erhaltene Bohrmaschine, 2 Jahre alt, kaum benutzt.',
       type: 'SELL',
       price: 5000, // 50.00 CHF in cents
-      category: 'TOOLS_HARDWARE',
+      category: 'TOOLS',
     },
   });
 
@@ -89,7 +89,7 @@ async function main() {
       title: 'Suche Rasenmäher zum Ausleihen',
       description: 'Brauche einen Rasenmäher für dieses Wochenende.',
       type: 'SEARCH',
-      category: 'GARDEN_PLANTS',
+      category: 'GARDEN',
     },
   });
 

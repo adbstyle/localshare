@@ -176,6 +176,7 @@ Copy `.env.example` to `.env` at root level. Key variables:
 - `NEXT_PUBLIC_API_URL` - Backend URL for frontend
 - `STORAGE_PROVIDER` - `local` or `r2` for image storage
 - `R2_*` - Cloudflare R2 credentials (only if STORAGE_PROVIDER=r2)
+- `COOKIE_DOMAIN` - Cookie domain for cross-subdomain auth (e.g., `.wylergut.ch` with leading dot in production, empty for localhost)
 
 Local database uses port 5433 (not 5432) to avoid conflicts:
 ```

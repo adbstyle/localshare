@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Response, Request } from 'express';
+import { Response, Request, CookieOptions } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
@@ -23,6 +23,23 @@ export class AuthController {
     private authService: AuthService,
     private inviteStateService: InviteStateService,
   ) {}
+
+  private getCookieOptions(type: 'access' | 'refresh'): CookieOptions {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieDomain = process.env.COOKIE_DOMAIN;
+
+    return {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: cookieDomain || undefined,
+      maxAge:
+        type === 'refresh'
+          ? 90 * 24 * 60 * 60 * 1000 // 90 days
+          : 15 * 60 * 1000, // 15 minutes
+      ...(type === 'refresh' && { path: '/api/v1/auth' }),
+    };
+  }
 
   @Public()
   @Get('google')
@@ -60,21 +77,10 @@ export class AuthController {
     );
 
     // Set refresh token as HTTPOnly cookie (restricted to auth endpoints)
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 90 * 24 * 60 * 60 * 1000,
-      path: '/api/v1/auth',
-    });
+    res.cookie('refreshToken', refreshToken, this.getCookieOptions('refresh'));
 
     // Set access token as HTTPOnly cookie (available for all API calls)
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+    res.cookie('accessToken', accessToken, this.getCookieOptions('access'));
 
     // Build redirect URL WITHOUT token in URL (security best practice)
     let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback`;
@@ -95,7 +101,9 @@ export class AuthController {
         // Invalid cookie data, ignore
       }
       // Clear the cookie after use
-      res.clearCookie('pendingInvite');
+      res.clearCookie('pendingInvite', {
+        domain: process.env.COOKIE_DOMAIN || undefined,
+      });
     }
 
     res.redirect(redirectUrl);
@@ -137,21 +145,10 @@ export class AuthController {
     );
 
     // Set refresh token as HTTPOnly cookie (restricted to auth endpoints)
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 90 * 24 * 60 * 60 * 1000,
-      path: '/api/v1/auth',
-    });
+    res.cookie('refreshToken', refreshToken, this.getCookieOptions('refresh'));
 
     // Set access token as HTTPOnly cookie (available for all API calls)
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+    res.cookie('accessToken', accessToken, this.getCookieOptions('access'));
 
     // Build redirect URL WITHOUT token in URL (security best practice)
     let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback`;
@@ -172,7 +169,9 @@ export class AuthController {
         // Invalid cookie data, ignore
       }
       // Clear the cookie after use
-      res.clearCookie('pendingInvite');
+      res.clearCookie('pendingInvite', {
+        domain: process.env.COOKIE_DOMAIN || undefined,
+      });
     }
 
     res.redirect(redirectUrl);
@@ -187,21 +186,10 @@ export class AuthController {
       await this.authService.refreshTokens(refreshToken);
 
     // Set new refresh token as HTTPOnly cookie
-    res.cookie('refreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 90 * 24 * 60 * 60 * 1000,
-      path: '/api/v1/auth',
-    });
+    res.cookie('refreshToken', newRefreshToken, this.getCookieOptions('refresh'));
 
     // Set new access token as HTTPOnly cookie
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+    res.cookie('accessToken', accessToken, this.getCookieOptions('access'));
 
     return res.json({ success: true });
   }
@@ -211,8 +199,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(@CurrentUser() user, @Res() res: Response) {
     await this.authService.logout(user.id);
-    res.clearCookie('refreshToken', { path: '/api/v1/auth' });
-    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken', this.getCookieOptions('refresh'));
+    res.clearCookie('accessToken', this.getCookieOptions('access'));
     return res.json({ message: 'Logged out successfully' });
   }
 

@@ -1,12 +1,15 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 
-export function Footer() {
+interface FooterProps {
+  locale: string;
+}
+
+export function Footer({ locale }: FooterProps) {
   const t = useTranslations();
-  const locale = useLocale();
 
   return (
     <footer className="border-t mt-auto bg-muted/50">

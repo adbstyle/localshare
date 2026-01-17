@@ -340,15 +340,15 @@
     "steps": {
       "join": {
         "title": "Tritt einer Gemeinschaft bei",
-        "text": "Du bekommst einen Einladungslink von Nachbarn. Ein Klick – und du bist dabei."
+        "text": "Folge einem Einladungslink einer Gemeinschaft. Noch keine Gemeinschaft? Starte die erste."
       },
       "offer": {
         "title": "Biete etwas an",
-        "text": "Foto, kurze Beschreibung, fertig. Deine Nachbarn sehen es sofort."
+        "text": "Foto, kurze Beschreibung, fertig. Deine Gemeinschaft freut sich über die Anzeige."
       },
       "find": {
         "title": "Finde etwas",
-        "text": "Stöbere durch Angebote aus der Nachbarschaft. Gefunden? Schreib eine Nachricht."
+        "text": "Stöbere durch Angebote aus Gemeinschaften und Gruppen. Gefunden? Schreib eine Nachricht."
       },
       "arrange": {
         "title": "Vereinbare direkt",

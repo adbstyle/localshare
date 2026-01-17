@@ -340,15 +340,15 @@
     "steps": {
       "join": {
         "title": "Rejoins une communauté",
-        "text": "Tu reçois un lien d'invitation de tes voisins. Un clic – et tu y es."
+        "text": "Suis un lien d'invitation d'une communauté. Pas encore de communauté? Crée la première."
       },
       "offer": {
         "title": "Propose quelque chose",
-        "text": "Photo, courte description, terminé. Tes voisins le voient immédiatement."
+        "text": "Photo, courte description, terminé. Ta communauté appréciera ton annonce."
       },
       "find": {
         "title": "Trouve quelque chose",
-        "text": "Parcours les offres du quartier. Trouvé? Envoie un message."
+        "text": "Parcours les offres des communautés et groupes. Trouvé? Envoie un message."
       },
       "arrange": {
         "title": "Arrange directement",

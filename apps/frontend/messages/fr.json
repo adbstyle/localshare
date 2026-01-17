@@ -297,9 +297,7 @@
     "imprint": "Mentions légales"
   },
   "footer": {
-    "madeWith": "Fait avec",
-    "in": "en",
-    "switzerland": "Suisse"
+    "tagline": "Par des voisins, pour des voisins"
   },
   "errors": {
     "generic": "Une erreur s'est produite",

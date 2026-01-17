@@ -297,9 +297,7 @@
     "imprint": "Impressum"
   },
   "footer": {
-    "madeWith": "Gemacht mit",
-    "in": "in",
-    "switzerland": "der Schweiz"
+    "tagline": "Von Nachbarn, für Nachbarn"
   },
   "errors": {
     "generic": "Ein Fehler ist aufgetreten",

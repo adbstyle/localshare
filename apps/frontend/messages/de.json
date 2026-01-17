@@ -40,7 +40,7 @@
   },
   "auth": {
     "login": "Anmelden",
-    "loginWith": "Weiter mit",
+    "loginWith": "Anmelden mit",
     "google": "Google",
     "microsoft": "Microsoft",
     "welcome": "Los geht's",
@@ -297,9 +297,7 @@
     "imprint": "Impressum"
   },
   "footer": {
-    "madeWith": "Gemacht mit",
-    "in": "in",
-    "switzerland": "der Schweiz"
+    "tagline": "Von Nachbarn, für Nachbarn"
   },
   "errors": {
     "generic": "Ein Fehler ist aufgetreten",
@@ -336,5 +334,49 @@
     "communityInvite": "Sie wurden zu einer Gemeinschaft eingeladen",
     "groupInvite": "Sie wurden zu einer Gruppe eingeladen",
     "groupJoinNote": "Der Beitritt zu dieser Gruppe fügt Sie auch zur Gemeinschaft <strong>{communityName}</strong> hinzu, falls Sie noch kein Mitglied sind."
+  },
+  "howItWorks": {
+    "title": "So funktioniert's",
+    "steps": {
+      "join": {
+        "title": "Tritt einer Gemeinschaft bei",
+        "text": "Folge einem Einladungslink einer Gemeinschaft. Noch keine Gemeinschaft? Starte die erste."
+      },
+      "offer": {
+        "title": "Biete etwas an",
+        "text": "Foto, kurze Beschreibung, fertig. Deine Gemeinschaft freut sich über die Anzeige."
+      },
+      "find": {
+        "title": "Finde etwas",
+        "text": "Stöbere durch Angebote aus Gemeinschaften und Gruppen. Gefunden? Schreib eine Nachricht."
+      },
+      "arrange": {
+        "title": "Vereinbare direkt",
+        "text": "Trefft euch vor Ort, regelt alles persönlich. Keine Gebühren."
+      }
+    },
+    "faq": {
+      "title": "Gut zu wissen",
+      "payment": {
+        "question": "Wie läuft die Abwicklung?",
+        "answer": "Ganz persönlich nach euren Regeln ohne die Plattform LocalShare."
+      },
+      "visibility": {
+        "question": "Wer sieht meine Angebote?",
+        "answer": "Nur Mitglieder deiner Gemeinschaften und Gruppen. LocalShare ist nicht öffentlich."
+      },
+      "app": {
+        "question": "Muss ich eine App installieren?",
+        "answer": "Nein. LocalShare läuft direkt im Browser – auf dem Handy und am Computer."
+      },
+      "access": {
+        "question": "Wie finde ich zu Gemeinschaften und Gruppen?",
+        "answer": "Nur mit gültigen Einladungen. Frag jemanden aus deiner Nachbarschaft."
+      },
+      "offers": {
+        "question": "Was kann ich alles anbieten?",
+        "answer": "Alles was du verleihen, verschenken, verkaufen oder suchen willst – vom Akkuschrauber bis zur Zucchini."
+      }
+    }
   }
 }

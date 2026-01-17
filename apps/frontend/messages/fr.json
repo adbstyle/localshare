@@ -340,7 +340,7 @@
     "steps": {
       "join": {
         "title": "Rejoins une communauté",
-        "text": "Suis un lien d'invitation d'une communauté. Pas encore de communauté? Crée la première."
+        "text": "Suis un lien d'invitation ou crée une première communauté."
       },
       "offer": {
         "title": "Propose quelque chose",
@@ -348,7 +348,7 @@
       },
       "find": {
         "title": "Trouve quelque chose",
-        "text": "Parcours les offres des communautés et groupes. Trouvé? Envoie un message."
+        "text": "Parcours les annonces de tes communautés et groupes. Trouvé quelque chose? Envoie un message."
       },
       "arrange": {
         "title": "Réglez tout directement",

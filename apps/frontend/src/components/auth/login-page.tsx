@@ -105,7 +105,7 @@ export function LoginPage() {
         <div className="flex items-center justify-center">
           <Card className="max-w-md w-full shadow-xl">
             <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-3xl font-bold">{t('auth.welcome')}</CardTitle>
+              <CardTitle className="text-2xl font-bold">{t('auth.welcome')}</CardTitle>
               <CardDescription className="text-base">{t('auth.welcomeText')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

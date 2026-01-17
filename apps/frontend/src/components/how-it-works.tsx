@@ -24,7 +24,7 @@ export function HowItWorks() {
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-12">
       {/* Title */}
-      <h2 className="text-2xl lg:text-3xl font-bold text-center text-gray-900 dark:text-white mb-10">
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">
         {t('title')}
       </h2>
 

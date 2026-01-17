@@ -336,5 +336,49 @@
     "communityInvite": "Sie wurden zu einer Gemeinschaft eingeladen",
     "groupInvite": "Sie wurden zu einer Gruppe eingeladen",
     "groupJoinNote": "Der Beitritt zu dieser Gruppe fügt Sie auch zur Gemeinschaft <strong>{communityName}</strong> hinzu, falls Sie noch kein Mitglied sind."
+  },
+  "howItWorks": {
+    "title": "So funktioniert's",
+    "steps": {
+      "join": {
+        "title": "Tritt einer Gemeinschaft bei",
+        "text": "Du bekommst einen Einladungslink von Nachbarn. Ein Klick – und du bist dabei."
+      },
+      "offer": {
+        "title": "Biete etwas an",
+        "text": "Foto, kurze Beschreibung, fertig. Deine Nachbarn sehen es sofort."
+      },
+      "find": {
+        "title": "Finde etwas",
+        "text": "Stöbere durch Angebote aus der Nachbarschaft. Gefunden? Schreib eine Nachricht."
+      },
+      "arrange": {
+        "title": "Vereinbare direkt",
+        "text": "Trefft euch vor Ort, regelt alles persönlich. Keine Gebühren."
+      }
+    },
+    "faq": {
+      "title": "Gut zu wissen",
+      "payment": {
+        "question": "Wie bezahle ich?",
+        "answer": "Gar nicht über LocalShare. Ihr macht das direkt untereinander aus – beim Abholen, wie's euch passt."
+      },
+      "visibility": {
+        "question": "Wer sieht meine Angebote?",
+        "answer": "Nur Mitglieder deiner Nachbarschaft. LocalShare ist nicht öffentlich."
+      },
+      "app": {
+        "question": "Muss ich eine App installieren?",
+        "answer": "Nein. LocalShare läuft direkt im Browser – auf dem Handy und am Computer."
+      },
+      "access": {
+        "question": "Wie komme ich rein?",
+        "answer": "Nur mit Einladung. Frag jemanden aus deiner Nachbarschaft oder deine Verwaltung."
+      },
+      "offers": {
+        "question": "Was kann ich alles anbieten?",
+        "answer": "Alles was du verleihen, verschenken, verkaufen oder suchen willst – vom Akkuschrauber bis zur Zucchini."
+      }
+    }
   }
 }

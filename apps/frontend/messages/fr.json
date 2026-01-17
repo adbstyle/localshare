@@ -336,5 +336,49 @@
     "communityInvite": "Vous avez été invité à rejoindre une communauté",
     "groupInvite": "Vous avez été invité à rejoindre un groupe",
     "groupJoinNote": "Rejoindre ce groupe vous ajoutera également à la communauté <strong>{communityName}</strong> si vous n'êtes pas encore membre."
+  },
+  "howItWorks": {
+    "title": "Comment ça marche",
+    "steps": {
+      "join": {
+        "title": "Rejoins une communauté",
+        "text": "Tu reçois un lien d'invitation de tes voisins. Un clic – et tu y es."
+      },
+      "offer": {
+        "title": "Propose quelque chose",
+        "text": "Photo, courte description, terminé. Tes voisins le voient immédiatement."
+      },
+      "find": {
+        "title": "Trouve quelque chose",
+        "text": "Parcours les offres du quartier. Trouvé? Envoie un message."
+      },
+      "arrange": {
+        "title": "Arrange directement",
+        "text": "Rencontrez-vous sur place, réglez tout en personne. Pas de frais."
+      }
+    },
+    "faq": {
+      "title": "Bon à savoir",
+      "payment": {
+        "question": "Comment je paie?",
+        "answer": "Pas via LocalShare. Vous réglez directement entre vous – lors du retrait, comme bon vous semble."
+      },
+      "visibility": {
+        "question": "Qui voit mes offres?",
+        "answer": "Uniquement les membres de ton quartier. LocalShare n'est pas public."
+      },
+      "app": {
+        "question": "Dois-je installer une app?",
+        "answer": "Non. LocalShare fonctionne directement dans le navigateur – sur mobile et ordinateur."
+      },
+      "access": {
+        "question": "Comment j'accède?",
+        "answer": "Uniquement sur invitation. Demande à quelqu'un de ton quartier ou à ta régie."
+      },
+      "offers": {
+        "question": "Que puis-je proposer?",
+        "answer": "Tout ce que tu veux prêter, donner, vendre ou chercher – de la perceuse aux courgettes."
+      }
+    }
   }
 }

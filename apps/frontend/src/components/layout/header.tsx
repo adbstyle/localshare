@@ -241,13 +241,23 @@ function HeaderContent() {
 }
 
 // Skeleton for header during SSR/loading
+// Shows real logo and app name for SEO/crawlers (Google OAuth verification)
 function HeaderSkeleton() {
   return (
     <header className="border-b bg-background sticky top-0 z-50">
       <div className="container flex items-center gap-6 py-4">
-        <div className="flex items-center gap-4">
-          <div className="h-8 w-8 bg-muted animate-pulse rounded" />
-          <div className="h-5 w-12 bg-muted animate-pulse rounded" />
+        <div className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2" aria-label="LocalShare">
+            <img
+              src="/logo.svg"
+              alt="LocalShare Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+            />
+            <span className="font-semibold text-lg">LocalShare</span>
+          </a>
+          <span className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Beta</span>
         </div>
         <div className="flex-grow" />
         <div className="flex md:hidden items-center gap-2">

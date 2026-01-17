@@ -30,9 +30,6 @@ export function Footer({ locale }: FooterProps) {
             </Link>
           </nav>
         </div>
-        <div className="mt-4 text-center text-xs text-muted-foreground">
-          Made with Next.js 14, NestJS, Prisma, and shadcn/ui
-        </div>
       </div>
     </footer>
   );

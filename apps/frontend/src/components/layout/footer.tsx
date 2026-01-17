@@ -1,11 +1,12 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 
 export function Footer() {
   const t = useTranslations();
+  const locale = useLocale();
 
   return (
     <footer className="border-t mt-auto bg-muted/50">
@@ -15,13 +16,13 @@ export function Footer() {
             {t('footer.madeWith')} <Heart className="h-4 w-4 text-red-500 fill-red-500" /> {t('footer.in')} {t('footer.switzerland')}
           </p>
           <nav className="flex flex-wrap justify-center gap-4 text-sm">
-            <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
+            <Link href={`/${locale}/privacy`} className="text-muted-foreground hover:text-foreground">
               {t('legal.privacy')}
             </Link>
-            <Link href="/terms" className="text-muted-foreground hover:text-foreground">
+            <Link href={`/${locale}/terms`} className="text-muted-foreground hover:text-foreground">
               {t('legal.terms')}
             </Link>
-            <Link href="/imprint" className="text-muted-foreground hover:text-foreground">
+            <Link href={`/${locale}/imprint`} className="text-muted-foreground hover:text-foreground">
               {t('legal.imprint')}
             </Link>
           </nav>

@@ -136,11 +136,12 @@ export function LoginPage() {
                 {t('auth.loginWith')} {t('auth.microsoft')}
               </Button>
 
-              <div className="flex items-start space-x-2 pt-4">
+              <div className="flex space-x-2 pt-4">
                 <Checkbox
                   id="terms"
                   checked={acceptedTerms}
                   onCheckedChange={(checked) => setAcceptedTerms(!!checked)}
+                  className="mt-1"
                 />
                 <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
                   {t('auth.acceptTerms')}{' '}

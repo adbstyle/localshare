@@ -40,7 +40,7 @@
   },
   "auth": {
     "login": "Se connecter",
-    "loginWith": "Continuer avec",
+    "loginWith": "Se connecter avec",
     "google": "Google",
     "microsoft": "Microsoft",
     "welcome": "C'est parti",
@@ -297,9 +297,7 @@
     "imprint": "Mentions légales"
   },
   "footer": {
-    "madeWith": "Fait avec",
-    "in": "en",
-    "switzerland": "Suisse"
+    "tagline": "Par des voisins, pour des voisins"
   },
   "errors": {
     "generic": "Une erreur s'est produite",
@@ -336,5 +334,49 @@
     "communityInvite": "Vous avez été invité à rejoindre une communauté",
     "groupInvite": "Vous avez été invité à rejoindre un groupe",
     "groupJoinNote": "Rejoindre ce groupe vous ajoutera également à la communauté <strong>{communityName}</strong> si vous n'êtes pas encore membre."
+  },
+  "howItWorks": {
+    "title": "Comment ça marche",
+    "steps": {
+      "join": {
+        "title": "Rejoins une communauté",
+        "text": "Suis un lien d'invitation d'une communauté. Pas encore de communauté? Crée la première."
+      },
+      "offer": {
+        "title": "Propose quelque chose",
+        "text": "Photo, courte description, terminé. Ta communauté appréciera ton annonce."
+      },
+      "find": {
+        "title": "Trouve quelque chose",
+        "text": "Parcours les offres des communautés et groupes. Trouvé? Envoie un message."
+      },
+      "arrange": {
+        "title": "Réglez tout directement",
+        "text": "Rencontrez-vous pour la remise ou déposez et réglez le reste en personne. Simple, rapide et sans frais."
+      }
+    },
+    "faq": {
+      "title": "Bon à savoir",
+      "payment": {
+        "question": "Comment se passe la transaction?",
+        "answer": "Tout se fait en personne selon vos règles, sans passer par LocalShare."
+      },
+      "visibility": {
+        "question": "Qui voit mes offres?",
+        "answer": "Uniquement les membres de tes communautés ou groupes. LocalShare n'est pas public."
+      },
+      "app": {
+        "question": "Dois-je installer une app?",
+        "answer": "Non. LocalShare fonctionne directement dans le navigateur – sur mobile et ordinateur."
+      },
+      "access": {
+        "question": "Comment trouver des communautés et groupes?",
+        "answer": "Uniquement avec des invitations valides. Demande à quelqu'un de ton quartier."
+      },
+      "offers": {
+        "question": "Que puis-je proposer?",
+        "answer": "Tout ce que tu veux prêter, donner, vendre ou chercher – de la perceuse aux courgettes."
+      }
+    }
   }
 }

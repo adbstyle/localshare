@@ -2,13 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Lock, Recycle, Users } from 'lucide-react';
+import { Mail } from 'lucide-react';
+import { HowItWorks } from '@/components/how-it-works';
 
 export function LoginPage() {
   const t = useTranslations();
@@ -60,53 +61,24 @@ export function LoginPage() {
     window.location.href = authUrl;
   };
 
-  const valueProps = [
-    { icon: Lock, titleKey: 'auth.valueProp1Title', textKey: 'auth.valueProp1Text' },
-    { icon: Recycle, titleKey: 'auth.valueProp2Title', textKey: 'auth.valueProp2Text' },
-    { icon: Users, titleKey: 'auth.valueProp3Title', textKey: 'auth.valueProp3Text' },
-  ];
-
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 lg:p-8 max-w-7xl mx-auto items-center">
-        {/* Value Proposition Section */}
-        <div className="flex flex-col justify-center space-y-8 lg:pr-8">
-          <div className="space-y-4">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-              {t('auth.headline')}
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              {t('auth.subline')}
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {valueProps.map((prop, index) => (
-              <div key={index} className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <prop.icon className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {t(prop.titleKey)}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {t(prop.textKey)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Hero Section - Vertical Stack */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-8 p-4 lg:p-8 max-w-3xl mx-auto">
+        {/* Headline Section */}
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+            {t('auth.headline')}
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300">
+            {t('auth.subline')}
+          </p>
         </div>
 
         {/* Login Card Section */}
-        <div className="flex items-center justify-center">
+        <div className="w-full max-w-md">
           <Card className="max-w-md w-full shadow-xl">
-            <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-3xl font-bold">{t('auth.welcome')}</CardTitle>
-              <CardDescription className="text-base">{t('auth.welcomeText')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               {hasPendingInvite && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
                   <div className="flex items-start gap-3">
@@ -164,11 +136,12 @@ export function LoginPage() {
                 {t('auth.loginWith')} {t('auth.microsoft')}
               </Button>
 
-              <div className="flex items-start space-x-2 pt-4">
+              <div className="flex space-x-2 pt-4">
                 <Checkbox
                   id="terms"
                   checked={acceptedTerms}
                   onCheckedChange={(checked) => setAcceptedTerms(!!checked)}
+                  className="mt-1"
                 />
                 <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
                   {t('auth.acceptTerms')}{' '}
@@ -185,6 +158,9 @@ export function LoginPage() {
           </Card>
         </div>
       </div>
+
+      {/* How It Works Section */}
+      <HowItWorks />
     </div>
   );
 }

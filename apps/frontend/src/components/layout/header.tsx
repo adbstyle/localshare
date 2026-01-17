@@ -68,8 +68,8 @@ function HeaderContent() {
   return (
     <header className="border-b bg-background sticky top-0 z-50">
       <div className="container flex items-center gap-6 py-4">
-        {/* Logo & Beta Badge */}
-        <div className="flex items-center gap-4">
+        {/* Logo, Name & Beta Badge */}
+        <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2" aria-label="LocalShare">
             <Image
               src="/logo.svg"
@@ -79,6 +79,7 @@ function HeaderContent() {
               priority
               className="h-8 w-8"
             />
+            <span className="font-semibold text-lg">LocalShare</span>
           </Link>
           <BetaBadge />
         </div>

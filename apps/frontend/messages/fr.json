@@ -351,8 +351,8 @@
         "text": "Parcours les offres des communautés et groupes. Trouvé? Envoie un message."
       },
       "arrange": {
-        "title": "Arrange directement",
-        "text": "Rencontrez-vous sur place, réglez tout en personne. Pas de frais."
+        "title": "Réglez tout directement",
+        "text": "Rencontrez-vous pour la remise ou déposez et réglez le reste en personne. Simple, rapide et sans frais."
       }
     },
     "faq": {
@@ -363,15 +363,15 @@
       },
       "visibility": {
         "question": "Qui voit mes offres?",
-        "answer": "Uniquement les membres de ton quartier. LocalShare n'est pas public."
+        "answer": "Uniquement les membres de tes communautés ou groupes. LocalShare n'est pas public."
       },
       "app": {
         "question": "Dois-je installer une app?",
         "answer": "Non. LocalShare fonctionne directement dans le navigateur – sur mobile et ordinateur."
       },
       "access": {
-        "question": "Comment j'accède?",
-        "answer": "Uniquement sur invitation. Demande à quelqu'un de ton quartier ou à ta régie."
+        "question": "Comment trouver des communautés et groupes?",
+        "answer": "Uniquement avec des invitations valides. Demande à quelqu'un de ton quartier."
       },
       "offers": {
         "question": "Que puis-je proposer?",

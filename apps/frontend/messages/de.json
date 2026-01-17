@@ -363,15 +363,15 @@
       },
       "visibility": {
         "question": "Wer sieht meine Angebote?",
-        "answer": "Nur Mitglieder deiner Nachbarschaft. LocalShare ist nicht öffentlich."
+        "answer": "Nur Mitglieder deiner Gemeinschaften und Gruppen. LocalShare ist nicht öffentlich."
       },
       "app": {
         "question": "Muss ich eine App installieren?",
         "answer": "Nein. LocalShare läuft direkt im Browser – auf dem Handy und am Computer."
       },
       "access": {
-        "question": "Wie komme ich rein?",
-        "answer": "Nur mit Einladung. Frag jemanden aus deiner Nachbarschaft oder deine Verwaltung."
+        "question": "Wie finde ich zu Gemeinschaften und Gruppen?",
+        "answer": "Nur mit gültigen Einladungen. Frag jemanden aus deiner Nachbarschaft."
       },
       "offers": {
         "question": "Was kann ich alles anbieten?",

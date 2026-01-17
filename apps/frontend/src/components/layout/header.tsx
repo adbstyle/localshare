@@ -166,8 +166,8 @@ function HeaderContent() {
               {t('nav.menuDescription')}
             </DialogDescription>
             <DialogClose asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <X className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-10 w-10">
+                <X className="h-5 w-5" />
                 <span className="sr-only">{t('common.close')}</span>
               </Button>
             </DialogClose>
@@ -176,57 +176,57 @@ function HeaderContent() {
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto px-4 py-4">
             {user && (
-              <nav className="flex flex-col gap-4">
+              <nav className="flex flex-col gap-1">
                 {/* Action Section */}
                 <button
                   onClick={() => {
                     handleFeedback();
                     setMobileMenuOpen(false);
                   }}
-                  className="text-sm font-medium flex items-center gap-2"
+                  className="text-sm font-medium flex items-center gap-2 min-h-10"
                 >
                   <MessageSquare className="h-4 w-4" />
                   {t('common.feedback')}
                 </button>
                 <Link
                   href="/listings/create"
-                  className="text-sm font-medium text-primary flex items-center gap-2"
+                  className="text-sm font-medium text-primary flex items-center gap-2 min-h-10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Plus className="h-4 w-4" />
                   {t('listings.create')}
                 </Link>
-                <div className="border-t my-1" />
+                <div className="border-t my-2" />
                 {/* Navigation Section */}
                 <Link
                   href="/"
-                  className="text-sm font-medium"
+                  className="text-sm font-medium flex items-center min-h-10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('nav.listings')}
                 </Link>
                 <Link
                   href="/communities"
-                  className="text-sm font-medium"
+                  className="text-sm font-medium flex items-center min-h-10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('nav.communities')}
                 </Link>
                 <Link
                   href="/profile"
-                  className="text-sm font-medium"
+                  className="text-sm font-medium flex items-center min-h-10"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('nav.profile')}
                 </Link>
-                <div className="border-t my-1" />
+                <div className="border-t my-2" />
                 {/* Account Section */}
                 <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="text-sm font-medium text-left text-destructive"
+                  className="text-sm font-medium text-left text-destructive flex items-center min-h-10"
                 >
                   {t('nav.logout')}
                 </button>

@@ -358,8 +358,8 @@
     "faq": {
       "title": "Bon à savoir",
       "payment": {
-        "question": "Comment je paie?",
-        "answer": "Pas via LocalShare. Vous réglez directement entre vous – lors du retrait, comme bon vous semble."
+        "question": "Comment se passe la transaction?",
+        "answer": "Tout se fait en personne selon vos règles, sans passer par LocalShare."
       },
       "visibility": {
         "question": "Qui voit mes offres?",

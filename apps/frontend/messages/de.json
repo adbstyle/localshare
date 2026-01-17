@@ -40,7 +40,7 @@
   },
   "auth": {
     "login": "Anmelden",
-    "loginWith": "Weiter mit",
+    "loginWith": "Anmelden mit",
     "google": "Google",
     "microsoft": "Microsoft",
     "welcome": "Los geht's",

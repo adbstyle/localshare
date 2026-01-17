@@ -72,9 +72,9 @@ export function LoginPage() {
       {/* Hero Section */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 lg:p-8 max-w-7xl mx-auto items-center">
         {/* Value Proposition Section */}
-        <div className="flex flex-col justify-center space-y-8 lg:pr-8">
+        <div className="flex flex-col justify-center items-center text-center space-y-8 lg:pr-8">
           <div className="space-y-4">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
               {t('auth.headline')}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300">
@@ -82,13 +82,13 @@ export function LoginPage() {
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 w-full max-w-md">
             {valueProps.map((prop, index) => (
               <div key={index} className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <prop.icon className="w-6 h-6 text-primary" />
                 </div>
-                <div>
+                <div className="flex-1 pt-1 text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">
                     {t(prop.titleKey)}
                   </h3>

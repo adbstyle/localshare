@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Trash2, LogOut, Settings } from 'lucide-react';
+import { Download, Trash2, LogOut } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 
 export default function ProfilePage() {
@@ -87,6 +87,7 @@ export default function ProfilePage() {
 
       toast({
         title: t('profile.profileUpdated'),
+        variant: 'success',
       });
     } catch (error) {
       toast({
@@ -103,6 +104,7 @@ export default function ProfilePage() {
       await api.delete('/users/me');
       toast({
         title: t('profile.accountDeleted'),
+        variant: 'success',
       });
       await logout();
     } catch (error) {
@@ -130,6 +132,7 @@ export default function ProfilePage() {
       URL.revokeObjectURL(url);
       toast({
         title: t('profile.dataExported'),
+        variant: 'success',
       });
     } catch (error) {
       toast({
@@ -146,10 +149,10 @@ export default function ProfilePage() {
   return (
     <div className="container max-w-4xl py-8">
       <div className="space-y-6">
-        {/* Personal Information Section */}
+        {/* Profile Section */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('profile.personalInformation')}</CardTitle>
+            <CardTitle>{t('profile.title')}</CardTitle>
             <CardDescription>
               {user.email}
             </CardDescription>
@@ -221,6 +224,27 @@ export default function ProfilePage() {
                 )}
               </div>
 
+              <div>
+                <Label htmlFor="preferredLanguage">
+                  {t('profile.preferredLanguage')}
+                </Label>
+                <Select
+                  value={preferredLanguage}
+                  onValueChange={(value) => setValue('preferredLanguage', value)}
+                >
+                  <SelectTrigger id="preferredLanguage">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('profile.languageHint')}
+                </p>
+              </div>
+
               <div className="flex gap-4 pt-4">
                 <Button type="submit" disabled={loading}>
                   {loading ? t('common.loading') : t('common.save')}
@@ -236,46 +260,6 @@ export default function ProfilePage() {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
-
-        {/* Settings Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              {t('profile.settings')}
-            </CardTitle>
-            <CardDescription>
-              {t('profile.settingsDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="preferredLanguage">
-                  {t('profile.preferredLanguage')}
-                </Label>
-                <Select
-                  value={preferredLanguage}
-                  onValueChange={(value) => setValue('preferredLanguage', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="de">Deutsch</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t('profile.languageHint')}
-                </p>
-              </div>
-              <Button onClick={handleSubmit(onSubmit)} disabled={loading}>
-                {loading ? t('common.loading') : t('common.save')}
-              </Button>
-            </div>
           </CardContent>
         </Card>
 

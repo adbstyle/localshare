@@ -39,6 +39,7 @@ function HeaderContent() {
     let count = 0;
     if (searchParams.get('search')) count++;
     if (searchParams.get('myListings') === 'true') count++;
+    if (searchParams.get('bookmarked') === 'true') count++;
     const types = searchParams.getAll('types');
     const categories = searchParams.getAll('categories');
     count += types.length + categories.length;

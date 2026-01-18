@@ -229,7 +229,7 @@ export default function ProfilePage() {
                   value={preferredLanguage}
                   onValueChange={(value) => setValue('preferredLanguage', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="preferredLanguage">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

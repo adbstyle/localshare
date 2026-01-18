@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Trash2, LogOut, Settings } from 'lucide-react';
+import { Download, Trash2, LogOut } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 
 export default function ProfilePage() {
@@ -146,10 +146,10 @@ export default function ProfilePage() {
   return (
     <div className="container max-w-4xl py-8">
       <div className="space-y-6">
-        {/* Personal Information Section */}
+        {/* Profile Section */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('profile.personalInformation')}</CardTitle>
+            <CardTitle>{t('profile.title')}</CardTitle>
             <CardDescription>
               {user.email}
             </CardDescription>
@@ -221,37 +221,6 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              <div className="flex gap-4 pt-4">
-                <Button type="submit" disabled={loading}>
-                  {loading ? t('common.loading') : t('common.save')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleExportData}
-                  disabled={exporting}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  {exporting ? t('common.loading') : t('profile.exportData')}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Settings Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              {t('profile.settings')}
-            </CardTitle>
-            <CardDescription>
-              {t('profile.settingsDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
               <div>
                 <Label htmlFor="preferredLanguage">
                   {t('profile.preferredLanguage')}
@@ -272,10 +241,22 @@ export default function ProfilePage() {
                   {t('profile.languageHint')}
                 </p>
               </div>
-              <Button onClick={handleSubmit(onSubmit)} disabled={loading}>
-                {loading ? t('common.loading') : t('common.save')}
-              </Button>
-            </div>
+
+              <div className="flex gap-4 pt-4">
+                <Button type="submit" disabled={loading}>
+                  {loading ? t('common.loading') : t('common.save')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleExportData}
+                  disabled={exporting}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {exporting ? t('common.loading') : t('profile.exportData')}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
 

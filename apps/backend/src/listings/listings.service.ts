@@ -106,9 +106,10 @@ export class ListingsService {
       where.creatorId = userId;
     }
 
-    // Filter by bookmarked listings
+    // Filter by bookmarked listings (intersect with visible listings)
     if (filters.bookmarked) {
-      where.id = { in: Array.from(bookmarkedIds) };
+      const visibleBookmarkedIds = Array.from(bookmarkedIds).filter(id => visibleListingIds.includes(id));
+      where.id = { in: visibleBookmarkedIds };
     }
 
     if (filters.types && filters.types.length > 0) {
@@ -188,9 +189,10 @@ export class ListingsService {
       where.creatorId = userId;
     }
 
-    // Filter by bookmarked listings
+    // Filter by bookmarked listings (intersect with visible listings)
     if (filters.bookmarked) {
-      where.id = { in: Array.from(bookmarkedIds) };
+      const visibleBookmarkedIds = Array.from(bookmarkedIds).filter(id => visibleListingIds.includes(id));
+      where.id = { in: visibleBookmarkedIds };
     }
 
     if (filters.types && filters.types.length > 0) {

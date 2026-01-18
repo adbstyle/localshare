@@ -111,7 +111,8 @@ export default function GroupDetailPage() {
 
   const copyInviteLink = () => {
     if (!group) return;
-    const inviteUrl = `${window.location.origin}/groups/join?token=${group.inviteToken}`;
+    const locale = params.locale as string;
+    const inviteUrl = `${window.location.origin}/${locale}/groups/join?token=${group.inviteToken}`;
     navigator.clipboard.writeText(inviteUrl);
     toast({
       variant: 'success',

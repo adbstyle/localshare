@@ -142,7 +142,8 @@ export default function CommunityDetailPage() {
 
   const copyInviteLink = () => {
     if (!community) return;
-    const inviteUrl = `${window.location.origin}/communities/join?token=${community.inviteToken}`;
+    const locale = params.locale as string;
+    const inviteUrl = `${window.location.origin}/${locale}/communities/join?token=${community.inviteToken}`;
     navigator.clipboard.writeText(inviteUrl);
     toast({
       variant: 'success',

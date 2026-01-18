@@ -31,16 +31,14 @@ import {
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Trash2, LogOut } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { useRouter } from '@/navigation';
+import { useRouter, usePathname } from '@/navigation';
 
 export default function ProfilePage() {
   const { user, fetchUser, logout } = useAuth();
   const t = useTranslations();
   const { toast } = useToast();
   const router = useRouter();
-  const params = useParams();
-  const currentLocale = params.locale as string;
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -81,9 +79,9 @@ export default function ProfilePage() {
 
       // If language changed, navigate to new locale URL
       if (data.preferredLanguage && data.preferredLanguage !== previousLanguage) {
-        const currentPath = window.location.pathname;
-        const newPath = currentPath.replace(`/${currentLocale}`, `/${data.preferredLanguage}`);
-        router.push(newPath);
+        // pathname from usePathname() excludes locale prefix, so we add the new locale
+        const newPath = `/${data.preferredLanguage}${pathname}`;
+        window.location.href = newPath;
       }
 
       toast({

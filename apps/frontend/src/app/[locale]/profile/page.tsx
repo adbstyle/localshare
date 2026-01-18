@@ -31,7 +31,8 @@ import {
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Trash2, LogOut } from 'lucide-react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 
 export default function ProfilePage() {
   const { user, fetchUser, logout } = useAuth();

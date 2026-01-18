@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { api } from '@/lib/api';
 import { Listing } from '@localshare/shared';
@@ -14,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
 import { Edit, Trash2, MapPin, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import {
   AlertDialog,
   AlertDialogAction,

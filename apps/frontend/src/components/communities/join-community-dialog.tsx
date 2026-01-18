@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { parseInviteInput } from '@/lib/utils/parse-invite';
@@ -50,7 +49,6 @@ export function JoinCommunityDialog({
   hideDefaultTrigger = false,
 }: JoinCommunityDialogProps = {}) {
   const t = useTranslations();
-  const router = useRouter();
   const { toast } = useToast();
 
   // Support both controlled and uncontrolled modes

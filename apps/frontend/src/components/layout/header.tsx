@@ -1,9 +1,10 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { UserMenu } from '@/components/layout/user-menu';
 import { Menu, X, MessageSquare, Plus } from 'lucide-react';

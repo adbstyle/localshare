@@ -33,7 +33,7 @@ export default async function LocaleLayout({
           <Header />
           <main className="flex-1 overflow-y-auto flex flex-col">
             {children}
-            <Footer locale={locale} />
+            <Footer />
           </main>
           <Toaster />
         </NextIntlClientProvider>

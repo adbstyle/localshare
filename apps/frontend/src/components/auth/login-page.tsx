@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Mail } from 'lucide-react';
 import { HowItWorks } from '@/components/how-it-works';

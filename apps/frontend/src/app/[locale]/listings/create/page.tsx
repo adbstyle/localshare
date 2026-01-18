@@ -1,7 +1,7 @@
 'use client';
 
 import { ListingForm } from '@/components/listings/listing-form';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';

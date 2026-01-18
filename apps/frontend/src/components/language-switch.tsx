@@ -10,11 +10,7 @@ export function LanguageSwitch() {
   const pathname = usePathname();
 
   const handleChange = (newLocale: string) => {
-    // Replace the locale in the pathname
-    const segments = pathname.split('/');
-    segments[1] = newLocale;
-    const newPathname = segments.join('/');
-    router.push(newPathname);
+    router.push(pathname, { locale: newLocale });
   };
 
   return (

@@ -34,7 +34,7 @@ import { Download, Trash2, LogOut } from 'lucide-react';
 import { useRouter, usePathname } from '@/navigation';
 
 export default function ProfilePage() {
-  const { user, fetchUser, logout } = useAuth();
+  const { user, loading: authLoading, fetchUser, logout } = useAuth();
   const t = useTranslations();
   const { toast } = useToast();
   const router = useRouter();
@@ -47,23 +47,48 @@ export default function ProfilePage() {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      homeAddress: user?.homeAddress || '',
-      phoneNumber: user?.phoneNumber || '',
-      preferredLanguage: user?.preferredLanguage || 'de',
+      firstName: '',
+      lastName: '',
+      homeAddress: '',
+      phoneNumber: '',
+      preferredLanguage: 'de',
     },
   });
 
+  // Populate form when user data becomes available
   useEffect(() => {
-    if (!user) {
+    if (user) {
+      reset({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        homeAddress: user.homeAddress || '',
+        phoneNumber: user.phoneNumber || '',
+        preferredLanguage: user.preferredLanguage || 'de',
+      });
+    }
+  }, [user, reset]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
       router.push('/');
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
+
+  if (authLoading) {
+    return (
+      <div className="container max-w-4xl py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-1/3"></div>
+          <div className="h-96 bg-muted rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return null;

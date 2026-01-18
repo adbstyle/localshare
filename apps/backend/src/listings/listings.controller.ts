@@ -60,6 +60,11 @@ export class ListingsController {
     await this.listingsService.delete(id, user.id);
   }
 
+  @Post(':id/bookmark')
+  async toggleBookmark(@CurrentUser() user, @Param('id') id: string) {
+    return this.listingsService.toggleBookmark(id, user.id);
+  }
+
   @Post(':id/images')
   @UseInterceptors(
     FilesInterceptor('images', 3, {

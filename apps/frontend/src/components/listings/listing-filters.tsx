@@ -75,6 +75,7 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
       categories: undefined,
       search: undefined,
       myListings: undefined,
+      bookmarked: undefined,
     });
   };
 
@@ -82,7 +83,8 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
     filters.types?.length ||
     filters.categories?.length ||
     filters.search ||
-    filters.myListings;
+    filters.myListings ||
+    filters.bookmarked;
 
   return (
     <Card className="sticky top-8">
@@ -123,6 +125,22 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
             />
             <Label htmlFor="myListings" className="cursor-pointer">
               {t('listings.myListings')}
+            </Label>
+          </div>
+        )}
+
+        {/* Bookmarked Listings */}
+        {user && (
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="bookmarked"
+              checked={filters.bookmarked || false}
+              onCheckedChange={(checked) =>
+                onChange({ bookmarked: checked ? true : undefined })
+              }
+            />
+            <Label htmlFor="bookmarked" className="cursor-pointer">
+              {t('listings.onlyBookmarks')}
             </Label>
           </div>
         )}

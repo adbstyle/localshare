@@ -123,7 +123,7 @@ packages/
 ```
 
 ### Database Schema (Prisma)
-Key models: `User`, `SsoAccount`, `RefreshToken`, `Community`, `CommunityMember`, `Group`, `GroupMember`, `Listing`, `ListingImage`, `ListingVisibility`
+Key models: `User`, `SsoAccount`, `RefreshToken`, `Community`, `CommunityMember`, `Group`, `GroupMember`, `Listing`, `ListingImage`, `ListingVisibility`, `ListingBookmark`
 
 Key enums:
 - `ListingType`: SELL, RENT, LEND, SEARCH
@@ -139,7 +139,7 @@ All backend routes are prefixed with `/api/v1/`:
 - `/users/me` - Profile management
 - `/communities/*` - Community CRUD, join/leave, member management (owner can remove members)
 - `/groups/*` - Group CRUD within communities, member management (owner can remove members)
-- `/listings/*` - Listing CRUD with image upload
+- `/listings/*` - Listing CRUD with image upload, bookmarks
 
 ### Auth Flow
 1. User clicks OAuth login → redirected to Google/Microsoft

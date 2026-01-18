@@ -67,6 +67,7 @@ model User {
   ownedGroups          Group[]           @relation("GroupOwner")
   groupMemberships     GroupMember[]
   listings             Listing[]
+  bookmarks            ListingBookmark[]
 
   @@index([email])
   @@index([deletedAt])
@@ -195,6 +196,7 @@ model Listing {
   creator    User                @relation(fields: [creatorId], references: [id])
   images     ListingImage[]
   visibility ListingVisibility[]
+  bookmarks  ListingBookmark[]
 
   @@index([creatorId])
   @@index([type])
@@ -240,4 +242,19 @@ model ListingVisibility {
   @@index([visibilityType, communityId])
   @@index([visibilityType, groupId])
   @@map("listing_visibility")
+}
+
+model ListingBookmark {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  listingId String   @map("listing_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
+  @@map("listing_bookmarks")
 }

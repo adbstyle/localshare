@@ -45,11 +45,16 @@ export function parseFiltersFromURL(
   const myListingsParam = searchParams.get('myListings');
   const myListings = myListingsParam === 'true' ? true : undefined;
 
+  // Parse bookmarked boolean
+  const bookmarkedParam = searchParams.get('bookmarked');
+  const bookmarked = bookmarkedParam === 'true' ? true : undefined;
+
   return {
     search,
     types: validTypes.length > 0 ? validTypes : undefined,
     categories: validCategories.length > 0 ? validCategories : undefined,
     myListings,
+    bookmarked,
     limit: itemsPerPage,
     offset: (validPage - 1) * itemsPerPage,
   };
@@ -111,6 +116,11 @@ export function buildURLFromFilters(
     params.set('myListings', 'true');
   }
 
+  // Add bookmarked if true
+  if (filters.bookmarked) {
+    params.set('bookmarked', 'true');
+  }
+
   return params.toString();
 }
 
@@ -139,6 +149,7 @@ export function areFiltersEqual(
   // Compare primitive values
   if (a.search !== b.search) return false;
   if (a.myListings !== b.myListings) return false;
+  if (a.bookmarked !== b.bookmarked) return false;
   if (a.limit !== b.limit) return false;
   if (a.offset !== b.offset) return false;
 

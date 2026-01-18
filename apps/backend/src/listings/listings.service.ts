@@ -47,10 +47,54 @@ export class ListingsService {
     return listing;
   }
 
+  async toggleBookmark(listingId: string, userId: string): Promise<{ isBookmarked: boolean }> {
+    // Check if listing exists and user can view it
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: listingId, deletedAt: null },
+    });
+
+    if (!listing) {
+      throw new NotFoundException('Listing not found');
+    }
+
+    const canView = await this.visibilityService.canUserViewListing(userId, listingId);
+    if (!canView) {
+      throw new ForbiddenException('You do not have access to this listing');
+    }
+
+    // Check if bookmark exists
+    const existingBookmark = await this.prisma.listingBookmark.findUnique({
+      where: {
+        userId_listingId: { userId, listingId },
+      },
+    });
+
+    if (existingBookmark) {
+      // Remove bookmark
+      await this.prisma.listingBookmark.delete({
+        where: { id: existingBookmark.id },
+      });
+      return { isBookmarked: false };
+    } else {
+      // Create bookmark
+      await this.prisma.listingBookmark.create({
+        data: { userId, listingId },
+      });
+      return { isBookmarked: true };
+    }
+  }
+
   async findAll(userId: string, filters: FilterListingsDto) {
     const visibleListingIds = await this.visibilityService.getVisibleListingIds(
       userId,
     );
+
+    // Get user's bookmarked listing IDs
+    const userBookmarks = await this.prisma.listingBookmark.findMany({
+      where: { userId },
+      select: { listingId: true },
+    });
+    const bookmarkedIds = new Set(userBookmarks.map((b) => b.listingId));
 
     const where: any = {
       id: { in: visibleListingIds },
@@ -60,6 +104,12 @@ export class ListingsService {
     // Apply filters
     if (filters.myListings) {
       where.creatorId = userId;
+    }
+
+    // Filter by bookmarked listings (intersect with visible listings)
+    if (filters.bookmarked) {
+      const visibleBookmarkedIds = Array.from(bookmarkedIds).filter(id => visibleListingIds.includes(id));
+      where.id = { in: visibleBookmarkedIds };
     }
 
     if (filters.types && filters.types.length > 0) {
@@ -104,9 +154,10 @@ export class ListingsService {
       skip: filters.offset || 0,
     });
 
-    // Map image URLs
+    // Map image URLs and add isBookmarked field
     return listings.map((listing) => ({
       ...listing,
+      isBookmarked: bookmarkedIds.has(listing.id),
       images: listing.images.map((img) => ({
         ...img,
         url: this.imageService.getImageUrl(img.filename),
@@ -121,6 +172,13 @@ export class ListingsService {
       userId,
     );
 
+    // Get user's bookmarked listing IDs
+    const userBookmarks = await this.prisma.listingBookmark.findMany({
+      where: { userId },
+      select: { listingId: true },
+    });
+    const bookmarkedIds = new Set(userBookmarks.map((b) => b.listingId));
+
     const where: any = {
       id: { in: visibleListingIds },
       deletedAt: null,
@@ -129,6 +187,12 @@ export class ListingsService {
     // Apply filters
     if (filters.myListings) {
       where.creatorId = userId;
+    }
+
+    // Filter by bookmarked listings (intersect with visible listings)
+    if (filters.bookmarked) {
+      const visibleBookmarkedIds = Array.from(bookmarkedIds).filter(id => visibleListingIds.includes(id));
+      where.id = { in: visibleBookmarkedIds };
     }
 
     if (filters.types && filters.types.length > 0) {
@@ -177,9 +241,10 @@ export class ListingsService {
       this.prisma.listing.count({ where }),
     ]);
 
-    // Map image URLs
+    // Map image URLs and add isBookmarked field
     const mappedListings = listings.map((listing) => ({
       ...listing,
+      isBookmarked: bookmarkedIds.has(listing.id),
       images: listing.images.map((img) => ({
         ...img,
         url: this.imageService.getImageUrl(img.filename),
@@ -273,9 +338,17 @@ export class ListingsService {
       listing.creator.phoneNumber = null;
     }
 
+    // Check if user has bookmarked this listing
+    const bookmark = await this.prisma.listingBookmark.findUnique({
+      where: {
+        userId_listingId: { userId, listingId: id },
+      },
+    });
+
     // Map image URLs and transform visibility to match TypeScript interface
     return {
       ...listing,
+      isBookmarked: !!bookmark,
       visibility: filteredVisibility.map((v) => ({
         type: v.visibilityType,
         communityId: v.communityId,

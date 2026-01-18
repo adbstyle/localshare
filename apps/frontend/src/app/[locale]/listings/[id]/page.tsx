@@ -13,7 +13,7 @@ import { ContactButtons } from '@/components/listings/contact-buttons';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
-import { Edit, Trash2, MapPin, MoreVertical } from 'lucide-react';
+import { Edit, Trash2, MapPin, MoreVertical, Heart } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/navigation';
 import {
@@ -44,6 +44,8 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const getImageUrl = (url: string) => {
@@ -57,6 +59,7 @@ export default function ListingDetailPage() {
     try {
       const { data } = await api.get<Listing>(`/listings/${params.id}`);
       setListing(data);
+      setIsBookmarked(data.isBookmarked ?? false);
     } catch (error) {
       toast({
         title: t('errors.notFound'),
@@ -89,6 +92,23 @@ export default function ListingDetailPage() {
     }
   };
 
+  const handleBookmarkClick = async () => {
+    if (bookmarkLoading) return;
+
+    setBookmarkLoading(true);
+    try {
+      const { data } = await api.post<{ isBookmarked: boolean }>(`/listings/${params.id}/bookmark`);
+      setIsBookmarked(data.isBookmarked);
+    } catch (error) {
+      toast({
+        title: t('errors.generic'),
+        variant: 'destructive',
+      });
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container py-8">
@@ -118,14 +138,31 @@ export default function ListingDetailPage() {
               <CardHeader>
                 <div className="relative">
                   <div>
-                    {/* LEVEL 1: Type & Category */}
-                    <div className="flex items-center gap-2 mb-6" role="group" aria-label="Listing type and category">
-                      <Badge variant="secondary" className="text-sm">
-                        {t(`listings.types.${listing.type}`)}
-                      </Badge>
-                      <Badge variant="outline" className="text-sm">
-                        {t(`listings.categories.${listing.category}`)}
-                      </Badge>
+                    {/* LEVEL 1: Type & Category + Bookmark */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2" role="group" aria-label="Listing type and category">
+                        <Badge variant="secondary" className="text-sm">
+                          {t(`listings.types.${listing.type}`)}
+                        </Badge>
+                        <Badge variant="outline" className="text-sm">
+                          {t(`listings.categories.${listing.category}`)}
+                        </Badge>
+                      </div>
+                      {!isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleBookmarkClick}
+                          disabled={bookmarkLoading}
+                          aria-label={isBookmarked ? t('listings.bookmarked') : t('listings.bookmark')}
+                        >
+                          <Heart
+                            className={`h-5 w-5 transition-colors ${
+                              isBookmarked ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
+                            }`}
+                          />
+                        </Button>
+                      )}
                     </div>
 
                     {/* LEVEL 2: Title */}

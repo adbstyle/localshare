@@ -94,6 +94,7 @@ export const updateListingSchema = z.object({
 
 export const filterListingsSchema = z.object({
   myListings: z.boolean().optional(),
+  bookmarked: z.boolean().optional(),
   types: z.array(z.nativeEnum(ListingType)).optional(),
   categories: z.array(z.nativeEnum(ListingCategory)).optional(),
   search: z.string().optional(),

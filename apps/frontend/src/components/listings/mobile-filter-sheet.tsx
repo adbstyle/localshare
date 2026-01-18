@@ -49,6 +49,7 @@ export function MobileFilterSheet({
         types: currentFilters.types,
         categories: currentFilters.categories,
         myListings: currentFilters.myListings,
+        bookmarked: currentFilters.bookmarked,
       });
     }
   }, [open, currentFilters]);
@@ -81,6 +82,7 @@ export function MobileFilterSheet({
       types: undefined,
       categories: undefined,
       myListings: undefined,
+      bookmarked: undefined,
     });
   };
 
@@ -93,7 +95,8 @@ export function MobileFilterSheet({
     tempFilters.types?.length ||
     tempFilters.categories?.length ||
     tempFilters.search ||
-    tempFilters.myListings;
+    tempFilters.myListings ||
+    tempFilters.bookmarked;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,6 +160,25 @@ export function MobileFilterSheet({
                 />
                 <Label htmlFor="mobile-myListings" className="cursor-pointer">
                   {t('listings.myListings')}
+                </Label>
+              </div>
+            )}
+
+            {/* Bookmarked Listings */}
+            {user && (
+              <div className="flex items-center space-x-2 min-h-10">
+                <Checkbox
+                  id="mobile-bookmarked"
+                  checked={tempFilters.bookmarked || false}
+                  onCheckedChange={(checked) =>
+                    setTempFilters((prev) => ({
+                      ...prev,
+                      bookmarked: checked ? true : undefined,
+                    }))
+                  }
+                />
+                <Label htmlFor="mobile-bookmarked" className="cursor-pointer">
+                  {t('listings.onlyBookmarks')}
                 </Label>
               </div>
             )}

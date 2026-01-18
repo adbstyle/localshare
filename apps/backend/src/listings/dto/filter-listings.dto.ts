@@ -9,6 +9,11 @@ export class FilterListingsDto {
   myListings?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  bookmarked?: boolean;
+
+  @IsOptional()
   @IsArray()
   @IsEnum(ListingType, { each: true })
   @Transform(({ value }) => {

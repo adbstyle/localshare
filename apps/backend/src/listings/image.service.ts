@@ -198,9 +198,9 @@ export class ImageService {
         where: { listingId },
         data: { isCover: false },
       }),
-      // Set the target image as cover
+      // Set the target image as cover (listingId constraint prevents cross-listing bugs)
       this.prisma.listingImage.update({
-        where: { id: imageId },
+        where: { id: imageId, listingId },
         data: { isCover: true },
       }),
     ]);

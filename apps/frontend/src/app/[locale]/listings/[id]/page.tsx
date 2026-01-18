@@ -13,7 +13,7 @@ import { ContactButtons } from '@/components/listings/contact-buttons';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
-import { Edit, Trash2, MapPin, MoreVertical, Heart } from 'lucide-react';
+import { Edit, Trash2, MapPin, MoreVertical, Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/navigation';
 import {
@@ -156,9 +156,9 @@ export default function ListingDetailPage() {
                           disabled={bookmarkLoading}
                           aria-label={isBookmarked ? t('listings.bookmarked') : t('listings.bookmark')}
                         >
-                          <Heart
+                          <Bookmark
                             className={`h-5 w-5 transition-colors ${
-                              isBookmarked ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
+                              isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'
                             }`}
                           />
                         </Button>

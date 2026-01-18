@@ -8,7 +8,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/navigation';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
 import { api } from '@/lib/api';
-import { Heart } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { Bookmark } from 'lucide-react';
 import Image from 'next/image';
 
 interface ListingCardProps {
@@ -19,8 +20,11 @@ interface ListingCardProps {
 export function ListingCard({ listing, onBookmarkChange }: ListingCardProps) {
   const t = useTranslations();
   const locale = useLocale();
+  const { user } = useAuth();
   const [isBookmarked, setIsBookmarked] = useState(listing.isBookmarked ?? false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const isOwner = user?.id === listing.creatorId;
 
   // Prefer cover image, fallback to first image
   const coverImage = listing.images.find((img) => img.isCover) || listing.images[0];
@@ -66,21 +70,23 @@ export function ListingCard({ listing, onBookmarkChange }: ListingCardProps) {
               {t('listings.noImage')}
             </div>
           )}
-          {/* Bookmark button overlay */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background/90 backdrop-blur-sm"
-            onClick={handleBookmarkClick}
-            disabled={isLoading}
-            aria-label={isBookmarked ? t('listings.bookmarked') : t('listings.bookmark')}
-          >
-            <Heart
-              className={`h-4 w-4 transition-colors ${
-                isBookmarked ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
-              }`}
-            />
-          </Button>
+          {/* Bookmark button overlay - only for non-owners */}
+          {!isOwner && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background/90 backdrop-blur-sm"
+              onClick={handleBookmarkClick}
+              disabled={isLoading}
+              aria-label={isBookmarked ? t('listings.bookmarked') : t('listings.bookmark')}
+            >
+              <Bookmark
+                className={`h-4 w-4 transition-colors ${
+                  isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'
+                }`}
+              />
+            </Button>
+          )}
         </div>
 
         <CardContent className="p-4">

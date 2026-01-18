@@ -269,23 +269,20 @@ export function ImageUpload({
                   fill
                   className="object-cover"
                 />
-                {/* Cover badge */}
+                {/* Cover badge - bottom left */}
                 {image.isCover && (
-                  <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                  <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                     <GalleryThumbnails className="h-3 w-3" />
                     {t('listings.coverImage')}
                   </div>
                 )}
-              </div>
-              {/* Action buttons */}
-              <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                {/* Set as cover button (only if not already cover) */}
+                {/* Set as cover button - bottom right */}
                 {!image.isCover && images.length > 1 && (
                   <Button
                     type="button"
                     variant="secondary"
                     size="icon"
-                    className="h-8 w-8"
+                    className="absolute bottom-2 right-2 h-8 w-8 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     onClick={() => handleSetCoverImage(image.id)}
                     disabled={settingCover === image.id}
                     title={t('listings.setCoverImage')}
@@ -297,6 +294,9 @@ export function ImageUpload({
                     )}
                   </Button>
                 )}
+              </div>
+              {/* Delete button - top right */}
+              <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 <Button
                   type="button"
                   variant="destructive"
@@ -327,29 +327,29 @@ export function ImageUpload({
                     fill
                     className="object-cover"
                   />
-                  {/* Cover badge */}
+                  {/* Cover badge - bottom left */}
                   {isCover && (
-                    <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                    <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                       <GalleryThumbnails className="h-3 w-3" />
                       {t('listings.coverImage')}
                     </div>
                   )}
-                </div>
-                {/* Action buttons */}
-                <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                  {/* Set as cover button (only if not already cover and more than 1 image) */}
+                  {/* Set as cover button - bottom right */}
                   {!isCover && pendingFiles.length > 1 && (
                     <Button
                       type="button"
                       variant="secondary"
                       size="icon"
-                      className="h-8 w-8"
+                      className="absolute bottom-2 right-2 h-8 w-8 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       onClick={() => handleSetPendingCover(index)}
                       title={t('listings.setCoverImage')}
                     >
                       <GalleryThumbnails className="h-4 w-4" />
                     </Button>
                   )}
+                </div>
+                {/* Delete button - top right */}
+                <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                   <Button
                     type="button"
                     variant="destructive"

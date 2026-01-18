@@ -390,6 +390,7 @@ export class ListingsService {
   async deleteImage(listingId: string, imageId: string, userId: string) {
     const listing = await this.prisma.listing.findUnique({
       where: { id: listingId, deletedAt: null },
+      include: { images: true },
     });
 
     if (!listing) {
@@ -400,7 +401,16 @@ export class ListingsService {
       throw new ForbiddenException('You can only delete images from your own listings');
     }
 
+    // Verify image belongs to this listing (security: prevent IDOR)
+    const imageExists = listing.images.some((img) => img.id === imageId);
+    if (!imageExists) {
+      throw new NotFoundException('Image not found in this listing');
+    }
+
     await this.imageService.deleteImage(imageId);
+
+    // Return updated listing with refreshed cover state
+    return this.findOne(listingId, userId);
   }
 
   async setCoverImage(listingId: string, imageId: string, userId: string) {

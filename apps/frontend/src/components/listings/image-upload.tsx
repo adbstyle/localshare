@@ -162,12 +162,13 @@ export function ImageUpload({
 
     setDeleting(true);
     try {
-      await api.delete(`/listings/${listingId}/images/${imageId}`);
+      // Backend returns updated listing with refreshed cover state
+      const { data } = await api.delete<Listing>(`/listings/${listingId}/images/${imageId}`);
 
-      const newImages = images.filter((img) => img.id !== imageId);
-      setImages(newImages);
+      const updatedImages = data.images || [];
+      setImages(updatedImages);
       if (onImagesChange) {
-        onImagesChange(newImages);
+        onImagesChange(updatedImages);
       }
 
       toast({

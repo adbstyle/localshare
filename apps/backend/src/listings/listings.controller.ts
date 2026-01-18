@@ -90,13 +90,12 @@ export class ListingsController {
   }
 
   @Delete(':id/images/:imageId')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteImage(
     @CurrentUser() user,
     @Param('id') id: string,
     @Param('imageId') imageId: string,
   ) {
-    await this.listingsService.deleteImage(id, imageId, user.id);
+    return this.listingsService.deleteImage(id, imageId, user.id);
   }
 
   @Patch(':id/images/:imageId/cover')

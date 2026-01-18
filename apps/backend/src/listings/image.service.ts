@@ -51,6 +51,19 @@ export class ImageService {
     listingId: string,
     files: Express.Multer.File[],
   ): Promise<void> {
+    // Check if listing already has a cover image
+    const existingCover = await this.prisma.listingImage.findFirst({
+      where: { listingId, isCover: true },
+    });
+    const needsCover = !existingCover;
+
+    // Get current max orderIndex for this listing
+    const maxOrderResult = await this.prisma.listingImage.aggregate({
+      where: { listingId },
+      _max: { orderIndex: true },
+    });
+    const startOrderIndex = (maxOrderResult._max.orderIndex ?? -1) + 1;
+
     for (const [index, file] of files.entries()) {
       const filename = `${uuidv4()}.webp`;
 
@@ -87,6 +100,7 @@ export class ImageService {
       }
 
       // Save metadata to database
+      // First uploaded image becomes cover if no cover exists
       await this.prisma.listingImage.create({
         data: {
           listingId,
@@ -94,7 +108,8 @@ export class ImageService {
           originalName: file.originalname,
           mimeType: 'image/webp',
           sizeBytes,
-          orderIndex: index,
+          orderIndex: startOrderIndex + index,
+          isCover: needsCover && index === 0,
         },
       });
     }
@@ -106,6 +121,9 @@ export class ImageService {
     });
 
     if (image) {
+      const wasCover = image.isCover;
+      const listingId = image.listingId;
+
       if (this.useR2 && this.s3Client) {
         // Delete from R2
         await this.s3Client
@@ -123,6 +141,20 @@ export class ImageService {
       }
 
       await this.prisma.listingImage.delete({ where: { id: imageId } });
+
+      // If deleted image was cover, promote next image by orderIndex
+      if (wasCover) {
+        const nextImage = await this.prisma.listingImage.findFirst({
+          where: { listingId },
+          orderBy: { orderIndex: 'asc' },
+        });
+        if (nextImage) {
+          await this.prisma.listingImage.update({
+            where: { id: nextImage.id },
+            data: { isCover: true },
+          });
+        }
+      }
     }
   }
 
@@ -156,5 +188,21 @@ export class ImageService {
       return `${this.publicUrl}/${filename}`;
     }
     return `/uploads/listings/${filename}`;
+  }
+
+  async setCoverImage(listingId: string, imageId: string): Promise<void> {
+    // Use transaction to ensure exactly one cover per listing
+    await this.prisma.$transaction([
+      // Remove cover from all images of this listing
+      this.prisma.listingImage.updateMany({
+        where: { listingId },
+        data: { isCover: false },
+      }),
+      // Set the target image as cover
+      this.prisma.listingImage.update({
+        where: { id: imageId },
+        data: { isCover: true },
+      }),
+    ]);
   }
 }

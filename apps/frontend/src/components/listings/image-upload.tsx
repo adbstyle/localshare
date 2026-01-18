@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { ListingImage, Listing } from '@localshare/shared';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, Star } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +44,7 @@ export function ImageUpload({
   const [deleting, setDeleting] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [settingCover, setSettingCover] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -202,6 +203,34 @@ export function ImageUpload({
     }
   };
 
+  const handleSetCoverImage = async (imageId: string) => {
+    if (!listingId) return;
+
+    setSettingCover(imageId);
+    try {
+      const { data } = await api.patch<Listing>(`/listings/${listingId}/images/${imageId}/cover`);
+
+      const updatedImages = data.images || [];
+      setImages(updatedImages);
+      if (onImagesChange) {
+        onImagesChange(updatedImages);
+      }
+
+      toast({
+        variant: 'success',
+        title: t('listings.coverImageSet'),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('errors.generic'),
+        description: error.response?.data?.message || 'Failed to set cover image',
+        variant: 'destructive',
+      });
+    } finally {
+      setSettingCover(null);
+    }
+  };
+
   const currentImageCount = listingId ? images.length : pendingFiles.length;
   const canUploadMore = currentImageCount < maxImages;
 
@@ -212,24 +241,52 @@ export function ImageUpload({
         <div className="grid grid-cols-3 gap-4">
           {images.map((image) => (
             <div key={image.id} className="relative group">
-              <div className="relative h-32 rounded-lg overflow-hidden border">
+              <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${image.isCover ? 'border-primary' : 'border-transparent'}`}>
                 <Image
                   src={getImageUrl(image.url)}
                   alt={image.originalName}
                   fill
                   className="object-cover"
                 />
+                {/* Cover badge */}
+                {image.isCover && (
+                  <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-current" />
+                    {t('listings.coverImage')}
+                  </div>
+                )}
               </div>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity h-8 w-8"
-                onClick={() => setImageToDelete(image.id)}
-                disabled={deleting}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {/* Action buttons */}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                {/* Set as cover button (only if not already cover) */}
+                {!image.isCover && images.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleSetCoverImage(image.id)}
+                    disabled={settingCover === image.id}
+                    title={t('listings.setCoverImage')}
+                  >
+                    {settingCover === image.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Star className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setImageToDelete(image.id)}
+                  disabled={deleting}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>

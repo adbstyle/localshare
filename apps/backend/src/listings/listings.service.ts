@@ -88,8 +88,8 @@ export class ListingsService {
           },
         },
         images: {
-          orderBy: { orderIndex: 'asc' },
-          take: 1, // Just first image for list view
+          orderBy: [{ isCover: 'desc' }, { orderIndex: 'asc' }],
+          take: 1, // Cover image for list view
         },
         _count: {
           select: {
@@ -159,8 +159,8 @@ export class ListingsService {
             },
           },
           images: {
-            orderBy: { orderIndex: 'asc' },
-            take: 1, // Just first image for list view
+            orderBy: [{ isCover: 'desc' }, { orderIndex: 'asc' }],
+            take: 1, // Cover image for list view
           },
           _count: {
             select: {
@@ -209,7 +209,7 @@ export class ListingsService {
           },
         },
         images: {
-          orderBy: { orderIndex: 'asc' },
+          orderBy: [{ isCover: 'desc' }, { orderIndex: 'asc' }],
         },
         visibility: {
           include: {
@@ -401,5 +401,30 @@ export class ListingsService {
     }
 
     await this.imageService.deleteImage(imageId);
+  }
+
+  async setCoverImage(listingId: string, imageId: string, userId: string) {
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: listingId, deletedAt: null },
+      include: { images: true },
+    });
+
+    if (!listing) {
+      throw new NotFoundException('Listing not found');
+    }
+
+    if (listing.creatorId !== userId) {
+      throw new ForbiddenException('You can only set cover image for your own listings');
+    }
+
+    // Verify image belongs to this listing
+    const imageExists = listing.images.some((img) => img.id === imageId);
+    if (!imageExists) {
+      throw new NotFoundException('Image not found in this listing');
+    }
+
+    await this.imageService.setCoverImage(listingId, imageId);
+
+    return this.findOne(listingId, userId);
   }
 }

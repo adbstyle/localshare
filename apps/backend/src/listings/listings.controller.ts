@@ -98,4 +98,13 @@ export class ListingsController {
   ) {
     await this.listingsService.deleteImage(id, imageId, user.id);
   }
+
+  @Patch(':id/images/:imageId/cover')
+  async setCoverImage(
+    @CurrentUser() user,
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.listingsService.setCoverImage(id, imageId, user.id);
+  }
 }

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { ListingImage, Listing } from '@localshare/shared';
-import { Upload, X, Loader2, Star } from 'lucide-react';
+import { GalleryThumbnails, Loader2, Upload, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -272,7 +272,7 @@ export function ImageUpload({
                 {/* Cover badge */}
                 {image.isCover && (
                   <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-current" />
+                    <GalleryThumbnails className="h-3 w-3" />
                     {t('listings.coverImage')}
                   </div>
                 )}
@@ -293,7 +293,7 @@ export function ImageUpload({
                     {settingCover === image.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Star className="h-4 w-4" />
+                      <GalleryThumbnails className="h-4 w-4" />
                     )}
                   </Button>
                 )}
@@ -330,7 +330,7 @@ export function ImageUpload({
                   {/* Cover badge */}
                   {isCover && (
                     <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-current" />
+                      <GalleryThumbnails className="h-3 w-3" />
                       {t('listings.coverImage')}
                     </div>
                   )}
@@ -347,7 +347,7 @@ export function ImageUpload({
                       onClick={() => handleSetPendingCover(index)}
                       title={t('listings.setCoverImage')}
                     >
-                      <Star className="h-4 w-4" />
+                      <GalleryThumbnails className="h-4 w-4" />
                     </Button>
                   )}
                   <Button

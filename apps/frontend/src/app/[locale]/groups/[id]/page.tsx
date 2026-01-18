@@ -340,7 +340,7 @@ export default function GroupDetailPage() {
                   <p className="font-medium">
                     {member.firstName} {member.lastName}
                     {member.role === 'owner' && (
-                      <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
+                      <span className="ml-2 text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
                         {t('groups.owner')}
                       </span>
                     )}

@@ -87,6 +87,7 @@ export default function ProfilePage() {
 
       toast({
         title: t('profile.profileUpdated'),
+        variant: 'success',
       });
     } catch (error) {
       toast({
@@ -103,6 +104,7 @@ export default function ProfilePage() {
       await api.delete('/users/me');
       toast({
         title: t('profile.accountDeleted'),
+        variant: 'success',
       });
       await logout();
     } catch (error) {
@@ -130,6 +132,7 @@ export default function ProfilePage() {
       URL.revokeObjectURL(url);
       toast({
         title: t('profile.dataExported'),
+        variant: 'success',
       });
     } catch (error) {
       toast({

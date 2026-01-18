@@ -162,7 +162,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               name="type"
               control={control}
               render={({ field }) => (
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {listingTypes.map((type) => (
                     <Button
                       key={type}
@@ -170,7 +170,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
                       variant={field.value === type ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => field.onChange(type)}
-                      className="flex-1 min-w-[80px]"
+                      className="w-full"
                     >
                       {t(`listings.types.${type}`)}
                     </Button>

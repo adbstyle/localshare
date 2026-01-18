@@ -1,13 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 
-interface FooterProps {
-  locale: string;
-}
-
-export function Footer({ locale }: FooterProps) {
+export function Footer() {
   const t = useTranslations();
 
   return (
@@ -19,13 +15,13 @@ export function Footer({ locale }: FooterProps) {
             <span className="text-xs">({t('common.beta')})</span>
           </p>
           <nav className="flex flex-wrap justify-center gap-4 text-sm">
-            <Link href={`/${locale}/privacy`} className="text-muted-foreground hover:text-foreground">
+            <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
               {t('legal.privacy')}
             </Link>
-            <Link href={`/${locale}/terms`} className="text-muted-foreground hover:text-foreground">
+            <Link href="/terms" className="text-muted-foreground hover:text-foreground">
               {t('legal.terms')}
             </Link>
-            <Link href={`/${locale}/imprint`} className="text-muted-foreground hover:text-foreground">
+            <Link href="/imprint" className="text-muted-foreground hover:text-foreground">
               {t('legal.imprint')}
             </Link>
           </nav>

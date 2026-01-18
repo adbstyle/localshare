@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
@@ -70,7 +71,7 @@ export default function EditListingPage() {
 
   return (
     <div className="container max-w-3xl py-8">
-      <h1 className="text-3xl font-bold mb-8">{t('listings.edit')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-8">{t('listings.edit')}</h1>
       <ListingForm
         listing={listing}
         onSubmit={handleSubmit}

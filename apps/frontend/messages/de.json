@@ -70,7 +70,7 @@
     "phoneNumber": "Telefonnummer",
     "phoneHint": "Format: +41791234567",
     "preferredLanguage": "Bevorzugte Sprache",
-    "languageHint": "Ändern Sie Ihre bevorzugte Sprache für die Anwendung",
+    "languageHint": "Die App wird in der gewählten Sprache angezeigt.",
     "settings": "Einstellungen",
     "settingsDescription": "Verwalten Sie Ihre Anwendungseinstellungen",
     "accountManagement": "Konto-Verwaltung",
@@ -80,7 +80,7 @@
     "deleteAccount": "Account löschen",
     "deleteAccountConfirm": "Sind Sie sicher, dass Sie Ihren Account löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "deleteAccountWarning": "Ihr Account und alle Anzeigen werden gelöscht.",
-    "exportData": "Daten exportieren (DSGVO)",
+    "exportData": "Daten exportieren",
     "profileUpdated": "Profil erfolgreich aktualisiert",
     "accountDeleted": "Account erfolgreich gelöscht",
     "dataExported": "Daten erfolgreich exportiert"
@@ -214,6 +214,12 @@
     "title": "Anzeigen",
     "create": "Anzeige erstellen",
     "myListings": "Meine Anzeigen",
+    "formSections": {
+      "typeAndCategory": "Typ & Kategorie",
+      "photos": "Fotos",
+      "details": "Details",
+      "visibility": "Sichtbarkeit"
+    },
     "listingTitle": "Titel",
     "titlePlaceholder": "z.B. Bohrmaschine zu verleihen",
     "description": "Beschreibung",

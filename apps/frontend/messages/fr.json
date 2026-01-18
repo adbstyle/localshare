@@ -70,7 +70,7 @@
     "phoneNumber": "Numéro de téléphone",
     "phoneHint": "Format: +41791234567",
     "preferredLanguage": "Langue préférée",
-    "languageHint": "Modifiez votre langue préférée pour l'application",
+    "languageHint": "L'app s'affiche dans la langue choisie.",
     "settings": "Paramètres",
     "settingsDescription": "Gérez les paramètres de votre application",
     "accountManagement": "Gestion du compte",
@@ -80,7 +80,7 @@
     "deleteAccount": "Supprimer le compte",
     "deleteAccountConfirm": "Êtes-vous sûr de vouloir supprimer votre compte? Cette action est irréversible.",
     "deleteAccountWarning": "Votre compte et toutes vos annonces seront supprimés.",
-    "exportData": "Exporter les données (RGPD)",
+    "exportData": "Exporter les données",
     "profileUpdated": "Profil mis à jour avec succès",
     "accountDeleted": "Compte supprimé avec succès",
     "dataExported": "Données exportées avec succès"
@@ -214,6 +214,12 @@
     "title": "Annonces",
     "create": "Créer une annonce",
     "myListings": "Mes annonces",
+    "formSections": {
+      "typeAndCategory": "Type & Catégorie",
+      "photos": "Photos",
+      "details": "Détails",
+      "visibility": "Visibilité"
+    },
     "listingTitle": "Titre",
     "titlePlaceholder": "p.ex. Perceuse à prêter",
     "description": "Description",

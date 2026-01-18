@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -110,7 +111,8 @@ export default function GroupDetailPage() {
 
   const copyInviteLink = () => {
     if (!group) return;
-    const inviteUrl = `${window.location.origin}/groups/join?token=${group.inviteToken}`;
+    const locale = params.locale as string;
+    const inviteUrl = `${window.location.origin}/${locale}/groups/join?token=${group.inviteToken}`;
     navigator.clipboard.writeText(inviteUrl);
     toast({
       variant: 'success',

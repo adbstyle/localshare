@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
 import { ImageUpload } from './image-upload';
@@ -147,15 +147,113 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Card 1: Type & Category */}
       <Card>
-        <CardContent className="pt-6 space-y-4">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">{t('listings.formSections.typeAndCategory')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Type as button group */}
+          <div className="space-y-2">
+            <Label>
+              {t('listings.type')} <span className="text-destructive">*</span>
+            </Label>
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {listingTypes.map((type) => (
+                    <Button
+                      key={type}
+                      type="button"
+                      variant={field.value === type ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => field.onChange(type)}
+                      className="w-full"
+                    >
+                      {t(`listings.types.${type}`)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            />
+            {errors.type && (
+              <p className="text-sm text-destructive">{errors.type.message}</p>
+            )}
+          </div>
+
+          {/* Category */}
+          <div className="space-y-2">
+            <Label htmlFor="category">
+              {t('listings.category')} <span className="text-destructive">*</span>
+            </Label>
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {listingCategories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {t(`listings.categories.${category}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.category && (
+              <p className="text-sm text-destructive">{errors.category.message}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Card 2: Photos */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">{t('listings.formSections.photos')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t('listings.imageLimit')}</p>
+            <ImageUpload
+              listingId={listing?.id}
+              existingImages={currentImages}
+              maxImages={3}
+              maxSizeMB={10}
+              onImagesChange={(images) => {
+                setCurrentImages(images);
+              }}
+              onPendingImagesChange={(files, coverIndex) => {
+                setPendingImageFiles(files);
+                setPendingCoverIndex(coverIndex);
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Card 3: Details */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">{t('listings.formSections.details')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           {/* Title */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor="title">
                 {t('listings.listingTitle')} <span className="text-destructive">*</span>
               </Label>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground" aria-live="polite" aria-atomic="true">
                 {watch('title')?.length || 0}/60
               </span>
             </div>
@@ -181,37 +279,6 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
             />
             {errors.description && (
               <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
-          </div>
-
-          {/* Type */}
-          <div className="space-y-2">
-            <Label htmlFor="type">
-              {t('listings.type')} <span className="text-destructive">*</span>
-            </Label>
-            <Controller
-              name="type"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {listingTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`listings.types.${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.type && (
-              <p className="text-sm text-destructive">{errors.type.message}</p>
             )}
           </div>
 
@@ -267,49 +334,18 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               )}
             </div>
           )}
-
-          {/* Category */}
-          <div className="space-y-2">
-            <Label htmlFor="category">
-              {t('listings.category')} <span className="text-destructive">*</span>
-            </Label>
-            <Controller
-              name="category"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {listingCategories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {t(`listings.categories.${category}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.category && (
-              <p className="text-sm text-destructive">{errors.category.message}</p>
-            )}
-          </div>
         </CardContent>
       </Card>
 
-      {/* Visibility */}
+      {/* Card 4: Visibility */}
       <Card>
-        <CardContent className="pt-6 space-y-4">
-          <div>
-            <Label className="text-base font-semibold">{t('listings.shareWith')}</Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t('listings.selectCommunities')}
-            </p>
-          </div>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">{t('listings.formSections.visibility')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t('listings.selectCommunities')}
+          </p>
 
           {/* Communities */}
           {communities.length > 0 && (
@@ -385,29 +421,6 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               {t('communities.empty')} {t('communities.emptyAction')}
             </p>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Image Upload */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-2">
-            <Label>{t('listings.images')}</Label>
-            <p className="text-sm text-muted-foreground">{t('listings.imageLimit')}</p>
-            <ImageUpload
-              listingId={listing?.id}
-              existingImages={currentImages}
-              maxImages={3}
-              maxSizeMB={10}
-              onImagesChange={(images) => {
-                setCurrentImages(images);
-              }}
-              onPendingImagesChange={(files, coverIndex) => {
-                setPendingImageFiles(files);
-                setPendingCoverIndex(coverIndex);
-              }}
-            />
-          </div>
         </CardContent>
       </Card>
 

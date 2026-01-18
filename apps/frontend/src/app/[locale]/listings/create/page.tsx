@@ -1,7 +1,7 @@
 'use client';
 
 import { ListingForm } from '@/components/listings/listing-form';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
@@ -61,7 +61,7 @@ export default function CreateListingPage() {
 
   return (
     <div className="container max-w-3xl py-8">
-      <h1 className="text-3xl font-bold mb-8">{t('listings.create')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-8">{t('listings.create')}</h1>
       <ListingForm onSubmit={handleSubmit} />
     </div>
   );

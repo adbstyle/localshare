@@ -45,6 +45,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const [loadingData, setLoadingData] = useState(true);
   const [currentImages, setCurrentImages] = useState(listing?.images || []);
   const [pendingImageFiles, setPendingImageFiles] = useState<File[]>([]);
+  const [pendingCoverIndex, setPendingCoverIndex] = useState(0);
 
   const {
     register,
@@ -113,8 +114,17 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const handleFormSubmit = async (data: CreateListingDto) => {
     setLoading(true);
     try {
-      // Pass pending files for create mode, undefined for edit mode
-      await onSubmit(data, listing ? undefined : pendingImageFiles);
+      // For create mode: reorder files so cover image is at index 0
+      // Backend automatically sets first uploaded image as cover
+      let filesToUpload = pendingImageFiles;
+      if (!listing && pendingImageFiles.length > 0 && pendingCoverIndex > 0) {
+        // Move cover image to front
+        const reordered = [...pendingImageFiles];
+        const [coverFile] = reordered.splice(pendingCoverIndex, 1);
+        reordered.unshift(coverFile);
+        filesToUpload = reordered;
+      }
+      await onSubmit(data, listing ? undefined : filesToUpload);
     } finally {
       setLoading(false);
     }
@@ -392,8 +402,9 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               onImagesChange={(images) => {
                 setCurrentImages(images);
               }}
-              onPendingImagesChange={(files) => {
+              onPendingImagesChange={(files, coverIndex) => {
                 setPendingImageFiles(files);
+                setPendingCoverIndex(coverIndex);
               }}
             />
           </div>

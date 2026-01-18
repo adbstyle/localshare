@@ -25,7 +25,7 @@ interface ImageUploadProps {
   maxImages?: number;
   maxSizeMB?: number;
   onImagesChange?: (images: ListingImage[]) => void;
-  onPendingImagesChange?: (files: File[]) => void;
+  onPendingImagesChange?: (files: File[], coverIndex: number) => void;
 }
 
 export function ImageUpload({
@@ -45,6 +45,7 @@ export function ImageUpload({
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [settingCover, setSettingCover] = useState<string | null>(null);
+  const [pendingCoverIndex, setPendingCoverIndex] = useState(0); // For create mode: which pending file is cover
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -106,9 +107,9 @@ export function ImageUpload({
       const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
 
-      // Notify parent component
+      // Notify parent component with cover index (0 = first file is cover)
       if (onPendingImagesChange) {
-        onPendingImagesChange(updatedFiles);
+        onPendingImagesChange(updatedFiles, pendingCoverIndex);
       }
     }
 
@@ -198,9 +199,28 @@ export function ImageUpload({
     setPendingFiles(newFiles);
     setPreviewUrls(newUrls);
 
+    // Adjust cover index if needed
+    let newCoverIndex = pendingCoverIndex;
+    if (index < pendingCoverIndex) {
+      // Deleted file was before cover, shift cover index down
+      newCoverIndex = pendingCoverIndex - 1;
+    } else if (index === pendingCoverIndex) {
+      // Deleted the cover itself, reset to first image
+      newCoverIndex = 0;
+    }
+    setPendingCoverIndex(newCoverIndex);
+
     // Notify parent component
     if (onPendingImagesChange) {
-      onPendingImagesChange(newFiles);
+      onPendingImagesChange(newFiles, newCoverIndex);
+    }
+  };
+
+  const handleSetPendingCover = (index: number) => {
+    setPendingCoverIndex(index);
+    // Notify parent component
+    if (onPendingImagesChange) {
+      onPendingImagesChange(pendingFiles, index);
     }
   };
 
@@ -296,27 +316,53 @@ export function ImageUpload({
       {/* Pending Images (for create mode) */}
       {pendingFiles.length > 0 && !listingId && (
         <div className="grid grid-cols-3 gap-4">
-          {pendingFiles.map((file, index) => (
-            <div key={index} className="relative group">
-              <div className="relative h-32 rounded-lg overflow-hidden border">
-                <Image
-                  src={previewUrls[index]}
-                  alt={file.name}
-                  fill
-                  className="object-cover"
-                />
+          {pendingFiles.map((file, index) => {
+            const isCover = index === pendingCoverIndex;
+            return (
+              <div key={index} className="relative group">
+                <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${isCover ? 'border-primary' : 'border-transparent'}`}>
+                  <Image
+                    src={previewUrls[index]}
+                    alt={file.name}
+                    fill
+                    className="object-cover"
+                  />
+                  {/* Cover badge */}
+                  {isCover && (
+                    <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-current" />
+                      {t('listings.coverImage')}
+                    </div>
+                  )}
+                </div>
+                {/* Action buttons */}
+                <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  {/* Set as cover button (only if not already cover and more than 1 image) */}
+                  {!isCover && pendingFiles.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleSetPendingCover(index)}
+                      title={t('listings.setCoverImage')}
+                    >
+                      <Star className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleDeletePendingFile(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity h-8 w-8"
-                onClick={() => handleDeletePendingFile(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

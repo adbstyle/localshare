@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,7 @@ export function ImageUpload({
   const [pendingCoverIndex, setPendingCoverIndex] = useState(0); // For create mode: which pending file is cover
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const previewUrlsRef = useRef<string[]>([]);
 
   const getImageUrl = (url: string) => {
     if (url.startsWith('http')) return url;
@@ -59,12 +60,17 @@ export function ImageUpload({
     setImages(existingImages);
   }, [existingImages]);
 
-  // Cleanup preview URLs on unmount
+  // Keep ref in sync with state
+  useEffect(() => {
+    previewUrlsRef.current = previewUrls;
+  }, [previewUrls]);
+
+  // Cleanup preview URLs only on unmount
   useEffect(() => {
     return () => {
-      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [previewUrls]);
+  }, []);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;

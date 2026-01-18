@@ -262,7 +262,7 @@ export function ImageUpload({
         <div className="grid grid-cols-3 gap-4">
           {images.map((image) => (
             <div key={image.id} className="relative group">
-              <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${image.isCover ? 'border-primary' : 'border-transparent'}`}>
+              <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${image.isCover ? 'border-secondary' : 'border-transparent'}`}>
                 <Image
                   src={getImageUrl(image.url)}
                   alt={image.originalName}
@@ -271,7 +271,7 @@ export function ImageUpload({
                 />
                 {/* Cover badge - bottom left */}
                 {image.isCover && (
-                  <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                  <div className="absolute bottom-2 left-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                     <GalleryThumbnails className="h-3 w-3" />
                     {t('listings.coverImage')}
                   </div>
@@ -320,7 +320,7 @@ export function ImageUpload({
             const isCover = index === pendingCoverIndex;
             return (
               <div key={index} className="relative group">
-                <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${isCover ? 'border-primary' : 'border-transparent'}`}>
+                <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${isCover ? 'border-secondary' : 'border-transparent'}`}>
                   <Image
                     src={previewUrls[index]}
                     alt={file.name}
@@ -329,7 +329,7 @@ export function ImageUpload({
                   />
                   {/* Cover badge - bottom left */}
                   {isCover && (
-                    <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                    <div className="absolute bottom-2 left-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                       <GalleryThumbnails className="h-3 w-3" />
                       {t('listings.coverImage')}
                     </div>

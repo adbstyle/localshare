@@ -14,7 +14,8 @@ interface ListingCardProps {
 export function ListingCard({ listing }: ListingCardProps) {
   const t = useTranslations();
   const locale = useLocale();
-  const firstImage = listing.images[0];
+  // Prefer cover image, fallback to first image
+  const coverImage = listing.images.find((img) => img.isCover) || listing.images[0];
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const getImageUrl = (url: string) => {
@@ -27,9 +28,9 @@ export function ListingCard({ listing }: ListingCardProps) {
       <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
         {/* Image */}
         <div className="relative h-48 bg-muted">
-          {firstImage ? (
+          {coverImage ? (
             <Image
-              src={getImageUrl(firstImage.url)}
+              src={getImageUrl(coverImage.url)}
               alt={listing.title}
               fill
               className="object-cover"

@@ -212,6 +212,7 @@ model ListingImage {
   mimeType     String?  @map("mime_type")
   sizeBytes    Int?     @map("size_bytes")
   orderIndex   Int      @default(0) @map("order_index")
+  isCover      Boolean  @default(false) @map("is_cover")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)

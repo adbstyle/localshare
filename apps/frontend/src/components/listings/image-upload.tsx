@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { ListingImage, Listing } from '@localshare/shared';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { GalleryThumbnails, Loader2, Upload, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +25,7 @@ interface ImageUploadProps {
   maxImages?: number;
   maxSizeMB?: number;
   onImagesChange?: (images: ListingImage[]) => void;
-  onPendingImagesChange?: (files: File[]) => void;
+  onPendingImagesChange?: (files: File[], coverIndex: number) => void;
 }
 
 export function ImageUpload({
@@ -44,6 +44,8 @@ export function ImageUpload({
   const [deleting, setDeleting] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [settingCover, setSettingCover] = useState<string | null>(null);
+  const [pendingCoverIndex, setPendingCoverIndex] = useState(0); // For create mode: which pending file is cover
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -105,9 +107,9 @@ export function ImageUpload({
       const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
 
-      // Notify parent component
+      // Notify parent component with cover index (0 = first file is cover)
       if (onPendingImagesChange) {
-        onPendingImagesChange(updatedFiles);
+        onPendingImagesChange(updatedFiles, pendingCoverIndex);
       }
     }
 
@@ -161,12 +163,13 @@ export function ImageUpload({
 
     setDeleting(true);
     try {
-      await api.delete(`/listings/${listingId}/images/${imageId}`);
+      // Backend returns updated listing with refreshed cover state
+      const { data } = await api.delete<Listing>(`/listings/${listingId}/images/${imageId}`);
 
-      const newImages = images.filter((img) => img.id !== imageId);
-      setImages(newImages);
+      const updatedImages = data.images || [];
+      setImages(updatedImages);
       if (onImagesChange) {
-        onImagesChange(newImages);
+        onImagesChange(updatedImages);
       }
 
       toast({
@@ -196,9 +199,56 @@ export function ImageUpload({
     setPendingFiles(newFiles);
     setPreviewUrls(newUrls);
 
+    // Adjust cover index if needed
+    let newCoverIndex = pendingCoverIndex;
+    if (index < pendingCoverIndex) {
+      // Deleted file was before cover, shift cover index down
+      newCoverIndex = pendingCoverIndex - 1;
+    } else if (index === pendingCoverIndex) {
+      // Deleted the cover itself, reset to first image
+      newCoverIndex = 0;
+    }
+    setPendingCoverIndex(newCoverIndex);
+
     // Notify parent component
     if (onPendingImagesChange) {
-      onPendingImagesChange(newFiles);
+      onPendingImagesChange(newFiles, newCoverIndex);
+    }
+  };
+
+  const handleSetPendingCover = (index: number) => {
+    setPendingCoverIndex(index);
+    // Notify parent component
+    if (onPendingImagesChange) {
+      onPendingImagesChange(pendingFiles, index);
+    }
+  };
+
+  const handleSetCoverImage = async (imageId: string) => {
+    if (!listingId) return;
+
+    setSettingCover(imageId);
+    try {
+      const { data } = await api.patch<Listing>(`/listings/${listingId}/images/${imageId}/cover`);
+
+      const updatedImages = data.images || [];
+      setImages(updatedImages);
+      if (onImagesChange) {
+        onImagesChange(updatedImages);
+      }
+
+      toast({
+        variant: 'success',
+        title: t('listings.coverImageSet'),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('errors.generic'),
+        description: error.response?.data?.message || 'Failed to set cover image',
+        variant: 'destructive',
+      });
+    } finally {
+      setSettingCover(null);
     }
   };
 
@@ -212,24 +262,52 @@ export function ImageUpload({
         <div className="grid grid-cols-3 gap-4">
           {images.map((image) => (
             <div key={image.id} className="relative group">
-              <div className="relative h-32 rounded-lg overflow-hidden border">
+              <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${image.isCover ? 'border-secondary' : 'border-transparent'}`}>
                 <Image
                   src={getImageUrl(image.url)}
                   alt={image.originalName}
                   fill
                   className="object-cover"
                 />
+                {/* Cover badge - bottom left */}
+                {image.isCover && (
+                  <div className="absolute bottom-2 left-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                    <GalleryThumbnails className="h-3 w-3" />
+                    {t('listings.coverImage')}
+                  </div>
+                )}
+                {/* Set as cover button - bottom right */}
+                {!image.isCover && images.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon"
+                    className="absolute bottom-2 right-2 h-8 w-8 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleSetCoverImage(image.id)}
+                    disabled={settingCover === image.id}
+                    title={t('listings.setCoverImage')}
+                  >
+                    {settingCover === image.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <GalleryThumbnails className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity h-8 w-8"
-                onClick={() => setImageToDelete(image.id)}
-                disabled={deleting}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {/* Delete button - top right */}
+              <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setImageToDelete(image.id)}
+                  disabled={deleting}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -238,27 +316,53 @@ export function ImageUpload({
       {/* Pending Images (for create mode) */}
       {pendingFiles.length > 0 && !listingId && (
         <div className="grid grid-cols-3 gap-4">
-          {pendingFiles.map((file, index) => (
-            <div key={index} className="relative group">
-              <div className="relative h-32 rounded-lg overflow-hidden border">
-                <Image
-                  src={previewUrls[index]}
-                  alt={file.name}
-                  fill
-                  className="object-cover"
-                />
+          {pendingFiles.map((file, index) => {
+            const isCover = index === pendingCoverIndex;
+            return (
+              <div key={index} className="relative group">
+                <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${isCover ? 'border-secondary' : 'border-transparent'}`}>
+                  <Image
+                    src={previewUrls[index]}
+                    alt={file.name}
+                    fill
+                    className="object-cover"
+                  />
+                  {/* Cover badge - bottom left */}
+                  {isCover && (
+                    <div className="absolute bottom-2 left-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                      <GalleryThumbnails className="h-3 w-3" />
+                      {t('listings.coverImage')}
+                    </div>
+                  )}
+                  {/* Set as cover button - bottom right */}
+                  {!isCover && pendingFiles.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="icon"
+                      className="absolute bottom-2 right-2 h-8 w-8 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleSetPendingCover(index)}
+                      title={t('listings.setCoverImage')}
+                    >
+                      <GalleryThumbnails className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {/* Delete button - top right */}
+                <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleDeletePendingFile(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity h-8 w-8"
-                onClick={() => handleDeletePendingFile(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

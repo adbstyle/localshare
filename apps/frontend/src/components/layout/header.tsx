@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BetaBadge } from '@/components/beta-badge';
 import { useAuth } from '@/hooks/use-auth';
 import { UserMenu } from '@/components/layout/user-menu';
 import { Menu, X, MessageSquare, Plus } from 'lucide-react';
@@ -81,7 +80,6 @@ function HeaderContent() {
             />
             <span className="font-semibold text-lg">LocalShare</span>
           </Link>
-          <BetaBadge />
         </div>
 
         {/* Desktop Navigation Links - Left aligned */}
@@ -257,7 +255,6 @@ function HeaderSkeleton() {
             />
             <span className="font-semibold text-lg">LocalShare</span>
           </a>
-          <span className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Beta</span>
         </div>
         <div className="flex-grow" />
         <div className="flex md:hidden items-center gap-2">

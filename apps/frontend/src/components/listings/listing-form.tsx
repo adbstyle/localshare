@@ -253,7 +253,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               <Label htmlFor="title">
                 {t('listings.listingTitle')} <span className="text-destructive">*</span>
               </Label>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground" aria-live="polite" aria-atomic="true">
                 {watch('title')?.length || 0}/60
               </span>
             </div>

@@ -47,7 +47,7 @@ export function ListingCard({ listing, onBookmarkChange }: ListingCardProps) {
       setIsBookmarked(data.isBookmarked);
       onBookmarkChange?.(listing.id, data.isBookmarked);
     } catch (error) {
-      // Revert on error - optimistic update would be overkill here
+      // Silent fail - loading state provides UI feedback
     } finally {
       setIsLoading(false);
     }

@@ -50,6 +50,7 @@ function ListingsPageContent() {
     try {
       const params = new URLSearchParams();
       if (filters.myListings) params.append('myListings', 'true');
+      if (filters.bookmarked) params.append('bookmarked', 'true');
       if (filters.types?.length) {
         filters.types.forEach((type) => params.append('types', type));
       }

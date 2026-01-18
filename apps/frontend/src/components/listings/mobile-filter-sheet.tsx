@@ -49,6 +49,7 @@ export function MobileFilterSheet({
         types: currentFilters.types,
         categories: currentFilters.categories,
         myListings: currentFilters.myListings,
+        bookmarked: currentFilters.bookmarked,
       });
     }
   }, [open, currentFilters]);
@@ -81,6 +82,7 @@ export function MobileFilterSheet({
       types: undefined,
       categories: undefined,
       myListings: undefined,
+      bookmarked: undefined,
     });
   };
 
@@ -93,7 +95,8 @@ export function MobileFilterSheet({
     tempFilters.types?.length ||
     tempFilters.categories?.length ||
     tempFilters.search ||
-    tempFilters.myListings;
+    tempFilters.myListings ||
+    tempFilters.bookmarked;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -142,22 +145,39 @@ export function MobileFilterSheet({
               />
             </div>
 
-            {/* My Listings */}
+            {/* My Listings & Bookmarked */}
             {user && (
-              <div className="flex items-center space-x-2 min-h-10">
-                <Checkbox
-                  id="mobile-myListings"
-                  checked={tempFilters.myListings || false}
-                  onCheckedChange={(checked) =>
-                    setTempFilters((prev) => ({
-                      ...prev,
-                      myListings: checked ? true : undefined,
-                    }))
-                  }
-                />
-                <Label htmlFor="mobile-myListings" className="cursor-pointer">
-                  {t('listings.myListings')}
-                </Label>
+              <div className="space-y-0">
+                <div className="flex items-center space-x-2 min-h-11">
+                  <Checkbox
+                    id="mobile-myListings"
+                    checked={tempFilters.myListings || false}
+                    onCheckedChange={(checked) =>
+                      setTempFilters((prev) => ({
+                        ...prev,
+                        myListings: checked ? true : undefined,
+                      }))
+                    }
+                  />
+                  <Label htmlFor="mobile-myListings" className="cursor-pointer">
+                    {t('listings.myListings')}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 min-h-11">
+                  <Checkbox
+                    id="mobile-bookmarked"
+                    checked={tempFilters.bookmarked || false}
+                    onCheckedChange={(checked) =>
+                      setTempFilters((prev) => ({
+                        ...prev,
+                        bookmarked: checked ? true : undefined,
+                      }))
+                    }
+                  />
+                  <Label htmlFor="mobile-bookmarked" className="cursor-pointer">
+                    {t('listings.onlyBookmarks')}
+                  </Label>
+                </div>
               </div>
             )}
 

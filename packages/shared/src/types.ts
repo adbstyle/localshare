@@ -157,6 +157,7 @@ export interface Listing {
     community?: { id: string; name: string };
     group?: { id: string; name: string };
   }>;
+  isBookmarked?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -185,6 +186,7 @@ export interface UpdateListingDto {
 
 export interface FilterListingsDto {
   myListings?: boolean;
+  bookmarked?: boolean;
   types?: ListingType[];
   categories?: ListingCategory[];
   search?: string;

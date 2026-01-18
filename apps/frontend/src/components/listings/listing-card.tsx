@@ -3,7 +3,7 @@
 import { Listing } from '@localshare/shared';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { useTranslations, useLocale } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
 import Image from 'next/image';
 

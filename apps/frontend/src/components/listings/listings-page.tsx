@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from '@/navigation';
 import { api } from '@/lib/api';
 import { Listing, FilterListingsDto, PaginatedResponse } from '@localshare/shared';
 import { ListingCard } from './listing-card';
 import { ListingFilters } from './listing-filters';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import {
   Pagination,

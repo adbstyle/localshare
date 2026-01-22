@@ -73,6 +73,9 @@ export function HowItWorks() {
                     src={step.illustration}
                     alt={step.illustrationAlt}
                     loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                     className="w-full max-w-sm lg:max-w-md mx-auto rounded-2xl"
                   />
                 </div>

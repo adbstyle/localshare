@@ -10,6 +10,7 @@ import { Link } from '@/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Mail } from 'lucide-react';
 import { HowItWorks } from '@/components/how-it-works';
+import Image from 'next/image';
 
 export function LoginPage() {
   const t = useTranslations();
@@ -64,27 +65,30 @@ export function LoginPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section with Background */}
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen bg-gray-900">
         {/* Background Image Layer */}
-        <div className="absolute inset-0 -z-10">
-          <img
+        <div className="absolute inset-0 z-0">
+          <Image
             src="/images/neighbors-sharing.jpg"
-            alt="Nachbarn teilen Rettungswesten in ihrer Gemeinschaft"
-            className="w-full h-full object-cover"
+            alt={t('auth.heroImageAlt')}
+            fill
+            priority
+            unoptimized
+            className="object-cover"
           />
         </div>
 
         {/* Overlay Layer */}
-        <div className="absolute inset-0 -z-10 bg-black/20 dark:bg-black/40" />
+        <div className="absolute inset-0 z-10 bg-black/30 dark:bg-black/50" />
 
         {/* Hero Content */}
-        <div className="flex flex-col items-center justify-center min-h-screen gap-12 lg:gap-24 p-4 lg:p-12">
+        <div className="relative z-20 flex flex-col items-center justify-center min-h-screen gap-12 lg:gap-24 p-4 lg:p-12">
         {/* Hero Headline */}
         <div className="text-center">
-          <h1 className="text-white text-3xl lg:text-6xl font-bold drop-shadow-lg">
+          <h1 className="text-white text-3xl lg:text-6xl font-bold">
             {t('auth.headline')}
           </h1>
-          <p className="text-white/90 text-lg lg:text-2xl mt-4 drop-shadow-md">
+          <p className="text-white/90 text-lg lg:text-2xl mt-4">
             {t('auth.subline')}
           </p>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import {
   Accordion,
   AccordionContent,
@@ -11,29 +12,24 @@ import {
 type Step = {
   key: 'join' | 'offer' | 'find' | 'arrange';
   illustration: string;
-  illustrationAlt: string;
 };
 
 const steps: Step[] = [
   {
     key: 'join',
     illustration: '/images/how-it-works/step-1-community.jpg',
-    illustrationAlt: 'Nachbarschaft von oben mit Menschen die winken',
   },
   {
     key: 'offer',
     illustration: '/images/how-it-works/step-2-create-listing.jpg',
-    illustrationAlt: 'Person am Marktstand mit Laptop und Gegenständen',
   },
   {
     key: 'find',
     illustration: '/images/how-it-works/step-3-search.jpg',
-    illustrationAlt: 'Person am Laptop mit Such-Elementen',
   },
   {
     key: 'arrange',
     illustration: '/images/how-it-works/step-4-exchange.jpg',
-    illustrationAlt: 'Zwei Personen tauschen Paket vor Häusern',
   },
 ];
 
@@ -62,15 +58,13 @@ export function HowItWorks() {
                 }`}
               >
                 {/* Illustration Side */}
-                <div className="w-full lg:w-1/2">
-                  <img
+                <div className="w-full lg:w-1/2 relative h-64 lg:h-96">
+                  <Image
                     src={step.illustration}
-                    alt={step.illustrationAlt}
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                    className="w-full max-w-sm lg:max-w-md mx-auto rounded-2xl"
+                    alt={t(`steps.${step.key}.illustrationAlt`)}
+                    fill
+                    unoptimized
+                    className="object-contain rounded-2xl"
                   />
                 </div>
 

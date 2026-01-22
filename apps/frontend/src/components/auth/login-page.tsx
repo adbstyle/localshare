@@ -79,10 +79,10 @@ export function LoginPage() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-12 lg:gap-24 p-4 lg:p-12">
         {/* Hero Headline */}
         <div className="text-center">
-          <h1 className="text-white text-3xl lg:text-6xl font-bold shadow-[0_2px_4px_rgba(0,0,0,0.8),0_4px_8px_rgba(0,0,0,0.6),0_8px_16px_rgba(0,0,0,0.4)]">
+          <h1 className="text-white text-3xl lg:text-6xl font-bold">
             {t('auth.headline')}
           </h1>
-          <p className="text-white/90 text-lg lg:text-2xl mt-4 shadow-[0_2px_4px_rgba(0,0,0,0.8),0_4px_8px_rgba(0,0,0,0.6),0_8px_16px_rgba(0,0,0,0.4)]">
+          <p className="text-white/90 text-lg lg:text-2xl mt-4">
             {t('auth.subline')}
           </p>
         </div>

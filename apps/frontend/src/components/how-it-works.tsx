@@ -53,7 +53,7 @@ export function HowItWorks() {
           </h2>
 
           {/* 4-Step Flow with Illustrations */}
-          <div className="space-y-12 lg:space-y-24">
+          <div className="space-y-8 lg:space-y-16">
             {steps.map((step, index) => (
               <div
                 key={step.key}

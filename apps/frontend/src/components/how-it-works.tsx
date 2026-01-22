@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Users, Camera, Search, HeartHandshake, type LucideIcon } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -11,7 +10,6 @@ import {
 
 type Step = {
   key: 'join' | 'offer' | 'find' | 'arrange';
-  Icon: LucideIcon;
   illustration: string;
   illustrationAlt: string;
 };
@@ -19,25 +17,21 @@ type Step = {
 const steps: Step[] = [
   {
     key: 'join',
-    Icon: Users,
     illustration: '/images/how-it-works/step-1-community.jpg',
     illustrationAlt: 'Nachbarschaft von oben mit Menschen die winken',
   },
   {
     key: 'offer',
-    Icon: Camera,
     illustration: '/images/how-it-works/step-2-create-listing.jpg',
     illustrationAlt: 'Person am Marktstand mit Laptop und Gegenständen',
   },
   {
     key: 'find',
-    Icon: Search,
     illustration: '/images/how-it-works/step-3-search.jpg',
     illustrationAlt: 'Person am Laptop mit Such-Elementen',
   },
   {
     key: 'arrange',
-    Icon: HeartHandshake,
     illustration: '/images/how-it-works/step-4-exchange.jpg',
     illustrationAlt: 'Zwei Personen tauschen Paket vor Häusern',
   },
@@ -82,16 +76,8 @@ export function HowItWorks() {
 
                 {/* Text Side */}
                 <div className="w-full lg:w-1/2">
-                  {/* Icon - visible on desktop only */}
-                  <div className="hidden lg:flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <step.Icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <span className="text-2xl font-bold text-primary">{index + 1}.</span>
-                  </div>
-
-                  {/* Mobile: Number only */}
-                  <div className="flex items-center gap-2 mb-2 lg:hidden">
+                  {/* Number only */}
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl font-bold text-primary">{index + 1}.</span>
                   </div>
 

@@ -57,7 +57,8 @@
     "valueProp2Title": "Emprunte ce qu'il te faut",
     "valueProp2Text": "Économise argent et ressources",
     "valueProp3Title": "Tu décides qui participe",
-    "valueProp3Text": "Invite simplement par lien"
+    "valueProp3Text": "Invite simplement par lien",
+    "heroImageAlt": "Voisins partageant des gilets de sauvetage dans leur communauté"
   },
   "profile": {
     "title": "Profil",
@@ -352,19 +353,23 @@
     "steps": {
       "join": {
         "title": "Rejoins une communauté",
-        "text": "Suis un lien d'invitation ou crée une première communauté."
+        "text": "Suis un lien d'invitation ou crée une première communauté.",
+        "illustrationAlt": "Quartier vu d'en haut avec des personnes qui font signe"
       },
       "offer": {
         "title": "Propose quelque chose",
-        "text": "Photo, courte description, terminé. Ta communauté appréciera ton annonce."
+        "text": "Photo, courte description, terminé. Ta communauté appréciera ton annonce.",
+        "illustrationAlt": "Personne à un stand de marché avec ordinateur portable et objets"
       },
       "find": {
         "title": "Trouve quelque chose",
-        "text": "Parcours les annonces de tes communautés et groupes. Trouvé quelque chose? Envoie un message."
+        "text": "Parcours les annonces de tes communautés et groupes. Trouvé quelque chose? Envoie un message.",
+        "illustrationAlt": "Personne à l'ordinateur portable avec éléments de recherche"
       },
       "arrange": {
         "title": "Réglez tout directement",
-        "text": "Rencontrez-vous pour la remise ou déposez et réglez le reste en personne. Simple, rapide et sans frais."
+        "text": "Rencontrez-vous pour la remise ou déposez et réglez le reste en personne. Simple, rapide et sans frais.",
+        "illustrationAlt": "Deux personnes échangent un colis devant des maisons"
       }
     },
     "faq": {

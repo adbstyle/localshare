@@ -57,7 +57,8 @@
     "valueProp2Title": "Leih dir, was du brauchst",
     "valueProp2Text": "Spart Geld – und Ressourcen",
     "valueProp3Title": "Du entscheidest, wer mitmacht",
-    "valueProp3Text": "Einfach per Link einladen"
+    "valueProp3Text": "Einfach per Link einladen",
+    "heroImageAlt": "Nachbarn teilen Rettungswesten in ihrer Gemeinschaft"
   },
   "profile": {
     "title": "Profil",
@@ -352,19 +353,23 @@
     "steps": {
       "join": {
         "title": "Tritt einer Gemeinschaft bei",
-        "text": "Folge einem Einladungslink oder erstelle eine erste Gemeinschaft."
+        "text": "Folge einem Einladungslink oder erstelle eine erste Gemeinschaft.",
+        "illustrationAlt": "Nachbarschaft von oben mit Menschen die winken"
       },
       "offer": {
         "title": "Biete etwas an",
-        "text": "Foto, kurze Beschreibung, fertig. Deine Gemeinschaft freut sich über die Anzeige."
+        "text": "Foto, kurze Beschreibung, fertig. Deine Gemeinschaft freut sich über die Anzeige.",
+        "illustrationAlt": "Person am Marktstand mit Laptop und Gegenständen"
       },
       "find": {
         "title": "Finde etwas",
-        "text": "Stöbere durch Anzeigen aus deinen Gemeinschaften und Gruppen. Gefunden? Schreib eine Nachricht."
+        "text": "Stöbere durch Anzeigen aus deinen Gemeinschaften und Gruppen. Gefunden? Schreib eine Nachricht.",
+        "illustrationAlt": "Person am Laptop mit Such-Elementen"
       },
       "arrange": {
         "title": "Vereinbare direkt",
-        "text": "Trefft euch vor Ort, regelt alles persönlich. Keine Gebühren."
+        "text": "Trefft euch vor Ort, regelt alles persönlich. Keine Gebühren.",
+        "illustrationAlt": "Zwei Personen tauschen Paket vor Häusern"
       }
     },
     "faq": {

@@ -97,6 +97,10 @@ apps/
 │   │   └── database/ # Prisma service
 │   └── prisma/       # Schema + migrations + seed
 └── frontend/         # Next.js 14 (port 3000)
+    ├── public/
+    │   └── images/          # Static image assets
+    │       ├── how-it-works/  # Step illustrations
+    │       └── neighbors-sharing.jpg  # Hero background
     └── src/
         ├── app/[locale]/  # i18n routing (de/fr)
         │   ├── auth/callback/  # OAuth callback
@@ -110,11 +114,12 @@ apps/
         │   └── offline/        # PWA offline page
         ├── components/
         │   ├── ui/           # shadcn/ui components
-        │   ├── auth/         # Login components
+        │   ├── auth/         # Login components (login-page.tsx)
         │   ├── layout/       # Header, Footer, UserMenu
         │   ├── communities/  # Community cards, dialogs
         │   ├── groups/       # Group dialogs
-        │   └── listings/     # Listing cards, forms, filters
+        │   ├── listings/     # Listing cards, forms, filters
+        │   └── how-it-works.tsx  # How-it-works section
         ├── hooks/         # use-auth, use-toast, use-media-query
         └── lib/           # API client, utilities
             └── utils/     # url-filters, parse-invite
@@ -162,9 +167,11 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 
 ### Frontend
 - All pages use `[locale]` dynamic route for i18n
-- Use `useTranslations()` for all user-facing text
+- Use `useTranslations()` for all user-facing text (including alt text)
+- Use Next.js `Image` component from `next/image` for all images (never use `<img>` tags)
 - Use shadcn/ui components from `@/components/ui/*`
 - Protected pages use `useAuth()` hook
+- Static images go in `public/images/` directory
 
 ## Environment Setup
 
@@ -184,7 +191,15 @@ DATABASE_URL=postgresql://localshare:changeme_in_production@localhost:5433/local
 ```
 
 ### Image Storage
-Two storage backends supported:
+
+#### Static Images (Frontend)
+Static UI images (hero backgrounds, illustrations, icons) go in `apps/frontend/public/images/`:
+- Use Next.js `Image` component with `fill` prop for backgrounds
+- Use `priority` prop for above-the-fold images (hero backgrounds)
+- Always provide i18n alt text via translation keys
+
+#### User-Generated Images (Backend)
+Two storage backends supported for user uploads:
 - **local**: Files saved to `/uploads/listings/` (default for dev)
 - **r2**: Cloudflare R2 bucket (for production)
 

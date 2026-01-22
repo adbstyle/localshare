@@ -62,23 +62,34 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Hero Section - Vertical Stack */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-8 p-4 lg:p-8 max-w-3xl mx-auto">
-        {/* Headline Section */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+    <div className="relative min-h-screen">
+      {/* Background Image Layer */}
+      <div className="absolute inset-0 -z-10">
+        <img
+          src="/images/neighbors-sharing.jpg"
+          alt="Nachbarn teilen Rettungswesten in ihrer Gemeinschaft"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Overlay Layer */}
+      <div className="absolute inset-0 -z-10 bg-black/20" />
+
+      {/* Content Layer */}
+      <div className="flex flex-col items-center justify-center min-h-screen gap-12 lg:gap-24 p-4 lg:p-12">
+        {/* Hero Headline */}
+        <div className="text-center">
+          <h1 className="text-white text-3xl lg:text-6xl font-bold shadow-[0_2px_4px_rgba(0,0,0,0.8),0_4px_8px_rgba(0,0,0,0.6),0_8px_16px_rgba(0,0,0,0.4)]">
             {t('auth.headline')}
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
+          <p className="text-white/90 text-lg lg:text-2xl mt-4 shadow-[0_2px_4px_rgba(0,0,0,0.8),0_4px_8px_rgba(0,0,0,0.6),0_8px_16px_rgba(0,0,0,0.4)]">
             {t('auth.subline')}
           </p>
         </div>
 
-        {/* Login Card Section */}
-        <div className="w-full max-w-md">
-          <Card className="max-w-md w-full shadow-xl">
-            <CardContent className="space-y-4 pt-6">
+        {/* Glassmorphism Login Card */}
+        <Card className="w-full max-w-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl border border-white/20">
+          <CardContent className="space-y-4 p-6 lg:p-8 pt-6">
               {hasPendingInvite && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
                   <div className="flex items-start gap-3">
@@ -154,9 +165,8 @@ export function LoginPage() {
                   </Link>
                 </Label>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* How It Works Section */}

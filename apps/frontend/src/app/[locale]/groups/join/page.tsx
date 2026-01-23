@@ -42,23 +42,28 @@ function JoinGroupPageContent() {
     const handleInvite = async () => {
       if (!authLoading) {
         if (!user) {
-          // Store the invite token before redirecting to login
+          // Validate token BEFORE storing in sessionStorage
           if (token) {
             // Clear ALL invite tokens first (SAIT pattern - Single Active Invite Token)
             sessionStorage.removeItem('pendingInviteToken');
             sessionStorage.removeItem('pendingGroupInviteToken');
             sessionStorage.removeItem('pendingInviteName');
-            // Fetch group name for login page display
+            // Validate token via preview endpoint
             try {
               const { data } = await api.get<GroupPreview>(`/groups/preview/${token}`);
+              // Token is valid - store and redirect to login
               sessionStorage.setItem('pendingInviteName', data.name);
+              sessionStorage.setItem('pendingGroupInviteToken', token);
+              router.push('/');
             } catch {
-              // Ignore - name is optional for display
+              // Invalid token - show error instead of silent redirect
+              setError(t('errors.invalidInviteLinkDescription'));
+              setLoading(false);
             }
-            // Set the new group invite token
-            sessionStorage.setItem('pendingGroupInviteToken', token);
+          } else {
+            setError(t('errors.noInviteToken'));
+            setLoading(false);
           }
-          router.push('/');
         } else if (token) {
           fetchGroupPreview();
         } else {
@@ -128,12 +133,12 @@ function JoinGroupPageContent() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <AlertCircle className="h-16 w-16 text-destructive mb-4" />
-            <h2 className="text-xl font-semibold mb-2">{t('errors.notFound')}</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('errors.invalidInviteLinkTitle')}</h2>
             <p className="text-muted-foreground text-center mb-6">
-              {error || t('errors.invalidInviteLink')}
+              {error || t('errors.invalidInviteLinkDescription')}
             </p>
             <Button onClick={() => router.push('/')}>
-              {t('nav.home')}
+              {t('errors.backToHome')}
             </Button>
           </CardContent>
         </Card>

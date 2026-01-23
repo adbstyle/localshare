@@ -390,7 +390,7 @@ export default function ListingDetailPage() {
                     <p className="font-semibold mb-2">{t('listings.visibleToOthers')}:</p>
                     <ul className="space-y-1 text-xs">
                       <li>• {t('listings.email')}: {user?.email}</li>
-                      <li>• {t('listings.address')}: {user?.homeAddress}</li>
+                      <li>• {t('listings.address')}: {user?.homeAddress || t('profile.noAddress')}</li>
                       {user?.phoneNumber && <li>• {t('listings.phone')}: {user.phoneNumber}</li>}
                     </ul>
                   </div>

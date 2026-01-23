@@ -215,12 +215,17 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <Label htmlFor="homeAddress">{t('profile.homeAddress')} *</Label>
+                <Label htmlFor="homeAddress">
+                  {t('profile.homeAddress')} ({t('common.optional')})
+                </Label>
                 <Input
                   id="homeAddress"
                   {...register('homeAddress')}
                   className={errors.homeAddress ? 'border-destructive' : ''}
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('profile.addressHint')}
+                </p>
                 {errors.homeAddress && (
                   <p className="text-sm text-destructive mt-1">
                     {errors.homeAddress.message}

@@ -11,10 +11,10 @@ export class UpdateUserDto {
   @Length(1, 50)
   lastName?: string;
 
-  @IsOptional()
+  @ValidateIf((_, value) => value !== null && value !== undefined && value !== '')
   @IsString()
   @Length(1, 500)
-  homeAddress?: string;
+  homeAddress?: string | null;
 
   @ValidateIf((_, value) => value !== null && value !== undefined)
   @IsString()

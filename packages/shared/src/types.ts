@@ -55,8 +55,8 @@ export interface User {
 export interface UpdateUserDto {
   firstName?: string;
   lastName?: string;
-  homeAddress?: string;
-  phoneNumber?: string;
+  homeAddress?: string | null;
+  phoneNumber?: string | null;
   preferredLanguage?: string;
 }
 

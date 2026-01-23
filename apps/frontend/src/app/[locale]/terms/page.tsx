@@ -17,7 +17,7 @@ export default function TermsPage() {
           <p className="text-muted-foreground">
             Diese Nutzungsbedingungen gelten für die Nutzung der LocalShare-Plattform
             ("die Plattform"), einer Progressive Web App für nachbarschaftliches Teilen
-            innerhalb von Gemeinschaften. Die Plattform wird betrieben vom LocalShare Verein,
+            innerhalb von Communitys. Die Plattform wird betrieben vom LocalShare Verein,
             einem nicht gewinnorientierten Verein nach Art. 60 ff. ZGB mit Sitz in der Schweiz.
           </p>
 
@@ -26,17 +26,17 @@ export default function TermsPage() {
             <li><strong>Plattform:</strong> Die LocalShare Web-Applikation und alle zugehörigen Dienste</li>
             <li><strong>Betreiber:</strong> LocalShare Verein und dessen Vorstandsmitglieder</li>
             <li><strong>Nutzer:</strong> Jede Person, die die Plattform nutzt</li>
-            <li><strong>Gemeinschaft:</strong> Eine Nutzergruppe (z.B. Nachbarschaft, Quartier)</li>
-            <li><strong>Gruppe:</strong> Untergruppe innerhalb einer Gemeinschaft</li>
-            <li><strong>Anzeige:</strong> Von Nutzern erstellte Inserate (Verkauf, Verleih, Vermietung, Suche)</li>
-            <li><strong>Nutzerinhalt:</strong> Alle von Nutzern erstellten Inhalte (Anzeigen, Bilder, Texte)</li>
+            <li><strong>Community:</strong> Eine Nutzergruppe (z.B. Nachbarschaft, Quartier)</li>
+            <li><strong>Gruppe:</strong> Untergruppe innerhalb einer Community</li>
+            <li><strong>Inserat:</strong> Von Nutzern erstellte Inserate (Verkauf, Verleih, Vermietung, Suche)</li>
+            <li><strong>Nutzerinhalt:</strong> Alle von Nutzern erstellten Inhalte (Inserate, Bilder, Texte)</li>
           </ul>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">1.3 Plattform-Natur</h3>
           <p className="text-muted-foreground">
             <strong>Kritischer Hinweis:</strong> LocalShare ist eine reine Vermittlungsplattform,
             die Nutzer verbindet. Der Betreiber überprüft, verifiziert, kontrolliert oder
-            garantiert <strong>keine</strong> Nutzer, Anzeigen, Gegenstände, Dienstleistungen
+            garantiert <strong>keine</strong> Nutzer, Inserate, Gegenstände, Dienstleistungen
             oder Informationen auf der Plattform. Alle Aktivitäten, Interaktionen und
             Transaktionen erfolgen <strong>auf eigenes Risiko</strong>.
           </p>
@@ -74,7 +74,7 @@ export default function TermsPage() {
             <li><strong>Vermietung (RENT):</strong> Zeitweise Vermietung von Gegenständen gegen Entgelt</li>
             <li><strong>Verleih (LEND):</strong> Kostenloses oder vergünstigtes Ausleihen von Gegenständen</li>
             <li><strong>Suche (SEARCH):</strong> Gesuche nach bestimmten Gütern oder Dienstleistungen</li>
-            <li>Teilnahme an nachbarschaftlichen Gemeinschaften und Gruppen</li>
+            <li>Teilnahme an nachbarschaftlichen Communitys und Gruppen</li>
           </ul>
         </section>
 
@@ -154,7 +154,7 @@ export default function TermsPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">7.1 Eigentum</h3>
           <p className="text-muted-foreground">
-            Sie behalten alle Eigentumsrechte an Ihren Anzeigen, Bildern und Texten.
+            Sie behalten alle Eigentumsrechte an Ihren Inseraten, Bildern und Texten.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">7.2 Lizenzgewährung</h3>
@@ -228,9 +228,9 @@ export default function TermsPage() {
             Der Betreiber behält sich das Recht vor:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Anzeigen ohne Vorwarnung zu löschen, die gegen diese Bedingungen verstossen</li>
+            <li>Inserate ohne Vorwarnung zu löschen, die gegen diese Bedingungen verstossen</li>
             <li>Accounts bei Missbrauch temporär oder permanent zu sperren</li>
-            <li>Gemeinschaften/Gruppen mit illegalen Inhalten zu entfernen</li>
+            <li>Communitys/Gruppen mit illegalen Inhalten zu entfernen</li>
           </ul>
           <p className="text-muted-foreground mt-4">
             Der Betreiber hat jedoch <strong>keine Verpflichtung</strong>, Inhalte zu überwachen,

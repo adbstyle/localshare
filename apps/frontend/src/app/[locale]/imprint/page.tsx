@@ -53,7 +53,7 @@ export default function ImprintPage() {
             LocalShare ist eine nicht-kommerzielle Vermittlungsplattform, die Nutzer in
             Nachbarschaften verbindet. Der Verein ist <strong>nicht</strong> Partei von
             Transaktionen zwischen Nutzern. Wir überprüfen, verifizieren oder garantieren
-            keine Nutzer, Anzeigen, Gegenstände oder Dienstleistungen auf der Plattform.
+            keine Nutzer, Inserate, Gegenstände oder Dienstleistungen auf der Plattform.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">Inhalt des Onlineangebotes</h3>

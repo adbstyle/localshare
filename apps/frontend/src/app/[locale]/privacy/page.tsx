@@ -34,8 +34,8 @@ export default function PrivacyPage() {
             <li>E-Mail-Adresse, Vor- und Nachname (von Google/Microsoft SSO)</li>
             <li>Hausadresse (von Ihnen angegeben, Pflichtfeld)</li>
             <li>Telefonnummer (optional, von Ihnen angegeben)</li>
-            <li>Inhalt Ihrer Anzeigen (Titel, Beschreibung, Bilder, Kategorie, Preis)</li>
-            <li>Mitgliedschaften in Gemeinschaften und Gruppen</li>
+            <li>Inhalt Ihrer Inserate (Titel, Beschreibung, Bilder, Kategorie, Preis)</li>
+            <li>Mitgliedschaften in Communitys und Gruppen</li>
           </ul>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">2.2 Technische Daten</h3>
@@ -57,9 +57,9 @@ export default function PrivacyPage() {
           <h3 className="text-xl font-semibold mt-6 mb-3">3.1 Wir verwenden Ihre Daten für:</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Authentifizierung und Account-Verwaltung</li>
-            <li>Anzeigen von Anzeigen innerhalb Ihrer Gemeinschaften</li>
+            <li>Anzeigen von Inseraten innerhalb Ihrer Communitys</li>
             <li>Kontaktaufnahme zwischen Nutzern (E-Mail, Signal, WhatsApp)</li>
-            <li>Verwaltung von Gemeinschaften und Gruppen</li>
+            <li>Verwaltung von Communitys und Gruppen</li>
             <li>Sicherheit der Plattform (Missbrauchsprävention)</li>
             <li>Benachrichtigungen über Änderungen an der Plattform oder Ihrem Account</li>
           </ul>
@@ -166,7 +166,7 @@ export default function PrivacyPage() {
           <h3 className="text-xl font-semibold mt-6 mb-3">8.1 Sichtbarkeit für andere Nutzer</h3>
           <p className="text-muted-foreground">
             Ihre Kontaktdaten (E-Mail, Hausadresse, optional Telefonnummer) werden <strong>nur</strong>{' '}
-            anderen Nutzern bzw. Gemeinschafts- und Gruppenmitgliedern angezeigt, wenn diese eine Ihrer Anzeigen ansehen. Dies ist notwendig,
+            anderen Nutzern bzw. Community- und Gruppenmitgliedern angezeigt, wenn diese eines Ihrer Inserate ansehen. Dies ist notwendig,
             damit Interessenten Sie kontaktieren können.
           </p>
 
@@ -192,7 +192,7 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li><strong>Account-Daten:</strong> Bis zur Löschung Ihres Accounts</li>
-            <li><strong>Anzeigen:</strong> Bis zur Löschung durch den Nutzer oder des Accounts</li>
+            <li><strong>Inserate:</strong> Bis zur Löschung durch den Nutzer oder des Accounts</li>
             <li><strong>Server-Logs:</strong> 30 Tage (anonymisiert)</li>
             <li><strong>Gelöschte Accounts:</strong> Sofortige Löschung aller Daten</li>
           </ul>

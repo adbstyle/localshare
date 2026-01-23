@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
-import { FilterListingsDto, ListingType, ListingCategory } from '@localshare/shared';
+import { FilterListingsDto, ListingType, ListingCategory, PaginatedResponse, Listing } from '@localshare/shared';
+import { api } from '@/lib/api';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +42,11 @@ export function MobileFilterSheet({
 
   // Temporary filter state (local, not applied until "Suchen" click)
   const [tempFilters, setTempFilters] = useState<Partial<FilterListingsDto>>({});
+  const [previewCount, setPreviewCount] = useState<number | null>(null);
+  const [isLoadingCount, setIsLoadingCount] = useState(false);
+
+  // Debounce filters for API preview count
+  const debouncedFilters = useDebouncedValue(tempFilters, 300);
 
   // Sync temp filters when sheet opens
   useEffect(() => {
@@ -53,6 +60,39 @@ export function MobileFilterSheet({
       });
     }
   }, [open, currentFilters]);
+
+  // Fetch preview count when filters change (debounced)
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchPreviewCount = async () => {
+      setIsLoadingCount(true);
+      try {
+        const params = new URLSearchParams();
+        if (debouncedFilters.myListings) params.append('myListings', 'true');
+        if (debouncedFilters.bookmarked) params.append('bookmarked', 'true');
+        if (debouncedFilters.types?.length) {
+          debouncedFilters.types.forEach((type) => params.append('types', type));
+        }
+        if (debouncedFilters.categories?.length) {
+          debouncedFilters.categories.forEach((cat) => params.append('categories', cat));
+        }
+        if (debouncedFilters.search) params.append('search', debouncedFilters.search);
+        params.append('limit', '1');
+
+        const { data } = await api.get<PaginatedResponse<Listing>>(
+          `/listings/paginated?${params.toString()}`
+        );
+        setPreviewCount(data.total);
+      } catch {
+        setPreviewCount(0);
+      } finally {
+        setIsLoadingCount(false);
+      }
+    };
+
+    fetchPreviewCount();
+  }, [open, debouncedFilters]);
 
   const handleTypeToggle = (type: ListingType) => {
     const currentTypes = tempFilters.types || [];
@@ -232,7 +272,11 @@ export function MobileFilterSheet({
         {/* Sticky Footer */}
         <div className="sticky bottom-0 border-t bg-background px-4 py-4 mt-auto">
           <Button onClick={handleApply} className="w-full" size="lg">
-            {t('common.search')}
+            {isLoadingCount ? (
+              <span className="inline-block w-32 h-4 bg-primary-foreground/20 animate-pulse rounded" />
+            ) : (
+              t('listings.showResults', { count: previewCount ?? 0 })
+            )}
           </Button>
         </div>
       </DialogContent>

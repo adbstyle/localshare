@@ -75,8 +75,8 @@ function JoinCommunityPageContent() {
     try {
       const { data } = await api.get<CommunityPreview>(`/communities/preview/${token}`);
       setCommunity(data);
-    } catch (error: any) {
-      setError(error.response?.data?.message || t('errors.invalidInviteLink'));
+    } catch {
+      setError(t('errors.invalidInviteLinkDescription'));
     } finally {
       setLoading(false);
     }

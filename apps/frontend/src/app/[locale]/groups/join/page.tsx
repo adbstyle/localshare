@@ -79,8 +79,8 @@ function JoinGroupPageContent() {
     try {
       const { data } = await api.get<GroupPreview>(`/groups/preview/${token}`);
       setGroup(data);
-    } catch (error: any) {
-      setError(error.response?.data?.message || t('errors.invalidInviteLink'));
+    } catch {
+      setError(t('errors.invalidInviteLinkDescription'));
     } finally {
       setLoading(false);
     }

@@ -91,7 +91,7 @@ function JoinGroupPageContent() {
         variant: 'success',
         title: t('groups.joined'),
       });
-      router.push(`/groups/${group!.id}`);
+      router.push('/');
     } catch (error: any) {
       if (error.response?.status === 409 && error.response?.data?.alreadyMember) {
         const entityName = error.response.data.name || group?.name || '';
@@ -132,8 +132,8 @@ function JoinGroupPageContent() {
             <p className="text-muted-foreground text-center mb-6">
               {error || t('errors.invalidInviteLink')}
             </p>
-            <Button onClick={() => router.push('/listings')}>
-              {t('nav.listings')}
+            <Button onClick={() => router.push('/')}>
+              {t('nav.home')}
             </Button>
           </CardContent>
         </Card>

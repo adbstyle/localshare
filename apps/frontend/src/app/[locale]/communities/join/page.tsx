@@ -87,7 +87,7 @@ function JoinCommunityPageContent() {
         variant: 'success',
         title: t('communities.joined'),
       });
-      router.push('/communities');
+      router.push('/');
     } catch (error: any) {
       if (error.response?.status === 409 && error.response?.data?.alreadyMember) {
         const entityName = error.response.data.name || community?.name || '';

@@ -325,6 +325,9 @@
     "network": "Netzwerkfehler",
     "noInviteToken": "Kein Einladungs-Token angegeben",
     "invalidInviteLink": "Dieser Einladungslink ist ungültig oder abgelaufen",
+    "invalidInviteLinkTitle": "Einladungslink ungültig",
+    "invalidInviteLinkDescription": "Dieser Einladungslink ist leider ungültig oder abgelaufen. Bitte frag bei deiner Nachbarschaft oder Freunden nach einem neuen Link.",
+    "backToHome": "Zur Startseite",
     "failedToJoinCommunity": "Community beitreten fehlgeschlagen",
     "failedToJoinGroup": "Gruppe beitreten fehlgeschlagen"
   },

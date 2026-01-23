@@ -325,6 +325,9 @@
     "network": "Erreur réseau",
     "noInviteToken": "Aucun jeton d'invitation fourni",
     "invalidInviteLink": "Ce lien d'invitation est invalide ou a expiré",
+    "invalidInviteLinkTitle": "Lien d'invitation invalide",
+    "invalidInviteLinkDescription": "Ce lien d'invitation est malheureusement invalide ou expiré. Demande un nouveau lien à ton voisinage ou à tes amis.",
+    "backToHome": "Retour à l'accueil",
     "failedToJoinCommunity": "Impossible de rejoindre la communauté",
     "failedToJoinGroup": "Impossible de rejoindre le groupe"
   },

@@ -12,7 +12,12 @@ const trimmedString = (minLength: number, maxLength: number) =>
 export const updateUserSchema = z.object({
   firstName: trimmedString(1, 50).optional(),
   lastName: trimmedString(1, 50).optional(),
-  homeAddress: z.string().min(1).max(500).optional(),
+  homeAddress: z
+    .string()
+    .max(500)
+    .optional()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? null : val)),
   phoneNumber: z
     .string()
     .regex(/^\+[1-9]\d{1,14}$/, {

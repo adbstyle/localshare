@@ -84,7 +84,9 @@
     "exportData": "Daten exportieren",
     "profileUpdated": "Profil erfolgreich aktualisiert",
     "accountDeleted": "Account erfolgreich gelöscht",
-    "dataExported": "Daten erfolgreich exportiert"
+    "dataExported": "Daten erfolgreich exportiert",
+    "addressHint": "Hilft anderen bei der Abholung von Gegenständen",
+    "noAddress": "Keine Adresse angegeben"
   },
   "communities": {
     "title": "Communitys",

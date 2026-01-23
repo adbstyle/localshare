@@ -99,7 +99,7 @@ function JoinGroupPageContent() {
           variant: 'success',
           title: t('groups.alreadyMemberSuccess', { name: entityName }),
         });
-        router.push('/listings');
+        router.push('/');
       } else {
         toast({
           title: t('errors.generic'),

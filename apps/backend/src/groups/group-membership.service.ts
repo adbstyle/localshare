@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 
@@ -40,7 +41,11 @@ export class GroupMembershipService {
     });
 
     if (existingGroupMember) {
-      throw new BadRequestException('You are already a member of this group');
+      throw new ConflictException({
+        message: 'You are already a member of this group',
+        alreadyMember: true,
+        name: group.name,
+      });
     }
 
     // Auto-join parent community if not a member

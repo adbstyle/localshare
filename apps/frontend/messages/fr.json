@@ -108,6 +108,8 @@
     "linkRefreshed": "Nouveau lien d'invitation créé",
     "invitePendingCommunity": "Invitation à la communauté {name}",
     "invitePendingGroup": "Invitation au groupe {name}",
+    "invitePendingCommunityText": "Invitation à la communauté",
+    "invitePendingGroupText": "Invitation au groupe",
     "invitePendingText": "Connecte-toi pour rejoindre.",
     "join": "Rejoindre",
     "leave": "Quitter",
@@ -133,6 +135,7 @@
     "next": "Suivant",
     "alreadyMember": "Déjà membre",
     "alreadyMemberMessage": "Vous êtes déjà membre de cette communauté.",
+    "alreadyMemberSuccess": "Tu es déjà membre de {name}",
     "viewCommunity": "Voir la communauté",
     "retry": "Réessayer",
     "errors": {
@@ -198,6 +201,7 @@
     "next": "Suivant",
     "alreadyMember": "Déjà membre",
     "alreadyMemberMessage": "Vous êtes déjà membre de ce groupe.",
+    "alreadyMemberSuccess": "Tu es déjà membre de {name}",
     "joinCommunityNote": "Rejoindre ce groupe vous ajoutera également à la communauté {communityName} si vous n'êtes pas encore membre.",
     "errors": {
       "invalidFormat": "Format invalide. Veuillez insérer un lien ou un token.",
@@ -299,6 +303,7 @@
     "openFilters": "Ouvrir les filtres",
     "filterActive": "Filtre actif",
     "filterDescription": "Filtrez les annonces par type, catégorie et terme de recherche",
+    "showResults": "Afficher {count} annonces",
     "yourListing": "Votre annonce",
     "yourListingDescription": "Ceci est votre annonce. Les autres utilisateurs verront vos coordonnées ici.",
     "visibleToOthers": "Visible par les autres",
@@ -321,6 +326,9 @@
     "network": "Erreur réseau",
     "noInviteToken": "Aucun jeton d'invitation fourni",
     "invalidInviteLink": "Ce lien d'invitation est invalide ou a expiré",
+    "invalidInviteLinkTitle": "Lien d'invitation invalide",
+    "invalidInviteLinkDescription": "Ce lien d'invitation est malheureusement invalide ou expiré. Demande un nouveau lien à ton voisinage ou à tes amis.",
+    "backToHome": "Retour à l'accueil",
     "failedToJoinCommunity": "Impossible de rejoindre la communauté",
     "failedToJoinGroup": "Impossible de rejoindre le groupe"
   },
@@ -352,22 +360,22 @@
     "title": "Comment ça marche",
     "steps": {
       "join": {
-        "title": "Rejoins une communauté",
+        "title": "1. Rejoins une communauté",
         "text": "Suis un lien d'invitation ou crée une première communauté.",
         "illustrationAlt": "Quartier vu d'en haut avec des personnes qui font signe"
       },
       "offer": {
-        "title": "Propose quelque chose",
+        "title": "2. Propose quelque chose",
         "text": "Photo, courte description, terminé. Ta communauté appréciera ton annonce.",
         "illustrationAlt": "Personne à un stand de marché avec ordinateur portable et objets"
       },
       "find": {
-        "title": "Trouve quelque chose",
+        "title": "3. Trouve quelque chose",
         "text": "Parcours les annonces de tes communautés et groupes. Trouvé quelque chose? Envoie un message.",
         "illustrationAlt": "Personne à l'ordinateur portable avec éléments de recherche"
       },
       "arrange": {
-        "title": "Réglez tout directement",
+        "title": "4. Réglez tout directement",
         "text": "Rencontrez-vous pour la remise ou déposez et réglez le reste en personne. Simple, rapide et sans frais.",
         "illustrationAlt": "Deux personnes échangent un colis devant des maisons"
       }

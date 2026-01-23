@@ -24,20 +24,31 @@ export class AuthController {
     private inviteStateService: InviteStateService,
   ) {}
 
-  private getCookieOptions(type: 'access' | 'refresh'): CookieOptions {
+  private getCookieOptions(
+    type: 'access' | 'refresh' | 'pending',
+  ): CookieOptions {
     const isProduction = process.env.NODE_ENV === 'production';
     const cookieDomain = process.env.COOKIE_DOMAIN;
 
-    return {
+    const baseOptions: CookieOptions = {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       domain: cookieDomain || undefined,
-      maxAge:
-        type === 'refresh'
-          ? 90 * 24 * 60 * 60 * 1000 // 90 days
-          : 15 * 60 * 1000, // 15 minutes
-      ...(type === 'refresh' && { path: '/api/v1/auth' }),
+    };
+
+    if (type === 'refresh') {
+      return {
+        ...baseOptions,
+        maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
+        path: '/api/v1/auth',
+      };
+    }
+
+    // Both 'access' and 'pending' use 15 minutes
+    return {
+      ...baseOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
     };
   }
 
@@ -54,12 +65,7 @@ export class AuthController {
       res.cookie(
         'pendingInvite',
         JSON.stringify({ token: inviteToken, type: inviteType }),
-        {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax', // Required for OAuth redirects
-          maxAge: 15 * 60 * 1000, // 15 minutes
-        },
+        this.getCookieOptions('pending'),
       );
     }
 
@@ -101,9 +107,7 @@ export class AuthController {
         // Invalid cookie data, ignore
       }
       // Clear the cookie after use
-      res.clearCookie('pendingInvite', {
-        domain: process.env.COOKIE_DOMAIN || undefined,
-      });
+      res.clearCookie('pendingInvite', this.getCookieOptions('pending'));
     }
 
     res.redirect(redirectUrl);
@@ -122,12 +126,7 @@ export class AuthController {
       res.cookie(
         'pendingInvite',
         JSON.stringify({ token: inviteToken, type: inviteType }),
-        {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax', // Required for OAuth redirects
-          maxAge: 15 * 60 * 1000, // 15 minutes
-        },
+        this.getCookieOptions('pending'),
       );
     }
 
@@ -169,9 +168,7 @@ export class AuthController {
         // Invalid cookie data, ignore
       }
       // Clear the cookie after use
-      res.clearCookie('pendingInvite', {
-        domain: process.env.COOKIE_DOMAIN || undefined,
-      });
+      res.clearCookie('pendingInvite', this.getCookieOptions('pending'));
     }
 
     res.redirect(redirectUrl);

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 
@@ -37,7 +38,11 @@ export class MembershipService {
     });
 
     if (existingMember) {
-      throw new BadRequestException('You are already a member of this community');
+      throw new ConflictException({
+        message: 'You are already a member of this community',
+        alreadyMember: true,
+        name: community.name,
+      });
     }
 
     await this.prisma.communityMember.create({

@@ -38,23 +38,28 @@ function JoinCommunityPageContent() {
     const handleInvite = async () => {
       if (!authLoading) {
         if (!user) {
-          // Store the invite token before redirecting to login
+          // Validate token BEFORE storing in sessionStorage
           if (token) {
             // Clear ALL invite tokens first (SAIT pattern - Single Active Invite Token)
             sessionStorage.removeItem('pendingInviteToken');
             sessionStorage.removeItem('pendingGroupInviteToken');
             sessionStorage.removeItem('pendingInviteName');
-            // Fetch community name for login page display
+            // Validate token via preview endpoint
             try {
               const { data } = await api.get<CommunityPreview>(`/communities/preview/${token}`);
+              // Token is valid - store and redirect to login
               sessionStorage.setItem('pendingInviteName', data.name);
+              sessionStorage.setItem('pendingInviteToken', token);
+              router.push('/');
             } catch {
-              // Ignore - name is optional for display
+              // Invalid token - show error instead of silent redirect
+              setError(t('errors.invalidInviteLinkDescription'));
+              setLoading(false);
             }
-            // Set the new community invite token
-            sessionStorage.setItem('pendingInviteToken', token);
+          } else {
+            setError(t('errors.noInviteToken'));
+            setLoading(false);
           }
-          router.push('/');
         } else if (token) {
           fetchCommunityPreview();
         } else {
@@ -64,14 +69,14 @@ function JoinCommunityPageContent() {
       }
     };
     handleInvite();
-  }, [user, authLoading, token, router]);
+  }, [user, authLoading, token, router, t]);
 
   const fetchCommunityPreview = async () => {
     try {
       const { data } = await api.get<CommunityPreview>(`/communities/preview/${token}`);
       setCommunity(data);
-    } catch (error: any) {
-      setError(error.response?.data?.message || t('errors.invalidInviteLink'));
+    } catch {
+      setError(t('errors.invalidInviteLinkDescription'));
     } finally {
       setLoading(false);
     }
@@ -87,13 +92,22 @@ function JoinCommunityPageContent() {
         variant: 'success',
         title: t('communities.joined'),
       });
-      router.push('/communities');
+      router.push('/');
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToJoinCommunity'),
-        variant: 'destructive',
-      });
+      if (error.response?.status === 409 && error.response?.data?.alreadyMember) {
+        const entityName = error.response.data.name || community?.name || '';
+        toast({
+          variant: 'success',
+          title: t('communities.alreadyMemberSuccess', { name: entityName }),
+        });
+        router.push('/');
+      } else {
+        toast({
+          title: t('errors.generic'),
+          description: error.response?.data?.message || t('errors.failedToJoinCommunity'),
+          variant: 'destructive',
+        });
+      }
     } finally {
       setJoining(false);
     }
@@ -115,12 +129,12 @@ function JoinCommunityPageContent() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <AlertCircle className="h-16 w-16 text-destructive mb-4" />
-            <h2 className="text-xl font-semibold mb-2">{t('errors.notFound')}</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('errors.invalidInviteLinkTitle')}</h2>
             <p className="text-muted-foreground text-center mb-6">
-              {error || t('errors.invalidInviteLink')}
+              {error || t('errors.invalidInviteLinkDescription')}
             </p>
-            <Button onClick={() => router.push('/communities')}>
-              {t('communities.title')}
+            <Button onClick={() => router.push('/')}>
+              {t('errors.backToHome')}
             </Button>
           </CardContent>
         </Card>

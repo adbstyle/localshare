@@ -49,7 +49,7 @@ export function HowItWorks() {
           </h2>
 
           {/* 4-Step Flow with Illustrations */}
-          <div className="space-y-8 lg:space-y-16">
+          <div className="space-y-6 lg:space-y-6">
             {steps.map((step, index) => (
               <div
                 key={step.key}
@@ -70,8 +70,7 @@ export function HowItWorks() {
 
                 {/* Text Side */}
                 <div className="w-full lg:w-1/2">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                    <span className="text-primary">{index + 1}.</span>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                     {t(`steps.${step.key}.title`)}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">

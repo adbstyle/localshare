@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { Link } from '@/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Mail } from 'lucide-react';
 import { HowItWorks } from '@/components/how-it-works';
 import Image from 'next/image';
 
@@ -85,10 +84,10 @@ export function LoginPage() {
         <div className="relative z-20 flex flex-col items-center justify-center min-h-screen gap-12 lg:gap-24 p-4 lg:p-12">
         {/* Hero Headline */}
         <div className="text-center">
-          <h1 className="text-white text-3xl lg:text-6xl font-bold">
+          <h1 className="text-white text-4xl lg:text-7xl font-bold">
             {t('auth.headline')}
           </h1>
-          <p className="text-white/90 text-lg lg:text-2xl mt-4">
+          <p className="text-white/90 text-xl lg:text-3xl mt-4">
             {t('auth.subline')}
           </p>
         </div>
@@ -97,20 +96,13 @@ export function LoginPage() {
         <Card className="w-full max-w-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl border border-white/20">
           <CardContent className="space-y-4 p-6 lg:p-8 pt-6">
             {hasPendingInvite && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-                <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
-                      {t(inviteType === 'group' ? 'communities.invitePendingGroup' : 'communities.invitePendingCommunity', { name: inviteName || '' })}
-                    </p>
-                    <p className="text-blue-700 dark:text-blue-300 text-xs mt-1">
-                      {t('communities.invitePendingText')}
-                    </p>
-                  </div>
-                </div>
+              <div className="text-sm leading-relaxed text-center">
+                <p>{t(inviteType === 'group' ? 'communities.invitePendingGroupText' : 'communities.invitePendingCommunityText')}</p>
+                <p className="font-semibold">{inviteName}</p>
+                <p>{t('communities.invitePendingText')}</p>
               </div>
             )}
+
             <Button
               className="w-full"
               size="lg"
@@ -160,7 +152,7 @@ export function LoginPage() {
                 onCheckedChange={(checked) => setAcceptedTerms(!!checked)}
                 className="mt-1"
               />
-              <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+              <Label htmlFor="terms" className="text-sm font-normal leading-relaxed cursor-pointer">
                 {t('auth.acceptTerms')}{' '}
                 <Link href="/terms" className="underline hover:text-primary">
                   {t('auth.termsOfService')}

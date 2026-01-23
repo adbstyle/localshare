@@ -21,7 +21,7 @@ export default function PrivacyPage() {
             [PLZ Ort]<br />
             Schweiz<br />
             <br />
-            <strong>E-Mail:</strong> privacy@localshare.ch
+            <strong>E-Mail:</strong> privacylocalshare.antennae748@passmail.com
           </p>
         </section>
 
@@ -34,8 +34,8 @@ export default function PrivacyPage() {
             <li>E-Mail-Adresse, Vor- und Nachname (von Google/Microsoft SSO)</li>
             <li>Hausadresse (von Ihnen angegeben, Pflichtfeld)</li>
             <li>Telefonnummer (optional, von Ihnen angegeben)</li>
-            <li>Inhalt Ihrer Anzeigen (Titel, Beschreibung, Bilder, Kategorie, Preis)</li>
-            <li>Mitgliedschaften in Gemeinschaften und Gruppen</li>
+            <li>Inhalt Ihrer Inserate (Titel, Beschreibung, Bilder, Kategorie, Preis)</li>
+            <li>Mitgliedschaften in Communitys und Gruppen</li>
           </ul>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">2.2 Technische Daten</h3>
@@ -57,9 +57,9 @@ export default function PrivacyPage() {
           <h3 className="text-xl font-semibold mt-6 mb-3">3.1 Wir verwenden Ihre Daten für:</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Authentifizierung und Account-Verwaltung</li>
-            <li>Anzeigen von Anzeigen innerhalb Ihrer Gemeinschaften</li>
+            <li>Anzeigen von Inseraten innerhalb Ihrer Communitys</li>
             <li>Kontaktaufnahme zwischen Nutzern (E-Mail, Signal, WhatsApp)</li>
-            <li>Verwaltung von Gemeinschaften und Gruppen</li>
+            <li>Verwaltung von Communitys und Gruppen</li>
             <li>Sicherheit der Plattform (Missbrauchsprävention)</li>
             <li>Benachrichtigungen über Änderungen an der Plattform oder Ihrem Account</li>
           </ul>
@@ -110,7 +110,6 @@ export default function PrivacyPage() {
           <h3 className="text-xl font-semibold mt-6 mb-3">5.2 Sicherheitsmassnahmen</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>HTTPS-Verschlüsselung für alle Verbindungen</li>
-            <li>Verschlüsselte Speicherung von Passwörtern (bcrypt)</li>
             <li>Regelmässige Sicherheitsupdates</li>
             <li>Zugriffsbeschränkungen auf Datenbankebene</li>
             <li>HttpOnly-Cookies für Authentifizierungs-Tokens</li>
@@ -167,7 +166,7 @@ export default function PrivacyPage() {
           <h3 className="text-xl font-semibold mt-6 mb-3">8.1 Sichtbarkeit für andere Nutzer</h3>
           <p className="text-muted-foreground">
             Ihre Kontaktdaten (E-Mail, Hausadresse, optional Telefonnummer) werden <strong>nur</strong>{' '}
-            anderen Nutzern angezeigt, wenn diese eine Ihrer Anzeigen ansehen. Dies ist notwendig,
+            anderen Nutzern bzw. Community- und Gruppenmitgliedern angezeigt, wenn diese eines Ihrer Inserate ansehen. Dies ist notwendig,
             damit Interessenten Sie kontaktieren können.
           </p>
 
@@ -176,10 +175,14 @@ export default function PrivacyPage() {
             Wir verkaufen, vermieten oder teilen Ihre Daten <strong>nicht</strong> mit Dritten, ausser:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>SSO-Provider (Google/Microsoft) für Login-Authentifizierung</li>
             <li>Bei rechtlicher Verpflichtung (z.B. Gerichtsbeschluss, behördliche Anfrage)</li>
             <li>Zum Schutz unserer Rechte oder der Sicherheit anderer Nutzer</li>
           </ul>
+          <p className="text-muted-foreground mt-4">
+            <strong>Hinweis zu SSO:</strong> Bei der Anmeldung über Google oder Microsoft werden
+            Daten ausschliesslich <em>von</em> diesen Anbietern abgerufen (siehe Abschnitt 6).
+            Wir senden keine Ihrer Nutzerdaten an diese Anbieter zurück.
+          </p>
         </section>
 
         <section>
@@ -189,9 +192,9 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li><strong>Account-Daten:</strong> Bis zur Löschung Ihres Accounts</li>
-            <li><strong>Anzeigen:</strong> Bis zur Löschung oder 6 Monate nach Archivierung</li>
+            <li><strong>Inserate:</strong> Bis zur Löschung durch den Nutzer oder des Accounts</li>
             <li><strong>Server-Logs:</strong> 30 Tage (anonymisiert)</li>
-            <li><strong>Gelöschte Accounts:</strong> Endgültige Löschung nach 30 Tagen Wartefrist</li>
+            <li><strong>Gelöschte Accounts:</strong> Sofortige Löschung aller Daten</li>
           </ul>
         </section>
 
@@ -202,15 +205,13 @@ export default function PrivacyPage() {
           <h3 className="text-xl font-semibold mt-6 mb-3">10.1 Auskunftsrecht</h3>
           <p className="text-muted-foreground">
             Sie können jederzeit Auskunft über die von uns gespeicherten Daten verlangen.
-            Nutzen Sie hierfür die Funktion "Daten exportieren" in Ihrem Profil oder
-            kontaktieren Sie uns per E-Mail.
+            Nutzen Sie hierfür die Funktion "Daten exportieren" in Ihrem Profil.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">10.2 Recht auf Löschung</h3>
           <p className="text-muted-foreground">
             Sie können Ihren Account und alle damit verbundenen Daten jederzeit in den
-            Account-Einstellungen löschen. Nach der Löschung gibt es eine 30-tägige Wartefrist,
-            danach werden alle Daten endgültig gelöscht.
+            Account-Einstellungen löschen. Die Löschung erfolgt sofort und unwiderruflich.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">10.3 Recht auf Datenportabilität</h3>
@@ -221,7 +222,7 @@ export default function PrivacyPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">10.4 Recht auf Berichtigung</h3>
           <p className="text-muted-foreground">
-            Bearbeiten Sie Ihre Daten jederzeit in Ihrem Profil oder kontaktieren Sie uns.
+            Bearbeiten Sie Ihre Daten jederzeit in Ihrem Profil.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">10.5 Widerspruchsrecht</h3>
@@ -273,7 +274,7 @@ export default function PrivacyPage() {
             Bei Fragen zum Datenschutz oder zur Ausübung Ihrer Rechte kontaktieren Sie uns unter:
           </p>
           <p className="text-muted-foreground mt-2">
-            <strong>E-Mail:</strong> privacy@localshare.ch<br />
+            <strong>E-Mail:</strong> privacylocalshare.antennae748@passmail.com<br />
             <strong>Datenschutzverantwortlicher:</strong> Vorstand LocalShare Verein
           </p>
         </section>
@@ -282,7 +283,7 @@ export default function PrivacyPage() {
           <p>Stand: Januar 2026</p>
           <p className="mt-2">
             Diese Datenschutzerklärung erfüllt die Anforderungen der DSGVO (EU) und des
-            Schweizer Datenschutzgesetzes (DSG, revidierte Fassung 2023).
+            Schweizer Datenschutzgesetzes (DSG).
           </p>
         </div>
       </div>

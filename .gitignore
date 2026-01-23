@@ -53,3 +53,6 @@ docker-compose.override.yml
 
 # Claude Code (local settings only, commands are tracked)
 .claude/settings.local.json
+
+# Vereinsdokumente (nicht öffentlich)
+docs/verein/

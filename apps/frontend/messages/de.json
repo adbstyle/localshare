@@ -303,6 +303,7 @@
     "openFilters": "Filter öffnen",
     "filterActive": "Filter aktiv",
     "filterDescription": "Filtern Sie Inserate nach Typ, Kategorie und Suchbegriff",
+    "showResults": "{count} Inserate anzeigen",
     "yourListing": "Ihr Inserat",
     "yourListingDescription": "Dies ist Ihr Inserat. Andere Benutzer sehen hier Ihre Kontaktinformationen.",
     "visibleToOthers": "Für andere sichtbar",

@@ -303,6 +303,7 @@
     "openFilters": "Ouvrir les filtres",
     "filterActive": "Filtre actif",
     "filterDescription": "Filtrez les annonces par type, catégorie et terme de recherche",
+    "showResults": "Afficher {count} annonces",
     "yourListing": "Votre annonce",
     "yourListingDescription": "Ceci est votre annonce. Les autres utilisateurs verront vos coordonnées ici.",
     "visibleToOthers": "Visible par les autres",

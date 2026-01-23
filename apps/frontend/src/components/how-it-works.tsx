@@ -49,7 +49,7 @@ export function HowItWorks() {
           </h2>
 
           {/* 4-Step Flow with Illustrations */}
-          <div className="space-y-8 lg:space-y-16">
+          <div className="space-y-6 lg:space-y-6">
             {steps.map((step, index) => (
               <div
                 key={step.key}

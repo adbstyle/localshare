@@ -108,6 +108,8 @@
     "linkRefreshed": "Neuer Einladungslink erstellt",
     "invitePendingCommunity": "Einladung zur Community {name}",
     "invitePendingGroup": "Einladung zur Gruppe {name}",
+    "invitePendingCommunityText": "Einladung zur Community",
+    "invitePendingGroupText": "Einladung zur Gruppe",
     "invitePendingText": "Melde dich an, um beizutreten.",
     "join": "Beitreten",
     "leave": "Verlassen",

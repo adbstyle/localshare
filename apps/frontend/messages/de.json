@@ -135,6 +135,7 @@
     "next": "Weiter",
     "alreadyMember": "Bereits Mitglied",
     "alreadyMemberMessage": "Du bist bereits Mitglied dieser Community.",
+    "alreadyMemberSuccess": "Du bist bereits Mitglied von {name}",
     "viewCommunity": "Zur Community",
     "retry": "Erneut versuchen",
     "errors": {
@@ -200,6 +201,7 @@
     "next": "Weiter",
     "alreadyMember": "Bereits Mitglied",
     "alreadyMemberMessage": "Du bist bereits Mitglied dieser Gruppe.",
+    "alreadyMemberSuccess": "Du bist bereits Mitglied von {name}",
     "joinCommunityNote": "Der Beitritt zu dieser Gruppe fügt Sie auch der {communityName}-Community hinzu, falls Sie noch kein Mitglied sind.",
     "errors": {
       "invalidFormat": "Ungültiges Format. Bitte Link oder Token einfügen.",

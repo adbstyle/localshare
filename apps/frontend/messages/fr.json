@@ -135,6 +135,7 @@
     "next": "Suivant",
     "alreadyMember": "Déjà membre",
     "alreadyMemberMessage": "Vous êtes déjà membre de cette communauté.",
+    "alreadyMemberSuccess": "Tu es déjà membre de {name}",
     "viewCommunity": "Voir la communauté",
     "retry": "Réessayer",
     "errors": {
@@ -200,6 +201,7 @@
     "next": "Suivant",
     "alreadyMember": "Déjà membre",
     "alreadyMemberMessage": "Vous êtes déjà membre de ce groupe.",
+    "alreadyMemberSuccess": "Tu es déjà membre de {name}",
     "joinCommunityNote": "Rejoindre ce groupe vous ajoutera également à la communauté {communityName} si vous n'êtes pas encore membre.",
     "errors": {
       "invalidFormat": "Format invalide. Veuillez insérer un lien ou un token.",

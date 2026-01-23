@@ -93,11 +93,20 @@ function JoinGroupPageContent() {
       });
       router.push(`/groups/${group!.id}`);
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToJoinGroup'),
-        variant: 'destructive',
-      });
+      if (error.response?.status === 409 && error.response?.data?.alreadyMember) {
+        const entityName = error.response.data.name || group?.name || '';
+        toast({
+          variant: 'success',
+          title: t('groups.alreadyMemberSuccess', { name: entityName }),
+        });
+        router.push('/listings');
+      } else {
+        toast({
+          title: t('errors.generic'),
+          description: error.response?.data?.message || t('errors.failedToJoinGroup'),
+          variant: 'destructive',
+        });
+      }
     } finally {
       setJoining(false);
     }

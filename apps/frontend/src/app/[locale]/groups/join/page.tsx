@@ -73,7 +73,7 @@ function JoinGroupPageContent() {
       }
     };
     handleInvite();
-  }, [user, authLoading, token, router]);
+  }, [user, authLoading, token, router, t]);
 
   const fetchGroupPreview = async () => {
     try {

@@ -69,7 +69,7 @@ function JoinCommunityPageContent() {
       }
     };
     handleInvite();
-  }, [user, authLoading, token, router]);
+  }, [user, authLoading, token, router, t]);
 
   const fetchCommunityPreview = async () => {
     try {

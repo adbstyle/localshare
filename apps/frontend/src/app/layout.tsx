@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://localshare.wylergut.ch'),
-  title: 'LocalShare - Nachbarschaft teilen',
-  description: 'Teilen Sie mit Ihrer Nachbarschaft',
+  metadataBase: new URL('https://app.localshare.ch'),
+  title: 'LocalShare - Einfach privat teilen',
+  description: 'Leihen, tauschen, teilen mit deinen Nachbarn',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -15,9 +15,9 @@ export const metadata: Metadata = {
     siteName: 'LocalShare',
     locale: 'de_CH',
     title: 'LocalShare - Einfach privat teilen',
-    description: 'Leihen, tauschen, teilen mit deinen Nachbarn',
+    description: 'Inserate für deine Community',
     type: 'website',
-    url: 'https://localshare.wylergut.ch',
+    url: 'https://app.localshare.ch',
     images: [
       {
         url: '/images/og-image.png',

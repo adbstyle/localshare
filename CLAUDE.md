@@ -177,12 +177,12 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 
 | Environment | Frontend | Backend | Branch | R2 Bucket |
 |-------------|----------|---------|--------|-----------|
-| Production | localshare.wylergut.ch | api.localshare.wylergut.ch | `main` | localshare-images |
-| Staging | staging.localshare.wylergut.ch | api-staging.localshare.wylergut.ch | `develop` | localshare-images-staging |
+| Production | app.localshare.ch | api.localshare.ch | `main` | localshare-images |
+| Staging | staging.localshare.ch | api-staging.localshare.ch | `develop` | localshare-images-staging |
 
 - Auto-deploy: Push to `develop` → Staging, Push to `main` → Production
 - Each environment has separate PostgreSQL database
-- Cookie domain: `.localshare.wylergut.ch` (shared between frontend/backend)
+- Cookie domain: `.localshare.ch` (shared between frontend/backend, both environments)
 - OAuth callbacks configured for both environments in Google/Microsoft Console
 
 ## Environment Setup

@@ -13,7 +13,9 @@ const ALLOWED_REDIRECT_PREFIXES = ['/communities/join', '/groups/join'];
 function isValidRedirectUrl(url: string): boolean {
   if (!url.startsWith('/')) return false;
   if (url.startsWith('//')) return false;
-  return ALLOWED_REDIRECT_PREFIXES.some((prefix) => url.startsWith(prefix));
+  return ALLOWED_REDIRECT_PREFIXES.some(
+    (prefix) => url === prefix || url.startsWith(prefix + '?')
+  );
 }
 
 function AuthCallbackContent() {

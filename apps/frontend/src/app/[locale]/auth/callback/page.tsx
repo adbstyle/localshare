@@ -6,8 +6,10 @@ import { useRouter } from '@/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
+// Backend InviteStateService generates redirectTo via OAuth flow with UUID validation
 const ALLOWED_REDIRECT_PREFIXES = ['/communities/join', '/groups/join'];
 
+// Defense-in-depth: validate even backend-provided redirects to prevent open redirect (CWE-601)
 function isValidRedirectUrl(url: string): boolean {
   if (!url.startsWith('/')) return false;
   if (url.startsWith('//')) return false;

@@ -49,6 +49,9 @@ export function ImageUpload({
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   const previewUrlsRef = useRef<string[]>([]);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const desktopInputRef = useRef<HTMLInputElement>(null);
 
   const getImageUrl = (url: string) => {
     if (url.startsWith('http')) return url;
@@ -377,41 +380,44 @@ export function ImageUpload({
         <>
           {/* Hidden File Inputs */}
           <input
+            ref={cameraInputRef}
             type="file"
-            id="image-upload-camera"
             accept="image/*"
             capture="environment"
             onChange={handleFileChange}
             className="hidden"
             disabled={uploading}
+            aria-label={t('listings.takePhoto')}
           />
           <input
+            ref={galleryInputRef}
             type="file"
-            id="image-upload-gallery"
             accept="image/*"
             multiple
             onChange={handleFileChange}
             className="hidden"
             disabled={uploading}
+            aria-label={t('listings.fromGallery')}
           />
           <input
+            ref={desktopInputRef}
             type="file"
-            id="image-upload-desktop"
             accept="image/*"
             multiple
             onChange={handleFileChange}
             className="hidden"
             disabled={uploading}
+            aria-label={t('listings.uploadImages')}
           />
 
           {/* Mobile: Two Buttons (Camera + Gallery) */}
-          <div className="flex gap-2 md:hidden">
+          <div className="flex flex-col gap-2 md:hidden">
             <Button
               type="button"
               variant="default"
-              className="flex-1"
+              className="w-full"
               disabled={uploading}
-              onClick={() => document.getElementById('image-upload-camera')?.click()}
+              onClick={() => cameraInputRef.current?.click()}
             >
               {uploading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -423,9 +429,9 @@ export function ImageUpload({
             <Button
               type="button"
               variant="outline"
-              className="flex-1"
+              className="w-full"
               disabled={uploading}
-              onClick={() => document.getElementById('image-upload-gallery')?.click()}
+              onClick={() => galleryInputRef.current?.click()}
             >
               {uploading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -443,7 +449,7 @@ export function ImageUpload({
               variant="outline"
               className="w-full"
               disabled={uploading}
-              onClick={() => document.getElementById('image-upload-desktop')?.click()}
+              onClick={() => desktopInputRef.current?.click()}
             >
               {uploading ? (
                 <>

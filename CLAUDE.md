@@ -173,6 +173,18 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 - Protected pages use `useAuth()` hook
 - Static images go in `public/images/` directory
 
+## Environments (Railway)
+
+| Environment | Frontend | Backend | Branch | R2 Bucket |
+|-------------|----------|---------|--------|-----------|
+| Production | localshare.wylergut.ch | api.localshare.wylergut.ch | `main` | localshare-images |
+| Staging | staging.localshare.wylergut.ch | api-staging.localshare.wylergut.ch | `develop` | localshare-images-staging |
+
+- Auto-deploy: Push to `develop` → Staging, Push to `main` → Production
+- Each environment has separate PostgreSQL database
+- Cookie domain: `.localshare.wylergut.ch` (shared between frontend/backend)
+- OAuth callbacks configured for both environments in Google/Microsoft Console
+
 ## Environment Setup
 
 Copy `.env.example` to `.env` at root level. Key variables:

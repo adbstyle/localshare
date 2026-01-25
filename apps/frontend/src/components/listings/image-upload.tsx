@@ -68,10 +68,14 @@ export function ImageUpload({
     previewUrlsRef.current = previewUrls;
   }, [previewUrls]);
 
-  // Cleanup preview URLs only on unmount
+  // Cleanup preview URLs only on unmount (only needed for blob: URLs, not data: URLs)
   useEffect(() => {
     return () => {
-      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current.forEach((url) => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
   }, []);
 
@@ -112,8 +116,18 @@ export function ImageUpload({
       const updatedFiles = [...pendingFiles, ...newFiles];
       setPendingFiles(updatedFiles);
 
-      // Create preview URLs
-      const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
+      // Create preview URLs using FileReader for better mobile compatibility
+      const newPreviewUrls = await Promise.all(
+        newFiles.map(
+          (file) =>
+            new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = () => resolve(''); // Empty string on error
+              reader.readAsDataURL(file);
+            })
+        )
+      );
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
 
       // Notify parent component with cover index (0 = first file is cover)
@@ -198,8 +212,10 @@ export function ImageUpload({
   };
 
   const handleDeletePendingFile = (index: number) => {
-    // Revoke the object URL to free memory
-    URL.revokeObjectURL(previewUrls[index]);
+    // Revoke blob URLs to free memory (data: URLs don't need cleanup)
+    if (previewUrls[index]?.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrls[index]);
+    }
 
     // Remove from arrays
     const newFiles = pendingFiles.filter((_, i) => i !== index);
@@ -327,15 +343,22 @@ export function ImageUpload({
         <div className="grid grid-cols-3 gap-4">
           {pendingFiles.map((file, index) => {
             const isCover = index === pendingCoverIndex;
+            const previewUrl = previewUrls[index];
             return (
               <div key={index} className="relative group">
                 <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${isCover ? 'border-secondary' : 'border-transparent'}`}>
-                  <Image
-                    src={previewUrls[index]}
-                    alt={file.name}
-                    fill
-                    className="object-cover"
-                  />
+                  {/* Use native img for local previews - better mobile compatibility */}
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt={file.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
                   {/* Cover badge - bottom left */}
                   {isCover && (
                     <div className="absolute bottom-2 left-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1">

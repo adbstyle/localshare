@@ -6,6 +6,14 @@ import { useRouter } from '@/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
+const ALLOWED_REDIRECT_PREFIXES = ['/communities/join', '/groups/join'];
+
+function isValidRedirectUrl(url: string): boolean {
+  if (!url.startsWith('/')) return false;
+  if (url.startsWith('//')) return false;
+  return ALLOWED_REDIRECT_PREFIXES.some((prefix) => url.startsWith(prefix));
+}
+
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,8 +26,7 @@ function AuthCallbackContent() {
       // Check URL params for redirect (from backend invite flow)
       const redirectTo = searchParams.get('redirectTo');
 
-      if (redirectTo) {
-        // Backend provided redirect URL - use it directly
+      if (redirectTo && isValidRedirectUrl(redirectTo)) {
         router.push(redirectTo);
         return;
       }

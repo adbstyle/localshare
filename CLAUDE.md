@@ -168,10 +168,22 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 ### Frontend
 - All pages use `[locale]` dynamic route for i18n
 - Use `useTranslations()` for all user-facing text (including alt text)
-- Use Next.js `Image` component from `next/image` for all images (never use `<img>` tags)
+- Use Next.js `Image` component from `next/image` for all images (exception: local file previews using data URLs may use native `<img>` for Android gallery compatibility)
 - Use shadcn/ui components from `@/components/ui/*`
 - Protected pages use `useAuth()` hook
 - Static images go in `public/images/` directory
+
+## Environments (Railway)
+
+| Environment | Frontend | Backend | Branch | R2 Bucket |
+|-------------|----------|---------|--------|-----------|
+| Production | app.localshare.ch | api.localshare.ch | `main` | localshare-images |
+| Staging | staging.localshare.ch | api-staging.localshare.ch | `develop` | localshare-images-staging |
+
+- Auto-deploy: Push to `develop` → Staging, Push to `main` → Production
+- Each environment has separate PostgreSQL database
+- Cookie domain: `.localshare.ch` (shared between frontend/backend, both environments)
+- OAuth callbacks configured for both environments in Google/Microsoft Console
 
 ## Environment Setup
 

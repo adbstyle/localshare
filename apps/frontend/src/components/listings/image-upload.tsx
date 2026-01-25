@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { ListingImage, Listing } from '@localshare/shared';
-import { GalleryThumbnails, Loader2, Upload, X } from 'lucide-react';
+import { Camera, GalleryThumbnails, ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +49,9 @@ export function ImageUpload({
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   const previewUrlsRef = useRef<string[]>([]);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const desktopInputRef = useRef<HTMLInputElement>(null);
 
   const getImageUrl = (url: string) => {
     if (url.startsWith('http')) return url;
@@ -372,28 +375,81 @@ export function ImageUpload({
         </div>
       )}
 
-      {/* Upload Button */}
+      {/* Upload Buttons */}
       {canUploadMore && (
-        <div>
+        <>
+          {/* Hidden File Inputs */}
           <input
+            ref={cameraInputRef}
             type="file"
-            id="image-upload"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileChange}
+            className="hidden"
+            disabled={uploading}
+            aria-label={t('listings.takePhoto')}
+          />
+          <input
+            ref={galleryInputRef}
+            type="file"
             accept="image/*"
             multiple
             onChange={handleFileChange}
             className="hidden"
             disabled={uploading}
+            aria-label={t('listings.fromGallery')}
           />
-          <label htmlFor="image-upload">
+          <input
+            ref={desktopInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileChange}
+            className="hidden"
+            disabled={uploading}
+            aria-label={t('listings.uploadImages')}
+          />
+
+          {/* Mobile: Two Buttons (Camera + Gallery) */}
+          <div className="flex flex-col gap-2 md:hidden">
+            <Button
+              type="button"
+              variant="default"
+              className="w-full"
+              disabled={uploading}
+              onClick={() => cameraInputRef.current?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Camera className="mr-2 h-4 w-4" />
+              )}
+              {t('listings.takePhoto')}
+            </Button>
             <Button
               type="button"
               variant="outline"
               className="w-full"
               disabled={uploading}
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('image-upload')?.click();
-              }}
+              onClick={() => galleryInputRef.current?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ImageIcon className="mr-2 h-4 w-4" />
+              )}
+              {t('listings.fromGallery')}
+            </Button>
+          </div>
+
+          {/* Desktop: Single Button */}
+          <div className="hidden md:block">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={uploading}
+              onClick={() => desktopInputRef.current?.click()}
             >
               {uploading ? (
                 <>
@@ -407,8 +463,8 @@ export function ImageUpload({
                 </>
               )}
             </Button>
-          </label>
-        </div>
+          </div>
+        </>
       )}
 
       {/* Delete Confirmation Dialog */}

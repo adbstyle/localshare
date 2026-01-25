@@ -289,6 +289,7 @@
     "empty": "Keine Inserate gefunden.",
     "emptyAction": "Erstellen Sie ein neues Inserat.",
     "created": "Inserat erfolgreich erstellt",
+    "imageUploadFailed": "Bilder konnten nicht hochgeladen werden",
     "updated": "Inserat erfolgreich aktualisiert",
     "deleted": "Inserat erfolgreich gelöscht",
     "imagesUploaded": "Bilder erfolgreich hochgeladen",

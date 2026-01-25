@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { ListingImage, Listing } from '@localshare/shared';
-import { GalleryThumbnails, Loader2, Upload, X } from 'lucide-react';
+import { Camera, GalleryThumbnails, ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -372,28 +372,78 @@ export function ImageUpload({
         </div>
       )}
 
-      {/* Upload Button */}
+      {/* Upload Buttons */}
       {canUploadMore && (
-        <div>
+        <>
+          {/* Hidden File Inputs */}
           <input
             type="file"
-            id="image-upload"
+            id="image-upload-camera"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileChange}
+            className="hidden"
+            disabled={uploading}
+          />
+          <input
+            type="file"
+            id="image-upload-gallery"
             accept="image/*"
             multiple
             onChange={handleFileChange}
             className="hidden"
             disabled={uploading}
           />
-          <label htmlFor="image-upload">
+          <input
+            type="file"
+            id="image-upload-desktop"
+            accept="image/*"
+            multiple
+            onChange={handleFileChange}
+            className="hidden"
+            disabled={uploading}
+          />
+
+          {/* Mobile: Two Buttons (Camera + Gallery) */}
+          <div className="flex gap-2 md:hidden">
+            <Button
+              type="button"
+              variant="default"
+              className="flex-1"
+              disabled={uploading}
+              onClick={() => document.getElementById('image-upload-camera')?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Camera className="mr-2 h-4 w-4" />
+              )}
+              {t('listings.takePhoto')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              disabled={uploading}
+              onClick={() => document.getElementById('image-upload-gallery')?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ImageIcon className="mr-2 h-4 w-4" />
+              )}
+              {t('listings.fromGallery')}
+            </Button>
+          </div>
+
+          {/* Desktop: Single Button */}
+          <div className="hidden md:block">
             <Button
               type="button"
               variant="outline"
               className="w-full"
               disabled={uploading}
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('image-upload')?.click();
-              }}
+              onClick={() => document.getElementById('image-upload-desktop')?.click()}
             >
               {uploading ? (
                 <>
@@ -407,8 +457,8 @@ export function ImageUpload({
                 </>
               )}
             </Button>
-          </label>
-        </div>
+          </div>
+        </>
       )}
 
       {/* Delete Confirmation Dialog */}

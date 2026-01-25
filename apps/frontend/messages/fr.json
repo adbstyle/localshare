@@ -266,6 +266,8 @@
     },
     "images": "Images",
     "uploadImages": "Télécharger des images (max. 3)",
+    "takePhoto": "Prendre une photo",
+    "fromGallery": "Depuis la galerie",
     "imageLimit": "Maximum 3 images de 10 Mo chacune",
     "sharedWith": "Partagé avec",
     "shareWith": "Partager avec",

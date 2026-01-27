@@ -17,14 +17,14 @@ export default function TermsPage() {
           <p className="text-muted-foreground">
             Diese Nutzungsbedingungen gelten für die Nutzung der LocalShare-Plattform
             ("die Plattform"), einer Progressive Web App für nachbarschaftliches Teilen
-            innerhalb von Communitys. Die Plattform wird betrieben vom LocalShare Verein,
+            innerhalb von Communitys. Die Plattform wird betrieben vom Verein LocalShare,
             einem nicht gewinnorientierten Verein nach Art. 60 ff. ZGB mit Sitz in der Schweiz.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">1.2 Definitionen</h3>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li><strong>Plattform:</strong> Die LocalShare Web-Applikation und alle zugehörigen Dienste</li>
-            <li><strong>Betreiber:</strong> LocalShare Verein und dessen Vorstandsmitglieder</li>
+            <li><strong>Betreiber:</strong> Verein LocalShare</li>
             <li><strong>Nutzer:</strong> Jede Person, die die Plattform nutzt</li>
             <li><strong>Community:</strong> Eine Nutzergruppe (z.B. Nachbarschaft, Quartier)</li>
             <li><strong>Gruppe:</strong> Untergruppe innerhalb einer Community</li>
@@ -62,7 +62,7 @@ export default function TermsPage() {
           <p className="text-muted-foreground">
             Sie sind verantwortlich für die Sicherheit Ihres Accounts (Google/Microsoft Login)
             und alle Aktivitäten, die unter Ihrem Account erfolgen. Bei unbefugtem Zugriff
-            informieren Sie uns bitte umgehend unter security@localshare.ch.
+            informieren Sie uns bitte umgehend unter support@localshare.ch.
           </p>
         </section>
 
@@ -72,7 +72,7 @@ export default function TermsPage() {
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li><strong>Verkauf (SELL):</strong> Verkauf von legalen, gebrauchten oder neuen Gütern</li>
             <li><strong>Vermietung (RENT):</strong> Zeitweise Vermietung von Gegenständen gegen Entgelt</li>
-            <li><strong>Verleih (LEND):</strong> Kostenloses oder vergünstigtes Ausleihen von Gegenständen</li>
+            <li><strong>Verleih (LEND):</strong> Kostenloses Ausleihen von Gegenständen</li>
             <li><strong>Suche (SEARCH):</strong> Gesuche nach bestimmten Gütern oder Dienstleistungen</li>
             <li>Teilnahme an nachbarschaftlichen Communitys und Gruppen</li>
           </ul>
@@ -184,7 +184,7 @@ export default function TermsPage() {
             zuverlässige Ergebnisse liefert.
           </p>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">8.2 Haftungsbeschränkung</h3>
+          <h3 className="text-xl font-semibold mt-6 mb-3">8.2 Haftungsausschluss</h3>
           <p className="text-muted-foreground">
             Im maximal zulässigen gesetzlichen Rahmen haftet der Betreiber <strong>nicht</strong> für:
           </p>
@@ -197,21 +197,14 @@ export default function TermsPage() {
             <li>Fehler, Ungenauigkeiten oder falsche Informationen auf der Plattform</li>
           </ul>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">8.3 Ausschluss für Vorstandsmitglieder</h3>
-          <p className="text-muted-foreground">
-            Kein Vorstandsmitglied, Vereinsmitglied oder Freiwilliger des LocalShare Vereins
-            haftet persönlich für Ansprüche, Schäden, Verluste, Kosten oder Ausgaben, die aus
-            der Nutzung der Plattform entstehen.
-          </p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mt-8 mb-4">9. Freistellung (Indemnifikation)</h2>
           <p className="text-muted-foreground">
-            Sie erklären sich bereit, den Betreiber, seine Vorstandsmitglieder, Mitglieder,
-            Freiwilligen und Vertreter von allen Ansprüchen, Forderungen, Schäden, Verlusten,
-            Kosten und Ausgaben (einschliesslich Anwaltskosten) freizustellen und schadlos
-            zu halten, die entstehen aus:
+            Sie erklären sich bereit, den Betreiber von allen Ansprüchen, Forderungen, Schäden,
+            Verlusten, Kosten und Ausgaben (einschliesslich Anwaltskosten) freizustellen und
+            schadlos zu halten, die entstehen aus:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Ihrer Nutzung oder Ihrem Missbrauch der Plattform</li>
@@ -251,9 +244,10 @@ export default function TermsPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">11.2 Keine Datenerhaltungsgarantie</h3>
           <p className="text-muted-foreground">
-            Der Betreiber hat keine Verpflichtung, Ihre Daten, Nutzerinhalte oder Account-
-            Informationen aufzubewahren, zu sichern oder zu schützen. Sie sind selbst
-            verantwortlich für die Sicherung wichtiger Daten.
+            Der Betreiber garantiert nicht die dauerhafte Aufbewahrung Ihrer Nutzerinhalte.
+            Sie sind selbst verantwortlich für die Sicherung wichtiger Daten. Der Schutz
+            personenbezogener Daten erfolgt gemäss unserer Datenschutzerklärung und dem
+            anwendbaren Datenschutzrecht.
           </p>
         </section>
 
@@ -272,13 +266,12 @@ export default function TermsPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">13.1 Anwendbares Recht</h3>
           <p className="text-muted-foreground">
-            Es gilt Schweizer Recht unter Ausschluss des UN-Kaufrechts (CISG) und der
-            Kollisionsnormen des internationalen Privatrechts.
+            Es gilt Schweizer Recht.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">13.2 Gerichtsstand</h3>
           <p className="text-muted-foreground">
-            Ausschliesslicher Gerichtsstand ist der Sitz des LocalShare Vereins in der Schweiz,
+            Ausschliesslicher Gerichtsstand ist der Sitz des Vereins LocalShare in der Schweiz,
             soweit gesetzlich zulässig. Für Konsumenten gilt der gesetzliche Gerichtsstand.
           </p>
         </section>
@@ -308,8 +301,8 @@ export default function TermsPage() {
             Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns unter:
           </p>
           <p className="text-muted-foreground mt-2">
-            <strong>E-Mail:</strong> legal@localshare.ch<br />
-            <strong>Allgemein:</strong> contact@localshare.ch
+            <strong>E-Mail:</strong> support@localshare.ch<br />
+            <strong>Allgemein:</strong> info@localshare.ch
           </p>
         </section>
 

@@ -8,39 +8,13 @@ export default function ImprintPage() {
           <h2 className="text-2xl font-semibold mt-8 mb-4">Betreiber der Plattform</h2>
           <p className="text-muted-foreground">
             <strong>Verein LocalShare</strong><br />
-            Nachbarschafts-Sharing-Plattform<br />
+            Nicht gewinnorientierter Verein gemäss Art. 60 ff. ZGB<br />
             <br />
-            [Vereinsadresse]<br />
-            [PLZ Ort]<br />
-            Schweiz
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">Kontakt</h2>
-          <p className="text-muted-foreground">
+            <strong>Sitz:</strong> Bern, Schweiz<br />
+            <strong>Gründungsjahr:</strong> 2026<br />
+            <br />
             <strong>E-Mail:</strong> info@localshare.ch<br />
             <strong>Website:</strong> https://app.localshare.ch
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">Vereinsregister</h2>
-          <p className="text-muted-foreground">
-            Der LocalShare Verein ist ein nicht gewinnorientierter Verein gemäss Art. 60 ff. ZGB.<br />
-            <br />
-            <strong>Gründungsjahr:</strong> 2026<br />
-            <strong>Sitz:</strong> Bern, Schweiz
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">Verantwortlich für den Inhalt</h2>
-          <p className="text-muted-foreground">
-            Gemäss Art. 8 Abs. 1 lit. a UWG und Art. 28 DSG:<br />
-            <br />
-            Vorstand des LocalShare Vereins<br />
-            info@localshare.ch
           </p>
         </section>
 

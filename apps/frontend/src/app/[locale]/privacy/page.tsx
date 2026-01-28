@@ -5,7 +5,7 @@ export default function PrivacyPage() {
 
       <div className="prose prose-slate max-w-none space-y-6">
         <p className="text-muted-foreground">
-          Der LocalShare Verein ("wir", "uns", "Betreiber") betreibt die LocalShare-Plattform.
+          Der Verein LocalShare ("wir", "uns", "Betreiber") betreibt die LocalShare-Plattform.
           Wir verpflichten uns zum Schutz Ihrer Privatsphäre und zur Einhaltung des Schweizer
           Datenschutzgesetzes (DSG) und der EU-Datenschutzgrundverordnung (DSGVO).
         </p>
@@ -16,12 +16,10 @@ export default function PrivacyPage() {
             Verantwortlich für die Datenverarbeitung ist:
           </p>
           <p className="text-muted-foreground mt-2">
-            <strong>LocalShare Verein</strong><br />
-            [Vereinsadresse]<br />
-            [PLZ Ort]<br />
-            Schweiz<br />
+            <strong>Verein LocalShare</strong><br />
+            Sitz: Bern, Schweiz<br />
             <br />
-            <strong>E-Mail:</strong> privacylocalshare.antennae748@passmail.com
+            <strong>E-Mail:</strong> info@localshare.ch
           </p>
         </section>
 
@@ -32,7 +30,7 @@ export default function PrivacyPage() {
           <p className="text-muted-foreground">Wir erheben folgende Daten:</p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>E-Mail-Adresse, Vor- und Nachname (von Google/Microsoft SSO)</li>
-            <li>Hausadresse (von Ihnen angegeben, Pflichtfeld)</li>
+            <li>Adresse (optional, von Ihnen angegeben)</li>
             <li>Telefonnummer (optional, von Ihnen angegeben)</li>
             <li>Inhalt Ihrer Inserate (Titel, Beschreibung, Bilder, Kategorie, Preis)</li>
             <li>Mitgliedschaften in Communitys und Gruppen</li>
@@ -74,28 +72,33 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">4. Rechtsgrundlage (Art. 6 DSGVO)</h2>
+          <h2 className="text-2xl font-semibold mt-8 mb-4">4. Rechtsgrundlage der Bearbeitung</h2>
           <p className="text-muted-foreground">
-            Wir verarbeiten Ihre Daten auf folgenden Rechtsgrundlagen:
+            Nach Schweizer Datenschutzgesetz (DSG) bearbeiten wir Personendaten nach Treu und
+            Glauben, zweckgebunden und verhältnismässig (Art. 6 DSG). Die Bearbeitung erfolgt für:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>
-              <strong>Vertragserfüllung (Art. 6 Abs. 1 lit. b):</strong> Verarbeitung ist
-              notwendig für die Bereitstellung der Plattform-Funktionen
+              <strong>Vertragserfüllung:</strong> Bereitstellung der Plattform-Funktionen
+              gemäss Nutzungsbedingungen
             </li>
             <li>
-              <strong>Einwilligung (Art. 6 Abs. 1 lit. a):</strong> Für optionale Funktionen
-              wie Newsletter oder erweiterte Benachrichtigungen
+              <strong>Einwilligung:</strong> Für optionale Funktionen wie erweiterte
+              Benachrichtigungen
             </li>
             <li>
-              <strong>Berechtigtes Interesse (Art. 6 Abs. 1 lit. f):</strong> Sicherheit der
-              Plattform, Missbrauchsprävention, Verbesserung des Dienstes
+              <strong>Überwiegende Interessen:</strong> Sicherheit der Plattform und
+              Missbrauchsprävention
             </li>
             <li>
-              <strong>Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c):</strong> Erfüllung
-              gesetzlicher Aufbewahrungspflichten
+              <strong>Gesetzliche Pflichten:</strong> Erfüllung gesetzlicher
+              Aufbewahrungspflichten
             </li>
           </ul>
+          <p className="text-muted-foreground mt-4">
+            Für EU-Nutzer gelten zusätzlich die Rechtsgrundlagen nach Art. 6 DSGVO
+            (Vertragserfüllung, Einwilligung, berechtigtes Interesse, rechtliche Verpflichtung).
+          </p>
         </section>
 
         <section>
@@ -103,8 +106,15 @@ export default function PrivacyPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">5.1 Speicherort</h3>
           <p className="text-muted-foreground">
-            Alle Daten werden auf Servern in der Schweiz/EU gespeichert und verarbeitet.
-            Wir verwenden PostgreSQL als Datenbank.
+            Daten werden auf folgenden Servern gespeichert und verarbeitet:
+          </p>
+          <ul className="list-disc pl-6 space-y-2 text-muted-foreground mt-2">
+            <li><strong>Datenbank (PostgreSQL):</strong> EU West (Amsterdam, Niederlande) via Railway</li>
+            <li><strong>Bilder:</strong> Cloudflare R2 (Eastern Europe) - US-Anbieter mit EU-Speicherort</li>
+          </ul>
+          <p className="text-muted-foreground mt-4">
+            Cloudflare Inc. ist ein US-Unternehmen, das dem EU-US Data Privacy Framework unterliegt.
+            Die Daten werden in der EU gespeichert.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">5.2 Sicherheitsmassnahmen</h3>
@@ -151,6 +161,14 @@ export default function PrivacyPage() {
               Gültigkeitsdauer 90 Tage
             </li>
             <li>
+              <strong>Access Token</strong> (httpOnly Cookie): Für API-Anfragen,
+              kurze Gültigkeitsdauer
+            </li>
+            <li>
+              <strong>Pending Invite</strong> (httpOnly Cookie): Temporär während des
+              Login-Prozesses bei Einladungslinks
+            </li>
+            <li>
               <strong>Locale</strong>: Speichert Ihre Sprachpräferenz (Deutsch/Französisch)
             </li>
           </ul>
@@ -165,7 +183,7 @@ export default function PrivacyPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">8.1 Sichtbarkeit für andere Nutzer</h3>
           <p className="text-muted-foreground">
-            Ihre Kontaktdaten (E-Mail, Hausadresse, optional Telefonnummer) werden <strong>nur</strong>{' '}
+            Ihre Kontaktdaten (E-Mail, optionale Adresse, optionale Telefonnummer) werden <strong>nur</strong>{' '}
             anderen Nutzern bzw. Community- und Gruppenmitgliedern angezeigt, wenn diese eines Ihrer Inserate ansehen. Dies ist notwendig,
             damit Interessenten Sie kontaktieren können.
           </p>
@@ -249,17 +267,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">12. Haftungsbeschränkung</h2>
-          <p className="text-muted-foreground">
-            Wir garantieren keine unterbrechungsfreie oder fehlerfreie Verfügbarkeit der Plattform.
-            Alle Dienste werden "wie besehen" bereitgestellt. Im maximal zulässigen gesetzlichen
-            Rahmen haften wir nicht für indirekte Schäden, Datenverlust, entgangenen Gewinn oder
-            andere Folgeschäden.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">13. Änderungen dieser Datenschutzerklärung</h2>
+          <h2 className="text-2xl font-semibold mt-8 mb-4">12. Änderungen dieser Datenschutzerklärung</h2>
           <p className="text-muted-foreground">
             Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte
             Rechtslage oder Änderungen unserer Dienstleistungen anzupassen. Bei wesentlichen
@@ -269,13 +277,12 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">14. Kontakt</h2>
+          <h2 className="text-2xl font-semibold mt-8 mb-4">13. Kontakt</h2>
           <p className="text-muted-foreground">
             Bei Fragen zum Datenschutz oder zur Ausübung Ihrer Rechte kontaktieren Sie uns unter:
           </p>
           <p className="text-muted-foreground mt-2">
-            <strong>E-Mail:</strong> privacylocalshare.antennae748@passmail.com<br />
-            <strong>Datenschutzverantwortlicher:</strong> Vorstand LocalShare Verein
+            <strong>E-Mail:</strong> support@localshare.ch
           </p>
         </section>
 

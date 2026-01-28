@@ -31,7 +31,7 @@ function AuthCallbackContent() {
       const redirectTo = searchParams.get('redirectTo');
 
       if (redirectTo && isValidRedirectUrl(redirectTo)) {
-        router.push(redirectTo);
+        router.replace(redirectTo);
         return;
       }
 
@@ -41,16 +41,16 @@ function AuthCallbackContent() {
 
       if (communityToken) {
         sessionStorage.removeItem('pendingInviteToken');
-        router.push(`/communities/join?token=${communityToken}`);
+        router.replace(`/communities/join?token=${communityToken}`);
       } else if (groupToken) {
         sessionStorage.removeItem('pendingGroupInviteToken');
-        router.push(`/groups/join?token=${groupToken}`);
+        router.replace(`/groups/join?token=${groupToken}`);
       } else {
-        router.push('/');
+        router.replace('/');
       }
     }).catch(() => {
       // Auth failed, redirect to home
-      router.push('/');
+      router.replace('/');
     });
   }, [searchParams, router, fetchUser]);
 

@@ -27,8 +27,9 @@ export class AuthController {
   private getCookieOptions(
     type: 'access' | 'refresh' | 'pending',
   ): CookieOptions {
-    const isProduction = process.env.NODE_ENV === 'production';
     const cookieDomain = process.env.COOKIE_DOMAIN;
+    // Auto-detect: COOKIE_DOMAIN is only set in deployed environments (Railway)
+    const isProduction = process.env.NODE_ENV === 'production' || !!cookieDomain;
 
     const baseOptions: CookieOptions = {
       httpOnly: true,

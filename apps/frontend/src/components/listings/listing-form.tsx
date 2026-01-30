@@ -303,53 +303,57 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
           </div>
 
           {/* Price (conditional) */}
-          <div className={!showPriceField ? "hidden" : "space-y-2"}>
-            <Label htmlFor="price">
-              {t('listings.price')} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="price"
-              type="number"
-              min="0"
-              max="1000000"
-              placeholder={t('listings.pricePlaceholder')}
-              {...register('price', { valueAsNumber: true })}
-            />
-            {errors.price && (
-              <p className="text-sm text-destructive">{errors.price.message}</p>
-            )}
-          </div>
+          {showPriceField && (
+            <div className="space-y-2">
+              <Label htmlFor="price">
+                {t('listings.price')} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="price"
+                type="number"
+                min="0"
+                max="1000000"
+                placeholder={t('listings.pricePlaceholder')}
+                {...register('price', { valueAsNumber: true })}
+              />
+              {errors.price && (
+                <p className="text-sm text-destructive">{errors.price.message}</p>
+              )}
+            </div>
+          )}
 
           {/* Price Time Unit (conditional - only for RENT) */}
-          <div className={!showPriceTimeUnit ? "hidden" : "space-y-2"}>
-            <Label htmlFor="priceTimeUnit">
-              {t('listings.priceTimeUnit')} <span className="text-destructive">*</span>
-            </Label>
-            <Controller
-              name="priceTimeUnit"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('listings.selectTimeUnit')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {priceTimeUnits.map((unit) => (
-                      <SelectItem key={unit} value={unit}>
-                        {t(`listings.timeUnits.${unit}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          {showPriceTimeUnit && (
+            <div className="space-y-2">
+              <Label htmlFor="priceTimeUnit">
+                {t('listings.priceTimeUnit')} <span className="text-destructive">*</span>
+              </Label>
+              <Controller
+                name="priceTimeUnit"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('listings.selectTimeUnit')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {priceTimeUnits.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {t(`listings.timeUnits.${unit}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.priceTimeUnit && (
+                <p className="text-sm text-destructive">{errors.priceTimeUnit.message}</p>
               )}
-            />
-            {errors.priceTimeUnit && (
-              <p className="text-sm text-destructive">{errors.priceTimeUnit.message}</p>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

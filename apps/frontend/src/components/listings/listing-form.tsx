@@ -149,11 +149,12 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
 
   // Preserve scroll position on type change (defensive)
   useEffect(() => {
+    if (typeof window === 'undefined') return; // SSR guard
     const scrollY = window.scrollY;
-    // Use requestAnimationFrame to ensure scroll restoration after React render
-    requestAnimationFrame(() => {
+    const rafId = requestAnimationFrame(() => {
       window.scrollTo(0, scrollY);
     });
+    return () => cancelAnimationFrame(rafId); // Cleanup
   }, [selectedType]);
 
   if (loadingData) {

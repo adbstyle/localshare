@@ -4,6 +4,7 @@ import { CreateListingDto, UpdateListingDto, FilterListingsDto } from './dto';
 import { VisibilityService } from './visibility.service';
 import { ImageService } from './image.service';
 import { PaginatedResponse } from '../common/types';
+import { ListingType } from '@prisma/client';
 
 @Injectable()
 export class ListingsService {
@@ -21,7 +22,7 @@ export class ListingsService {
         description: dto.description,
         type: dto.type,
         price: dto.price,
-        priceTimeUnit: dto.priceTimeUnit,
+        priceTimeUnit: dto.type === ListingType.RENT ? dto.priceTimeUnit : null,
         category: dto.category,
       },
       include: {
@@ -376,6 +377,9 @@ export class ListingsService {
       throw new ForbiddenException('You can only update your own listings');
     }
 
+    // Determine effective type: use dto.type if provided, otherwise keep existing
+    const effectiveType = dto.type ?? listing.type;
+
     const updated = await this.prisma.listing.update({
       where: { id },
       data: {
@@ -383,7 +387,8 @@ export class ListingsService {
         description: dto.description,
         type: dto.type,
         price: dto.price,
-        priceTimeUnit: dto.priceTimeUnit,
+        priceTimeUnit:
+          effectiveType === ListingType.RENT ? dto.priceTimeUnit : null,
         category: dto.category,
       },
       include: {

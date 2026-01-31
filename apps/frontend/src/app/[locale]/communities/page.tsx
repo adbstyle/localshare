@@ -158,7 +158,7 @@ export default function CommunitiesPage() {
                 {t('communities.create')}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent closeLabel={t('common.close')}>
               <DialogHeader>
                 <DialogTitle>{t('communities.create')}</DialogTitle>
                 <DialogDescription>

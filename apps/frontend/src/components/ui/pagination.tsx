@@ -65,7 +65,7 @@ type PaginationNavigationProps = {
 
 const PaginationPrevious = ({
   className,
-  previousText = 'Previous',
+  previousText,
   ...props
 }: PaginationNavigationProps) => (
   <PaginationLink
@@ -75,14 +75,14 @@ const PaginationPrevious = ({
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
-    <span>{previousText}</span>
+    {previousText && <span>{previousText}</span>}
   </PaginationLink>
 );
 PaginationPrevious.displayName = 'PaginationPrevious';
 
 const PaginationNext = ({
   className,
-  nextText = 'Next',
+  nextText,
   ...props
 }: PaginationNavigationProps) => (
   <PaginationLink
@@ -91,23 +91,28 @@ const PaginationNext = ({
     className={cn('gap-1 pr-2.5', className)}
     {...props}
   >
-    <span>{nextText}</span>
+    {nextText && <span>{nextText}</span>}
     <ChevronRight className="h-4 w-4" />
   </PaginationLink>
 );
 PaginationNext.displayName = 'PaginationNext';
 
+type PaginationEllipsisProps = {
+  srText?: string;
+} & React.ComponentProps<'span'>;
+
 const PaginationEllipsis = ({
   className,
+  srText,
   ...props
-}: React.ComponentProps<'span'>) => (
+}: PaginationEllipsisProps) => (
   <span
     aria-hidden
     className={cn('flex h-9 w-9 items-center justify-center', className)}
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">More pages</span>
+    {srText && <span className="sr-only">{srText}</span>}
   </span>
 );
 PaginationEllipsis.displayName = 'PaginationEllipsis';

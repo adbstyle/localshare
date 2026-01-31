@@ -48,7 +48,7 @@ export function EditCommunityDialog({ community, onSuccess }: EditCommunityDialo
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to update community',
+        description: error.response?.data?.message || t('errors.failedToUpdateCommunity'),
         variant: 'destructive',
       });
     } finally {

@@ -388,7 +388,7 @@ export default function GroupDetailPage() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent closeLabel={t('common.close')}>
           <DialogHeader>
             <DialogTitle>{t('groups.edit')}</DialogTitle>
             <DialogDescription>

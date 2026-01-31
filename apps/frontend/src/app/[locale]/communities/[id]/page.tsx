@@ -472,7 +472,7 @@ export default function CommunityDetailPage() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent closeLabel={t('common.close')}>
           <DialogHeader>
             <DialogTitle>{t('communities.edit')}</DialogTitle>
             <DialogDescription>
@@ -488,7 +488,7 @@ export default function CommunityDetailPage() {
 
       {/* Create Group Dialog */}
       <Dialog open={showCreateGroupDialog} onOpenChange={setShowCreateGroupDialog}>
-        <DialogContent>
+        <DialogContent closeLabel={t('common.close')}>
           <DialogHeader>
             <DialogTitle>{t('groups.create')}</DialogTitle>
             <DialogDescription>

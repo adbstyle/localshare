@@ -74,7 +74,7 @@ export function CreateGroupDialog({ onSuccess, preselectedCommunityId }: CreateG
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to create group',
+        description: error.response?.data?.message || t('errors.failedToCreateGroup'),
         variant: 'destructive',
       });
     } finally {

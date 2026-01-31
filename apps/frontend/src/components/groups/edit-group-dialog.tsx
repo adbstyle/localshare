@@ -48,7 +48,7 @@ export function EditGroupDialog({ group, onSuccess }: EditGroupDialogProps) {
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to update group',
+        description: error.response?.data?.message || t('errors.failedToUpdateGroup'),
         variant: 'destructive',
       });
     } finally {

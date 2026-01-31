@@ -25,7 +25,9 @@
     "actionCannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden.",
     "showAll": "Alle {count} anzeigen",
     "showLess": "Weniger anzeigen",
-    "typeToConfirm": "Geben Sie '{name}' ein, um zu bestätigen"
+    "typeToConfirm": "Geben Sie '{name}' ein, um zu bestätigen",
+    "authenticating": "Authentifizierung...",
+    "morePages": "Weitere Seiten"
   },
   "nav": {
     "home": "Startseite",
@@ -335,7 +337,17 @@
     "invalidInviteLinkDescription": "Dieser Einladungslink ist leider ungültig oder abgelaufen. Bitte frag bei deiner Nachbarschaft oder Freunden nach einem neuen Link.",
     "backToHome": "Zur Startseite",
     "failedToJoinCommunity": "Community beitreten fehlgeschlagen",
-    "failedToJoinGroup": "Gruppe beitreten fehlgeschlagen"
+    "failedToJoinGroup": "Gruppe beitreten fehlgeschlagen",
+    "failedToCreateGroup": "Gruppe konnte nicht erstellt werden",
+    "failedToUpdateGroup": "Gruppe konnte nicht aktualisiert werden",
+    "failedToCreateCommunity": "Community konnte nicht erstellt werden",
+    "failedToUpdateCommunity": "Community konnte nicht aktualisiert werden",
+    "failedToCreateListing": "Inserat konnte nicht erstellt werden",
+    "failedToUpdateListing": "Inserat konnte nicht aktualisiert werden",
+    "failedToUploadImages": "Bilder konnten nicht hochgeladen werden",
+    "failedToDeleteImage": "Bild konnte nicht gelöscht werden",
+    "failedToSetCoverImage": "Titelbild konnte nicht gesetzt werden",
+    "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten"
   },
   "pages": {
     "offline": {

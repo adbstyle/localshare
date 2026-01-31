@@ -179,7 +179,7 @@ export function JoinGroupDialog({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" closeLabel={t('common.close')}>
         <DialogHeader>
           <DialogTitle>{t('groups.joinDialogTitle')}</DialogTitle>
           {step === 'input' && (

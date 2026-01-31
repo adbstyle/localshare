@@ -43,7 +43,7 @@ export function CreateCommunityDialog({ onSuccess }: CreateCommunityDialogProps)
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to create community',
+        description: error.response?.data?.message || t('errors.failedToCreateCommunity'),
         variant: 'destructive',
       });
     } finally {

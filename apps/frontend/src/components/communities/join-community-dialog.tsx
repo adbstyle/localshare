@@ -175,7 +175,7 @@ export function JoinCommunityDialog({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" closeLabel={t('common.close')}>
         <DialogHeader>
           <DialogTitle>{t('communities.joinDialogTitle')}</DialogTitle>
           {step === 'input' && (

@@ -216,7 +216,7 @@ function ListingsPageContent() {
               {getPageNumbers().map((pageNum, idx) => (
                 <PaginationItem key={idx}>
                   {pageNum === 'ellipsis' ? (
-                    <PaginationEllipsis />
+                    <PaginationEllipsis srText={t('common.morePages')} />
                   ) : (
                     <PaginationLink
                       href="#"

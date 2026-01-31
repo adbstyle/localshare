@@ -173,7 +173,7 @@ export function ImageUpload({
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to upload images',
+        description: error.response?.data?.message || t('errors.failedToUploadImages'),
         variant: 'destructive',
       });
     } finally {
@@ -202,7 +202,7 @@ export function ImageUpload({
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to delete image',
+        description: error.response?.data?.message || t('errors.failedToDeleteImage'),
         variant: 'destructive',
       });
     } finally {
@@ -269,7 +269,7 @@ export function ImageUpload({
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to set cover image',
+        description: error.response?.data?.message || t('errors.failedToSetCoverImage'),
         variant: 'destructive',
       });
     } finally {

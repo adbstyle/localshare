@@ -52,7 +52,7 @@ export default function CreateListingPage() {
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to create listing',
+        description: error.response?.data?.message || t('errors.failedToCreateListing'),
         variant: 'destructive',
       });
       throw error;

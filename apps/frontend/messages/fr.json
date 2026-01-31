@@ -25,7 +25,9 @@
     "actionCannotBeUndone": "Cette action est irréversible.",
     "showAll": "Afficher tous les {count}",
     "showLess": "Afficher moins",
-    "typeToConfirm": "Tapez '{name}' pour confirmer"
+    "typeToConfirm": "Tapez '{name}' pour confirmer",
+    "authenticating": "Authentification...",
+    "morePages": "Plus de pages"
   },
   "nav": {
     "home": "Accueil",
@@ -335,7 +337,17 @@
     "invalidInviteLinkDescription": "Ce lien d'invitation est malheureusement invalide ou expiré. Demande un nouveau lien à ton voisinage ou à tes amis.",
     "backToHome": "Retour à l'accueil",
     "failedToJoinCommunity": "Impossible de rejoindre la communauté",
-    "failedToJoinGroup": "Impossible de rejoindre le groupe"
+    "failedToJoinGroup": "Impossible de rejoindre le groupe",
+    "failedToCreateGroup": "Impossible de créer le groupe",
+    "failedToUpdateGroup": "Impossible de mettre à jour le groupe",
+    "failedToCreateCommunity": "Impossible de créer la communauté",
+    "failedToUpdateCommunity": "Impossible de mettre à jour la communauté",
+    "failedToCreateListing": "Impossible de créer l'annonce",
+    "failedToUpdateListing": "Impossible de mettre à jour l'annonce",
+    "failedToUploadImages": "Échec du téléchargement des images",
+    "failedToDeleteImage": "Impossible de supprimer l'image",
+    "failedToSetCoverImage": "Impossible de définir l'image de couverture",
+    "unexpectedError": "Une erreur inattendue s'est produite"
   },
   "pages": {
     "offline": {

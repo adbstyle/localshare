@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
@@ -21,6 +22,7 @@ function isValidRedirectUrl(url: string): boolean {
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations();
   const { fetchUser } = useAuth();
 
   useEffect(() => {
@@ -58,15 +60,20 @@ function AuthCallbackContent() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-4 text-muted-foreground">Authenticating...</p>
+        <p className="mt-4 text-muted-foreground">{t('common.authenticating')}</p>
       </div>
     </div>
   );
 }
 
+function AuthCallbackFallback() {
+  const t = useTranslations();
+  return <LoadingSpinner fullScreen message={t('common.loading')} ariaLabel={t('common.loading')} />;
+}
+
 export default function AuthCallback() {
   return (
-    <Suspense fallback={<LoadingSpinner fullScreen message="Loading..." />}>
+    <Suspense fallback={<AuthCallbackFallback />}>
       <AuthCallbackContent />
     </Suspense>
   );

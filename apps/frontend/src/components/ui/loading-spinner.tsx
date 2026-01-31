@@ -3,13 +3,15 @@ import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
   message?: string;
+  ariaLabel?: string;
   size?: 'sm' | 'md' | 'lg';
   fullScreen?: boolean;
   className?: string;
 }
 
 export function LoadingSpinner({
-  message = 'Loading...',
+  message,
+  ariaLabel,
   size = 'md',
   fullScreen = false,
   className,
@@ -35,7 +37,7 @@ export function LoadingSpinner({
             sizeClasses[size]
           )}
           role="status"
-          aria-label="Loading"
+          {...(ariaLabel && { 'aria-label': ariaLabel })}
         />
         {message && (
           <p className="mt-4 text-muted-foreground">{message}</p>

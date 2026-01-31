@@ -47,7 +47,7 @@ export default function EditListingPage() {
     } catch (error: any) {
       toast({
         title: t('errors.generic'),
-        description: error.response?.data?.message || 'Failed to update listing',
+        description: error.response?.data?.message || t('errors.failedToUpdateListing'),
         variant: 'destructive',
       });
       throw error;

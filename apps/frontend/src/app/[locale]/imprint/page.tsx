@@ -92,7 +92,7 @@ export default function ImprintPage() {
           <p className="text-muted-foreground mt-4">
             <strong>Quellcode:</strong>{' '}
             <a
-              href="https://github.com/localshare-ch/localshare"
+              href="https://github.com/adbstyle/localshare"
               className="underline"
               target="_blank"
               rel="noopener"

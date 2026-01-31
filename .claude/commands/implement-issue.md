@@ -146,12 +146,41 @@ Warte auf User-Bestätigung dass manuelles Testen erfolgreich war.
 
 ---
 
-### Phase 11: Issue schliessen
+### Phase 11: Pull Request erstellen & Issue verlinken
 
 Nach User-Bestätigung:
-```bash
-gh issue close <ISSUE_NUMBER> --repo adbstyle/localshare --comment "Implemented in branch <branch-name>. Ready for PR."
-```
+
+1. **Änderungen committen und pushen:**
+   ```bash
+   git add -A
+   git commit -m "feat/fix: <kurze beschreibung>
+
+   Closes #<ISSUE_NUMBER>"
+   git push -u origin <branch-name>
+   ```
+
+2. **Pull Request erstellen mit Issue-Verlinkung:**
+   ```bash
+   gh pr create --base develop --title "<PR Titel>" --body "## Summary
+   <Zusammenfassung der Änderungen>
+
+   ## Changes
+   <Liste der geänderten Dateien/Features>
+
+   ## Test Plan
+   <Wie wurde getestet>
+
+   Closes #<ISSUE_NUMBER>"
+   ```
+
+3. **Issue wird automatisch geschlossen** wenn PR gemerged wird (durch "Closes #" Keyword)
+
+4. **Code Review starten:**
+   Öffne eine neue Session und führe aus:
+   ```
+   /code-review:code-review
+   ```
+   Dies startet einen unabhängigen Code-Review des erstellten PRs.
 
 ---
 
@@ -162,6 +191,7 @@ gh issue close <ISSUE_NUMBER> --repo adbstyle/localshare --comment "Implemented 
 3. **Bei Fehlern:** Analysiere, behebe, fahre fort
 4. **CLAUDE.md beachten:** Folge den Projekt-Konventionen
 5. **Commits:** Mache sinnvolle Commits nach jeder Phase
+6. **PR immer auf `develop`** - nie direkt auf `main`
 
 ## Output Format
 

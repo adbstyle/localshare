@@ -50,8 +50,9 @@ async function generateIcons() {
       await sharp(SOURCE_LOGO)
         .resize(size, size, {
           fit: 'contain',
-          background: { r: 255, g: 255, b: 255, alpha: 0 },
+          background: { r: 255, g: 255, b: 255, alpha: 1 },
         })
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
         .png({
           compressionLevel: 9,
           quality: 90,
@@ -66,8 +67,9 @@ async function generateIcons() {
     await sharp(SOURCE_LOGO)
       .resize(FAVICON_SIZE, FAVICON_SIZE, {
         fit: 'contain',
-        background: { r: 255, g: 255, b: 255, alpha: 0 },
+        background: { r: 255, g: 255, b: 255, alpha: 1 },
       })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
       .png()
       .toFile(join(OUTPUT_APP_DIR, 'favicon.ico'));
 
@@ -78,8 +80,9 @@ async function generateIcons() {
     await sharp(SOURCE_LOGO)
       .resize(APPLE_ICON_SIZE, APPLE_ICON_SIZE, {
         fit: 'contain',
-        background: { r: 255, g: 255, b: 255, alpha: 0 },
+        background: { r: 255, g: 255, b: 255, alpha: 1 },
       })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
       .png({
         compressionLevel: 9,
         quality: 90,

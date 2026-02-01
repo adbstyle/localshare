@@ -65,37 +65,63 @@ export class ImageService {
     const startOrderIndex = (maxOrderResult._max.orderIndex ?? -1) + 1;
 
     for (const [index, file] of files.entries()) {
-      const filename = `${uuidv4()}.webp`;
+      const uuid = uuidv4();
+      const filename = `${uuid}.webp`;
+      const thumbnailFilename = `${uuid}_thumb.webp`;
 
-      // Process image with Sharp - WebP for ~30% smaller files at same quality
-      const processedBuffer = await sharp(file.buffer)
-        .rotate() // Auto-rotate based on EXIF and strip metadata (privacy)
-        .resize(1280, null, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .webp({ quality: 80 })
-        .toBuffer();
+      // Process full image and thumbnail in parallel
+      const [processedBuffer, thumbnailBuffer] = await Promise.all([
+        // Full image: max 1280px width, quality 80
+        sharp(file.buffer)
+          .rotate() // Auto-rotate based on EXIF and strip metadata (privacy)
+          .resize(1280, null, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 80 })
+          .toBuffer(),
+        // Thumbnail: max 400px width, quality 75 for smaller size
+        sharp(file.buffer)
+          .rotate()
+          .resize(400, null, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 75 })
+          .toBuffer(),
+      ]);
 
       let sizeBytes: number;
 
       if (this.useR2 && this.s3Client) {
-        // Upload to R2
-        await this.s3Client.send(
-          new PutObjectCommand({
-            Bucket: this.bucketName,
-            Key: filename,
-            Body: processedBuffer,
-            ContentType: 'image/webp',
-          }),
-        );
+        // Upload both images to R2 in parallel
+        await Promise.all([
+          this.s3Client.send(
+            new PutObjectCommand({
+              Bucket: this.bucketName,
+              Key: filename,
+              Body: processedBuffer,
+              ContentType: 'image/webp',
+            }),
+          ),
+          this.s3Client.send(
+            new PutObjectCommand({
+              Bucket: this.bucketName,
+              Key: thumbnailFilename,
+              Body: thumbnailBuffer,
+              ContentType: 'image/webp',
+            }),
+          ),
+        ]);
         sizeBytes = processedBuffer.length;
       } else {
-        // Save to local filesystem
+        // Save both images to local filesystem
         await this.ensureUploadDir();
-        const filepath = path.join(this.uploadDir, filename);
-        await fs.writeFile(filepath, processedBuffer);
-        const stats = await fs.stat(filepath);
+        await Promise.all([
+          fs.writeFile(path.join(this.uploadDir, filename), processedBuffer),
+          fs.writeFile(path.join(this.uploadDir, thumbnailFilename), thumbnailBuffer),
+        ]);
+        const stats = await fs.stat(path.join(this.uploadDir, filename));
         sizeBytes = stats.size;
       }
 
@@ -105,6 +131,7 @@ export class ImageService {
         data: {
           listingId,
           filename,
+          thumbnailFilename,
           originalName: file.originalname,
           mimeType: 'image/webp',
           sizeBytes,
@@ -125,19 +152,26 @@ export class ImageService {
       const listingId = image.listingId;
 
       if (this.useR2 && this.s3Client) {
-        // Delete from R2
-        await this.s3Client
-          .send(
-            new DeleteObjectCommand({
-              Bucket: this.bucketName,
-              Key: image.filename,
-            }),
-          )
-          .catch(() => {}); // Ignore if file doesn't exist
+        // Delete full image and thumbnail from R2
+        const deletePromises = [
+          this.s3Client
+            .send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: image.filename }))
+            .catch(() => {}),
+        ];
+        if (image.thumbnailFilename) {
+          deletePromises.push(
+            this.s3Client
+              .send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: image.thumbnailFilename }))
+              .catch(() => {}),
+          );
+        }
+        await Promise.all(deletePromises);
       } else {
-        // Delete from local filesystem
-        const filepath = path.join(this.uploadDir, image.filename);
-        await fs.unlink(filepath).catch(() => {});
+        // Delete full image and thumbnail from local filesystem
+        await fs.unlink(path.join(this.uploadDir, image.filename)).catch(() => {});
+        if (image.thumbnailFilename) {
+          await fs.unlink(path.join(this.uploadDir, image.thumbnailFilename)).catch(() => {});
+        }
       }
 
       await this.prisma.listingImage.delete({ where: { id: imageId } });
@@ -164,19 +198,30 @@ export class ImageService {
     });
 
     if (this.useR2 && this.s3Client) {
-      // Delete from R2 in parallel
-      await Promise.all(
-        images.map((image) =>
+      // Delete full images and thumbnails from R2 in parallel
+      const deletePromises = images.flatMap((image) => {
+        const promises = [
           this.s3Client!
             .send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: image.filename }))
             .catch(() => {}),
-        ),
-      );
+        ];
+        if (image.thumbnailFilename) {
+          promises.push(
+            this.s3Client!
+              .send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: image.thumbnailFilename }))
+              .catch(() => {}),
+          );
+        }
+        return promises;
+      });
+      await Promise.all(deletePromises);
     } else {
-      // Delete from local filesystem
+      // Delete full images and thumbnails from local filesystem
       for (const image of images) {
-        const filepath = path.join(this.uploadDir, image.filename);
-        await fs.unlink(filepath).catch(() => {});
+        await fs.unlink(path.join(this.uploadDir, image.filename)).catch(() => {});
+        if (image.thumbnailFilename) {
+          await fs.unlink(path.join(this.uploadDir, image.thumbnailFilename)).catch(() => {});
+        }
       }
     }
 
@@ -188,6 +233,14 @@ export class ImageService {
       return `${this.publicUrl}/${filename}`;
     }
     return `/uploads/listings/${filename}`;
+  }
+
+  getThumbnailUrl(thumbnailFilename: string | null): string | null {
+    if (!thumbnailFilename) return null;
+    if (this.useR2) {
+      return `${this.publicUrl}/${thumbnailFilename}`;
+    }
+    return `/uploads/listings/${thumbnailFilename}`;
   }
 
   async setCoverImage(listingId: string, imageId: string): Promise<void> {

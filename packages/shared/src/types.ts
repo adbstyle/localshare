@@ -130,6 +130,7 @@ export interface ListingImage {
   mimeType: string;
   size: number;
   url: string;
+  thumbnailUrl?: string;
   isCover: boolean;
 }
 

@@ -158,7 +158,7 @@ function ListingsPageContent() {
     <div className="container py-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Filters Sidebar - Hidden on mobile */}
-        <aside className="hidden md:block md:col-span-1">
+        <aside className="hidden md:block md:col-span-1 h-fit sticky top-[101px]">
           <ListingFilters filters={filters} onChange={handleFilterChange} />
         </aside>
 

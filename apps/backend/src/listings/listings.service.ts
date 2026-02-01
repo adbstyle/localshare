@@ -162,6 +162,9 @@ export class ListingsService {
       images: listing.images.map((img) => ({
         ...img,
         url: this.imageService.getImageUrl(img.filename),
+        thumbnailUrl:
+          this.imageService.getThumbnailUrl(img.thumbnailFilename) ||
+          this.imageService.getImageUrl(img.filename),
       })),
     }));
   }
@@ -249,6 +252,9 @@ export class ListingsService {
       images: listing.images.map((img) => ({
         ...img,
         url: this.imageService.getImageUrl(img.filename),
+        thumbnailUrl:
+          this.imageService.getThumbnailUrl(img.thumbnailFilename) ||
+          this.imageService.getImageUrl(img.filename),
       })),
     }));
 
@@ -360,6 +366,9 @@ export class ListingsService {
       images: listing.images.map((img) => ({
         ...img,
         url: this.imageService.getImageUrl(img.filename),
+        thumbnailUrl:
+          this.imageService.getThumbnailUrl(img.thumbnailFilename) ||
+          this.imageService.getImageUrl(img.filename),
       })),
     };
   }

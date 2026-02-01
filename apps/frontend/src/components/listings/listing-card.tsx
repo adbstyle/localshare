@@ -56,11 +56,11 @@ export function ListingCard({ listing, onBookmarkChange }: ListingCardProps) {
   return (
     <Link href={`/listings/${listing.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-        {/* Image */}
+        {/* Image - use thumbnail for faster loading */}
         <div className="relative h-48 bg-muted">
           {coverImage ? (
             <Image
-              src={getImageUrl(coverImage.url)}
+              src={getImageUrl(coverImage.thumbnailUrl || coverImage.url)}
               alt={listing.title}
               fill
               className="object-cover"

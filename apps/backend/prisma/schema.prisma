@@ -207,15 +207,16 @@ model Listing {
 }
 
 model ListingImage {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  listingId    String   @map("listing_id") @db.Uuid
-  filename     String
-  originalName String?  @map("original_name")
-  mimeType     String?  @map("mime_type")
-  sizeBytes    Int?     @map("size_bytes")
-  orderIndex   Int      @default(0) @map("order_index")
-  isCover      Boolean  @default(false) @map("is_cover")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listingId         String   @map("listing_id") @db.Uuid
+  filename          String
+  thumbnailFilename String?  @map("thumbnail_filename")
+  originalName      String?  @map("original_name")
+  mimeType          String?  @map("mime_type")
+  sizeBytes         Int?     @map("size_bytes")
+  orderIndex        Int      @default(0) @map("order_index")
+  isCover           Boolean  @default(false) @map("is_cover")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 

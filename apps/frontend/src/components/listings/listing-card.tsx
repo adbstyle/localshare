@@ -14,10 +14,11 @@ import Image from 'next/image';
 
 interface ListingCardProps {
   listing: Listing;
+  priority?: boolean;
   onBookmarkChange?: (listingId: string, isBookmarked: boolean) => void;
 }
 
-export function ListingCard({ listing, onBookmarkChange }: ListingCardProps) {
+export function ListingCard({ listing, priority, onBookmarkChange }: ListingCardProps) {
   const t = useTranslations();
   const locale = useLocale();
   const { user } = useAuth();
@@ -64,6 +65,7 @@ export function ListingCard({ listing, onBookmarkChange }: ListingCardProps) {
               alt={listing.title}
               fill
               className="object-cover"
+              priority={priority}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground">

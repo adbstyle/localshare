@@ -310,7 +310,9 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
               min="0"
               max="1000000"
               placeholder={t('listings.pricePlaceholder')}
-              {...register('price', { valueAsNumber: true })}
+              {...register('price', {
+                setValueAs: (v) => (v === '' || Number.isNaN(Number(v)) ? undefined : Number(v)),
+              })}
             />
             {errors.price && (
               <p className="text-sm text-destructive">{errors.price.message}</p>

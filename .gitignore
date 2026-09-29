@@ -37,10 +37,6 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Prisma
-apps/backend/prisma/migrations/*_*/
-!apps/backend/prisma/migrations/.gitkeep
-
 # Uploads
 uploads/
 apps/backend/uploads/

@@ -103,6 +103,7 @@ Key variables in `.env`:
 
 ```env
 DATABASE_URL=postgresql://localshare:changeme@localhost:5433/localshare
+DIRECT_URL=postgresql://localshare:changeme@localhost:5433/localshare  # Prisma migrations
 JWT_SECRET=your-secret
 JWT_REFRESH_SECRET=your-refresh-secret
 GOOGLE_CLIENT_ID=...

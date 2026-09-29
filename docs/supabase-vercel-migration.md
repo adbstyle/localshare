@@ -1,6 +1,6 @@
 # Migrationsplan: Railway + R2 → Vercel + Supabase
 
-Stand: 29. September 2026 (Schritt 1 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29
+Stand: 29. September 2026 (Schritte 1 und 2 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29
 
 ## Kontext
 
@@ -25,7 +25,7 @@ Warum das «einfach» geht (verifiziert im Code):
 | 1 | Uploads: 3 × 10 MB in **einem** Multipart-Request → Vercel-Limit 4.5 MB (HTTP 413) | Client-seitiges Downscaling vor Upload (Canvas, ≤1600 px JPEG) → ~2 MB total. Server-Sharp-Pipeline (WebP 1280 px + Thumb 400 px, EXIF-Strip) bleibt unverändert. |
 | 2 | `refreshTokens()` lädt **alle** aktiven Refresh-Tokens und macht bcrypt.compare in Schleife (O(n)) | SHA-256-Hash + `findUnique` auf `tokenHash` (Spalte ist bereits `@unique`). Kein Schema-Change. Folge: einmaliger Re-Login aller User beim Release von Schritt 1 (Railway). Danach überleben Sessions den Cutover. |
 | 3 | `ThrottlerGuard` in-memory, kein `trust proxy` → hinter Vercel-Proxy teilen sich alle User eine IP | Throttler entfernen; Vercel-DDoS-Schutz / Firewall nutzen. |
-| 4 | Keine echte Prisma-Migrationshistorie (nur 5 lose `.sql`, `.gitignore` ignoriert `migrations/*_*/`!) | `.gitignore` fixen, Baseline `0_init` erzeugen, auf Supabase `migrate resolve --applied`. |
+| 4 | Keine echte Prisma-Migrationshistorie (nur 5 lose `.sql`, `.gitignore` ignoriert `migrations/*_*/`!) | `.gitignore` fixen, Baseline `0_init` aus der Railway-DB erzeugen, auf Railway `migrate resolve --applied`. Die Historie wandert danach mit dem Dump zu Supabase. |
 | 5 | `schema.prisma` ohne `directUrl` | Pooler: `DATABASE_URL` = Port 6543 `?pgbouncer=true&connection_limit=5`, `DIRECT_URL` = Port 5432 (Migrationen). `binaryTargets` nicht nötig, Prisma generiert auf Vercel nativ für `rhel-openssl-3.0.x`. |
 | 6 | `image.service.ts` hat R2 hart verdrahtet (`useR2`, `R2_*`) | Generischer S3-Provider (`STORAGE_PROVIDER=s3`, `S3_ENDPOINT/REGION/BUCKET/ACCESS_KEY_ID/SECRET_ACCESS_KEY/PUBLIC_URL/FORCE_PATH_STYLE`). Supabase Storage ist S3-kompatibel. |
 | 7 | Supabase Data API exponiert `public`-Schema via anon key | Data API deaktivieren (Project Settings → API) + RLS auf allen Tabellen aktivieren (Prisma verbindet als `postgres`, unbetroffen). |
@@ -48,17 +48,29 @@ Vercel unterstützt NestJS seit 17.10.2025 ohne Konfiguration (`@vercel/nestjs`)
 - `vercel.json` (neu): nur `"regions": ["fra1"]`.
 - Railway-Env vor dem Merge: `S3_*` aus den bestehenden `R2_*`-Werten (Endpoint `https://<account>.r2.cloudflarestorage.com`, Region `auto`). `R2_*` und `STORAGE_PROVIDER=r2` bleiben für den Rollback stehen.
 
-Bewusst in spätere Schritte verschoben, damit Railway nicht bricht: Multer-Limit 4 MB (Schritt 3), `directUrl` + `migrate-on-deploy.js` (Schritt 2), `railpack.json` löschen (Schritt 7).
+Bewusst in spätere Schritte verschoben, damit Railway nicht bricht: Multer-Limit 4 MB (Schritt 3), `directUrl` (Schritt 2), `migrate-on-deploy.js` (Schritt 4), `railpack.json` löschen (Schritt 7).
 
 Unverändert und geprüft: `OwnershipGuard` (`req.route.path` enthält den Prefix), Passport-`require`, sharp 0.33.5 und Prisma 5.22 ohne Bump.
 
-### Schritt 2: Prisma-Baseline
-1. `.gitignore`: Zeilen `apps/backend/prisma/migrations/*_*/` + `!…/.gitkeep` entfernen.
-2. Lose `.sql` nach `prisma/legacy-sql/` verschieben.
-3. Drift-Check (muss leer sein): `npx prisma migrate diff --from-url "$RAILWAY_DB" --to-schema-datamodel prisma/schema.prisma --script`
-4. Baseline: `npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql` + `migration_lock.toml`.
-5. `schema.prisma`: `directUrl = env("DIRECT_URL")`. `DIRECT_URL` vorher auf Railway und lokal setzen (lokal = `DATABASE_URL`).
-6. `scripts/migrate-on-deploy.js` (neu): `prisma migrate deploy` nur wenn `VERCEL_GIT_COMMIT_REF` ∈ {`main`,`develop`}, eingebunden als Script `vercel-build`.
+### Schritt 2: Prisma-Baseline — umgesetzt in `feature/167-prisma-baseline`
+Befund vom 2026-09-29:
+- **Crash-Risiko.** Railway startet über das Dockerfile, und das führt vor dem Start `prisma migrate deploy` aus. Sobald `0_init` existiert, würde der Befehl die Baseline auf die volle DB anwenden und scheitern. Deshalb muss `0_init` vor dem Deploy auf jeder DB per `migrate resolve --applied` markiert werden.
+- **Tabelle `_prisma_migrations`.** Sie existiert auf Staging, Production und lokal, aber jeweils leer.
+- **Drift.** Die einzige Abweichung ist `listing_images.thumbnail_filename`. Auf Railway ist sie `VARCHAR` aus der alten Hand-SQL, im Schema und lokal `TEXT`.
+- **Umgebungen.** Staging und Production sind schemagleich. Railway-Postgres läuft in Version 17.
+
+Umsetzung:
+1. `.gitignore`: Die Prisma-Ausnahme für Migrationsordner ist entfernt. Die 5 losen `.sql` liegen jetzt in `prisma/legacy-sql/`, nur noch zur Referenz.
+2. `0_init` wurde **aus der Prod-DB** erzeugt: `prisma migrate diff --from-empty --to-url "$RAILWAY_PROD" --script`. Geprüft: Auf eine leere DB angewendet ist der Diff zur Prod-DB leer.
+3. `20260929000000_thumbnail_filename_text` stellt `VARCHAR` auf `TEXT` um. In Postgres ist das eine reine Metadaten-Änderung ohne Tabellen-Rewrite. Railway wendet die Migration beim Deploy automatisch an. Geprüft: Danach ist der Diff zu `schema.prisma` leer.
+4. `schema.prisma`: `directUrl = env("DIRECT_URL")`. `DIRECT_URL` steht in `.env.example` (zweimal), in `docker-compose.yml`, in der lokalen `.env` und auf Railway als Referenz `${{DATABASE_URL}}`.
+5. Deploy-Reihenfolge je Umgebung:
+   - `DIRECT_URL` setzen.
+   - `DATABASE_URL=… DIRECT_URL=… npx prisma migrate resolve --applied 0_init` über die öffentliche DB-URL.
+   - Mergen. Das Dockerfile wendet dann nur Migration 1 an.
+6. Lokal: beide Migrationen per `migrate resolve --applied` markiert, weil die lokale DB schon `TEXT` hat.
+
+`migrate-on-deploy.js` für Vercel wandert in Schritt 4. Es hängt am Vercel-Build und lässt sich erst dort testen.
 
 ### Schritt 3: Frontend (`apps/frontend`)
 - `src/lib/image-resize.ts` (neu): `downscaleImage(file, maxEdge=1600, q=0.85)` via `createImageBitmap({imageOrientation:'from-image'})` → Canvas → JPEG; `<img>`-Fallback für alte Safari. Bonus: HEIC von iOS wird im Browser dekodiert.
@@ -88,13 +100,12 @@ Turbo v1 (`pipeline`-Key) ist mit repo-installiertem turbo 1.13.4 auf Vercel ok.
 ### Schritt 5: Daten migrieren (erst Staging als Probelauf, dann Prod)
 ```bash
 # Client-Tools >= Server-Major (brew postgresql@17)
-pg_dump "$RAILWAY_DB" -Fc --no-owner --no-privileges --schema=public \
-  --exclude-table=public._prisma_migrations -f localshare.dump
+# _prisma_migrations kommt mit: Die Historie ist seit Schritt 2 korrekt.
+pg_dump "$RAILWAY_DB" -Fc --no-owner --no-privileges --schema=public -f localshare.dump
 pg_restore -d "postgresql://postgres.<ref>:<pw>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres" \
   --no-owner --no-privileges --schema=public --exit-on-error localshare.dump
 psql "$SUPABASE_DIRECT" -c "select (select count(*) from users),(select count(*) from listings),(select count(*) from listing_images);"
-DATABASE_URL=… DIRECT_URL=… npx prisma migrate resolve --applied 0_init
-npx prisma migrate status   # "up to date"
+DATABASE_URL=… DIRECT_URL=… npx prisma migrate status   # "up to date", kein resolve nötig
 ```
 Bilder (flache Keys, 1:1):
 ```bash
@@ -106,12 +117,12 @@ rclone copy r2:localshare-images supa:listing-images --progress --transfers 16 -
 ### Schritt 6: Cutover
 **Phase A (kein Downtime):** Branch mit Schritten 2–3 (Schritt 1 ist dann schon auf Railway live) → Preview deployen → `/api/v1/auth/health`, `curl /main.js` (muss 404 sein) und ein Multipart-Upload testen (validiert Kaltstart-Listen, Body-Stream, sharp, Prisma-Engine). DNS-TTL der 4 Hostnames auf 60 s. Staging komplett durchspielen (Dump, Restore, rclone, merge `develop`, CNAMEs → `cname.vercel-dns.com`, Checkliste). Prod-Bucket vorab bulk-kopieren.
 
-**Phase B (30–60 min Fenster):** Railway-Backend stoppen (Write-Freeze) → Dump/Restore/Resolve → rclone Delta → Domains in Vercel zuweisen → PR nach `main` mergen → CNAMEs `api.` + `app.` umstellen → Checkliste → 24 h Vercel- und Supabase-Logs beobachten.
+**Phase B (30–60 min Fenster):** Railway-Backend stoppen (Write-Freeze) → Dump/Restore/Status-Check → rclone Delta → Domains in Vercel zuweisen → PR nach `main` mergen → CNAMEs `api.` + `app.` umstellen → Checkliste → 24 h Vercel- und Supabase-Logs beobachten.
 
 **Rollback:** CNAMEs zurück auf Railway, Railway-Backend starten. Railway-DB und R2 wurden nie verändert; Schreibvorgänge nach Cutover gehen verloren. Railway + R2 1–2 Wochen behalten, dann löschen.
 
 ### Schritt 7: Doku nachziehen
-`CLAUDE.md` (Environments-Tabelle, Migrations-Workflow), `README.md`, `docker-compose.yml` (Healthcheck-Pfad `/api/v1/auth/health`). Löschen: `apps/backend/railpack.json`, `R2_*`-Variablen. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.
+`CLAUDE.md` (Environments-Tabelle), `README.md`, `docker-compose.yml` (Healthcheck-Pfad `/api/v1/auth/health`). Löschen: `apps/backend/railpack.json`, `R2_*`-Variablen. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.
 
 **Datenschutzerklärung** `apps/frontend/src/app/[locale]/privacy/page.tsx` (Zeilen «Datenbank» und «Bilder»): Hosting-Angaben Railway und Cloudflare R2 durch Vercel (Frankfurt) und Supabase (Frankfurt) ersetzen. Das ist Rechtstext, also zeitgleich mit dem Cutover live schalten.
 
@@ -131,7 +142,8 @@ rclone copy r2:localshare-images supa:listing-images --progress --transfers 16 -
 | Nest-Bootstrap braucht nach dem Import mehr als 1000 ms bis `listen()` → «Can't detect way to handle request» | Kein eager `$connect()`; erster Preview-Test; Fallback: Handler statt `listen()` exportieren |
 | Vercel serviert Build-Output statisch (Quellcode-Leak) | Nach erstem Deploy `curl /main.js` → muss Nest-404 liefern |
 | Prisma-Engine / sharp-Binary nicht ins Bundle getraced (Monorepo-Hoisting) | `includeFiles` in `vercel.json` oder Prisma `output` umstellen |
-| Schema-Drift Railway-DB ≠ `schema.prisma` (SQL wurde von Hand angewendet) | Drift-Check in Schritt 2 muss leer sein |
+| Schema-Drift Railway-DB ≠ `schema.prisma` (SQL wurde von Hand angewendet) | Erledigt in Schritt 2: Baseline aus der Prod-DB, Drift per Migration behoben |
+| Neue Migration nach Schritt 2 vergessen, Restore-Stand ≠ Code-Stand | Vor dem Dump `migrate status` auf Railway: "up to date" |
 | Cold Starts 1–3 s | Fluid Compute, `fra1` neben DB; akzeptabel |
 | Pooler-Limits bei Fluid-Concurrency | `connection_limit=5`, Transaction Mode |
 | Feature-Branch-Previews (`*.vercel.app`) können sich nicht einloggen (Cookie-Domain, Single-Origin-CORS) | Dokumentierte Einschränkung; Auth auf Staging testen |

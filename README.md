@@ -111,15 +111,17 @@ MICROSOFT_CLIENT_ID=...
 MICROSOFT_CLIENT_SECRET=...
 NEXT_PUBLIC_API_URL=http://localhost:3001
 
-# Image Storage (local or r2)
+# Image Storage (local or s3)
 STORAGE_PROVIDER=local
 
-# Cloudflare R2 (only if STORAGE_PROVIDER=r2)
-R2_ACCOUNT_ID=...
-R2_ACCESS_KEY_ID=...
-R2_SECRET_ACCESS_KEY=...
-R2_BUCKET_NAME=localshare-images
-R2_PUBLIC_URL=https://pub-xxx.r2.dev
+# S3-compatible storage, e.g. Supabase Storage or Cloudflare R2 (only if STORAGE_PROVIDER=s3)
+S3_ENDPOINT=...
+S3_REGION=auto
+S3_BUCKET=localshare-images
+S3_ACCESS_KEY_ID=...
+S3_SECRET_ACCESS_KEY=...
+S3_PUBLIC_URL=...
+S3_FORCE_PATH_STYLE=false
 ```
 
 ## Docker Deployment
@@ -141,7 +143,7 @@ scripts/kill-port.sh     # Kill process on port (default: 3001)
 
 ## Recent Changes (v1.2)
 
-- **Cloudflare R2 Storage**: Hybrid image storage - lokal für Entwicklung, R2 für Produktion (`STORAGE_PROVIDER`)
+- **S3-kompatibler Image Storage**: lokal für Entwicklung, S3-kompatibler Object Store (Cloudflare R2, Supabase Storage) für Produktion (`STORAGE_PROVIDER`, `S3_*`)
 
 ## Recent Changes (v1.1)
 

@@ -5,37 +5,41 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../database/prisma.service';
+import { isS3StorageEnabled } from '../common/utils/storage-provider';
 
 @Injectable()
 export class ImageService {
-  private readonly useR2: boolean;
+  private readonly useS3: boolean;
   private readonly s3Client: S3Client | null = null;
   private readonly bucketName: string;
   private readonly publicUrl: string;
   private readonly uploadDir: string;
 
   constructor(private prisma: PrismaService) {
-    this.useR2 = process.env.STORAGE_PROVIDER === 'r2';
+    this.useS3 = isS3StorageEnabled();
     this.uploadDir = path.join(process.cwd(), 'uploads', 'listings');
 
-    if (this.useR2) {
-      if (!process.env.R2_ACCOUNT_ID || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
-        console.warn('R2 credentials not configured - image uploads will fail');
+    if (this.useS3) {
+      const requiredVars = ['S3_ENDPOINT', 'S3_BUCKET', 'S3_PUBLIC_URL', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'];
+      const missingVars = requiredVars.filter((name) => !process.env[name]);
+      if (missingVars.length > 0) {
+        console.warn(`S3 storage not fully configured (missing: ${missingVars.join(', ')}) - image uploads/URLs will fail`);
       }
 
-      this.bucketName = process.env.R2_BUCKET_NAME || 'localshare-images';
-      this.publicUrl = process.env.R2_PUBLIC_URL || '';
+      this.bucketName = process.env.S3_BUCKET || '';
+      this.publicUrl = (process.env.S3_PUBLIC_URL || '').replace(/\/+$/, '');
 
       this.s3Client = new S3Client({
-        region: 'auto',
-        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        region: process.env.S3_REGION || 'auto',
+        endpoint: process.env.S3_ENDPOINT,
+        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
         credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+          accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
         },
       });
 
-      console.log('ImageService: Using R2 storage');
+      console.log('ImageService: Using S3 storage');
     } else {
       this.bucketName = '';
       this.publicUrl = '';
@@ -93,8 +97,8 @@ export class ImageService {
 
       let sizeBytes: number;
 
-      if (this.useR2 && this.s3Client) {
-        // Upload both images to R2 in parallel
+      if (this.useS3 && this.s3Client) {
+        // Upload both images to S3 in parallel
         await Promise.all([
           this.s3Client.send(
             new PutObjectCommand({
@@ -151,8 +155,8 @@ export class ImageService {
       const wasCover = image.isCover;
       const listingId = image.listingId;
 
-      if (this.useR2 && this.s3Client) {
-        // Delete full image and thumbnail from R2
+      if (this.useS3 && this.s3Client) {
+        // Delete full image and thumbnail from S3
         const deletePromises = [
           this.s3Client
             .send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: image.filename }))
@@ -197,8 +201,8 @@ export class ImageService {
       where: { listingId },
     });
 
-    if (this.useR2 && this.s3Client) {
-      // Delete full images and thumbnails from R2 in parallel
+    if (this.useS3 && this.s3Client) {
+      // Delete full images and thumbnails from S3 in parallel
       const deletePromises = images.flatMap((image) => {
         const promises = [
           this.s3Client!
@@ -229,7 +233,7 @@ export class ImageService {
   }
 
   getImageUrl(filename: string): string {
-    if (this.useR2) {
+    if (this.useS3) {
       return `${this.publicUrl}/${filename}`;
     }
     return `/uploads/listings/${filename}`;
@@ -237,7 +241,7 @@ export class ImageService {
 
   getThumbnailUrl(thumbnailFilename: string | null): string | null {
     if (!thumbnailFilename) return null;
-    if (this.useR2) {
+    if (this.useS3) {
       return `${this.publicUrl}/${thumbnailFilename}`;
     }
     return `/uploads/listings/${thumbnailFilename}`;

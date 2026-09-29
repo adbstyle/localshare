@@ -5,12 +5,13 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { isS3StorageEnabled } from './common/utils/storage-provider';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Serve static files for local uploads (only when not using R2)
-  if (process.env.STORAGE_PROVIDER !== 'r2') {
+  // Serve static files for local uploads (only when not using S3)
+  if (!isS3StorageEnabled()) {
     app.useStaticAssets(join(process.cwd(), 'uploads'), {
       prefix: '/uploads',
     });

@@ -3,8 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
 import { SsoProvider } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+import { createHash, randomBytes } from 'crypto';
 
 interface SsoUser {
   provider: SsoProvider;
@@ -100,9 +99,15 @@ export class AuthService {
     };
   }
 
+  // High-entropy random token, so a fast deterministic hash is sufficient and
+  // allows a direct unique-index lookup instead of comparing against every row.
+  private hashRefreshToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
   async generateRefreshToken(userId: string): Promise<string> {
-    const token = uuidv4();
-    const tokenHash = await bcrypt.hash(token, 10);
+    const token = randomBytes(32).toString('base64url');
+    const tokenHash = this.hashRefreshToken(token);
 
     const expiresAt = new Date();
     expiresAt.setDate(
@@ -126,25 +131,12 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token not provided');
     }
 
-    // Find valid refresh token
-    const tokens = await this.prisma.refreshToken.findMany({
-      where: {
-        revokedAt: null,
-        expiresAt: { gte: new Date() },
-      },
+    const validToken = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash: this.hashRefreshToken(refreshToken) },
       include: { user: true },
     });
 
-    let validToken: typeof tokens[0] | null = null;
-    for (const token of tokens) {
-      const isValid = await bcrypt.compare(refreshToken, token.tokenHash);
-      if (isValid) {
-        validToken = token;
-        break;
-      }
-    }
-
-    if (!validToken) {
+    if (!validToken || validToken.revokedAt || validToken.expiresAt < new Date()) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 

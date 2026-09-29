@@ -93,7 +93,7 @@ apps/
 │   │   ├── common/   # Decorators, types, utils
 │   │   │   ├── decorators/  # @CurrentUser, @Public
 │   │   │   ├── types/       # Pagination types
-│   │   │   └── utils/       # Prisma utilities
+│   │   │   └── utils/       # Prisma + storage-provider utilities
 │   │   └── database/ # Prisma service
 │   └── prisma/       # Schema + migrations + seed
 └── frontend/         # Next.js 14 (port 3000)
@@ -149,7 +149,7 @@ All backend routes are prefixed with `/api/v1/`:
 ### Auth Flow
 1. User clicks OAuth login → redirected to Google/Microsoft
 2. Callback returns to backend → validates & creates/links user
-3. Backend issues JWT (15min) + refresh token (90d) as HTTPOnly cookies
+3. Backend issues JWT (15min) + refresh token (90d) as HTTPOnly cookies (refresh token stored as SHA-256 hash, rotated on every refresh)
 4. Frontend redirects to `/auth/callback` (no token in URL)
 5. API client sends cookies automatically (`withCredentials: true`)
 6. On 401, client calls `/auth/refresh` to get new tokens via cookies
@@ -193,8 +193,8 @@ Copy `.env.example` to `.env` at root level. Key variables:
 - `GOOGLE_CLIENT_ID/SECRET` - Google OAuth credentials
 - `MICROSOFT_CLIENT_ID/SECRET` - Microsoft OAuth credentials
 - `NEXT_PUBLIC_API_URL` - Backend URL for frontend
-- `STORAGE_PROVIDER` - `local` or `r2` for image storage
-- `R2_*` - Cloudflare R2 credentials (only if STORAGE_PROVIDER=r2)
+- `STORAGE_PROVIDER` - `local` or `s3` for image storage (legacy `r2` behaves like `s3`)
+- `S3_*` - S3-compatible storage config: `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_URL`, `S3_FORCE_PATH_STYLE` (only if STORAGE_PROVIDER=s3)
 - `COOKIE_DOMAIN` - Cookie domain for cross-subdomain auth (e.g., `.wylergut.ch` with leading dot in production, empty for localhost)
 
 Local database uses port 5433 (not 5432) to avoid conflicts:
@@ -213,7 +213,9 @@ Static UI images (hero backgrounds, illustrations, icons) go in `apps/frontend/p
 #### User-Generated Images (Backend)
 Two storage backends supported for user uploads:
 - **local**: Files saved to `/uploads/listings/` (default for dev)
-- **r2**: Cloudflare R2 bucket (for production)
+- **s3**: Any S3-compatible bucket via `S3_*` (production: Cloudflare R2 today, Supabase Storage after migration, see `docs/supabase-vercel-migration.md`)
+
+Image URLs are computed at read time from `S3_PUBLIC_URL` + filename, so switching buckets needs no DB change.
 
 ## i18n (Internationalization)
 

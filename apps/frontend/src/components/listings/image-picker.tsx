@@ -57,23 +57,37 @@ export function ImagePicker({ count, busy = false, onFiles }: ImagePickerProps) 
     }
   };
 
-  const icon = (Icon: typeof Camera) =>
-    disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icon className="mr-2 h-4 w-4" />;
-
   return (
     <>
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={handleChange}
         className="hidden" disabled={disabled} aria-label={t('listings.takePhoto')} />
       <input ref={galleryRef} type="file" accept="image/*" multiple onChange={handleChange}
         className="hidden" disabled={disabled} aria-label={t('listings.fromGallery')} />
+      <PickerButtons count={count} disabled={disabled}
+        onCamera={() => cameraRef.current?.click()} onGallery={() => galleryRef.current?.click()} />
+    </>
+  );
+}
 
+function PickerButtons({ count, disabled, onCamera, onGallery }: {
+  count: number;
+  disabled: boolean;
+  onCamera: () => void;
+  onGallery: () => void;
+}) {
+  const t = useTranslations();
+  const icon = (Icon: typeof Camera) =>
+    disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icon className="mr-2 h-4 w-4" />;
+
+  return (
+    <>
       <div className="flex flex-col gap-2 md:hidden">
-        <Button type="button" className="w-full" disabled={disabled} onClick={() => cameraRef.current?.click()}>
+        <Button type="button" className="w-full" disabled={disabled} onClick={onCamera}>
           {icon(Camera)}
           {t('listings.takePhoto')}
         </Button>
         <Button type="button" variant="outline" className="w-full" disabled={disabled}
-          onClick={() => galleryRef.current?.click()}>
+          onClick={onGallery}>
           {icon(ImageIcon)}
           {t('listings.fromGallery')}
         </Button>
@@ -81,7 +95,7 @@ export function ImagePicker({ count, busy = false, onFiles }: ImagePickerProps) 
 
       <div className="hidden md:block">
         <Button type="button" variant="outline" className="w-full" disabled={disabled}
-          onClick={() => galleryRef.current?.click()}>
+          onClick={onGallery}>
           {icon(Upload)}
           {disabled ? t('common.loading') : `${t('listings.uploadImages')} (${count}/${MAX_IMAGES_PER_LISTING})`}
         </Button>

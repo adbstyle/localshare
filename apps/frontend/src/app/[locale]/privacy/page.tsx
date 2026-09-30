@@ -106,15 +106,17 @@ export default function PrivacyPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">5.1 Speicherort</h3>
           <p className="text-muted-foreground">
-            Daten werden auf folgenden Servern gespeichert und verarbeitet:
+            Daten werden bei folgenden Anbietern gespeichert und verarbeitet:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground mt-2">
-            <li><strong>Datenbank (PostgreSQL):</strong> EU West (Amsterdam, Niederlande) via Railway</li>
-            <li><strong>Bilder:</strong> Cloudflare R2 (Eastern Europe) - US-Anbieter mit EU-Speicherort</li>
+            <li><strong>Anwendung (Webseite und Server):</strong> Vercel Inc., USA – Ausführung in der Region Frankfurt (Deutschland)</li>
+            <li><strong>Datenbank (PostgreSQL):</strong> Supabase Pte. Ltd., Singapur – Speicherort Frankfurt (Deutschland)</li>
+            <li><strong>Bilder:</strong> Supabase Storage (Supabase Pte. Ltd., Singapur) – Speicherort Frankfurt (Deutschland)</li>
           </ul>
           <p className="text-muted-foreground mt-4">
-            Cloudflare Inc. ist ein US-Unternehmen, das dem EU-US Data Privacy Framework unterliegt.
-            Die Daten werden in der EU gespeichert.
+            Die Daten werden in der EU gespeichert. Vercel Inc. (USA) und Supabase Pte. Ltd. (Singapur) haben
+            ihren Sitz ausserhalb der Schweiz und der EU. Supabase stützt allfällige Datenübermittlungen auf die
+            Standardvertragsklauseln der EU-Kommission.
           </p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">5.2 Sicherheitsmassnahmen</h3>
@@ -195,6 +197,7 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>Bei rechtlicher Verpflichtung (z.B. Gerichtsbeschluss, behördliche Anfrage)</li>
             <li>Zum Schutz unserer Rechte oder der Sicherheit anderer Nutzer</li>
+            <li>An unsere Hosting-Anbieter (siehe Abschnitt 5.1), die Daten ausschliesslich in unserem Auftrag verarbeiten</li>
           </ul>
           <p className="text-muted-foreground mt-4">
             <strong>Hinweis zu SSO:</strong> Bei der Anmeldung über Google oder Microsoft werden
@@ -287,7 +290,7 @@ export default function PrivacyPage() {
         </section>
 
         <div className="mt-12 pt-8 border-t text-sm text-muted-foreground">
-          <p>Stand: Januar 2026</p>
+          <p>Stand: September 2026</p>
           <p className="mt-2">
             Diese Datenschutzerklärung erfüllt die Anforderungen der DSGVO (EU) und des
             Schweizer Datenschutzgesetzes (DSG).

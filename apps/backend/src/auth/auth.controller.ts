@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  UseFilters,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response, Request, CookieOptions } from 'express';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { InviteStateService } from './invite-state.service';
+import { SsoLoginExceptionFilter } from './sso-login.exception';
 
 @Controller('auth')
 export class AuthController {
@@ -78,6 +80,7 @@ export class AuthController {
   @Public()
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @UseFilters(SsoLoginExceptionFilter)
   async googleAuthCallback(@Req() req, @Res() res: Response) {
     const { accessToken, refreshToken, user } = await this.authService.login(
       req.user,
@@ -139,6 +142,7 @@ export class AuthController {
   @Public()
   @Get('microsoft/callback')
   @UseGuards(AuthGuard('microsoft'))
+  @UseFilters(SsoLoginExceptionFilter)
   async microsoftAuthCallback(@Req() req, @Res() res: Response) {
     const { accessToken, refreshToken, user } = await this.authService.login(
       req.user,

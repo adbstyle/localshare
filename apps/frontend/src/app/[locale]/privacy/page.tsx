@@ -220,10 +220,16 @@ export default function PrivacyPage() {
             </li>
           </List>
           <Text className="mt-4">
-            Melden Sie sich mit einem zweiten Anbieter an, der dieselbe E-Mail-Adresse liefert, verknüpfen
-            wir diesen automatisch mit Ihrem bestehenden Konto. Wir erhalten keinen Zugriff auf Ihre E-Mails,
-            Dateien oder anderen Dienste bei Google oder Microsoft. Es gelten zusätzlich die
-            Datenschutzbestimmungen von{' '}
+            Ihr Konto erkennen wir an Ihrer Kennung bei Google bzw. Microsoft, nicht an der E-Mail-Adresse.
+            Einen zweiten Anbieter verknüpfen wir nicht automatisch mit Ihrem bestehenden Konto, auch wenn er
+            dieselbe E-Mail-Adresse liefert: Microsoft bestätigt nicht, dass eine übermittelte Adresse Ihnen
+            gehört, und E-Mail-Adressen können an andere Personen übergehen. Gibt es zu Ihrer E-Mail-Adresse
+            bereits ein Konto, melden Sie sich mit dem bisher verwendeten Anbieter an. Ein neues Konto über
+            Google eröffnen wir nur mit einer von Google bestätigten E-Mail-Adresse.
+          </Text>
+          <Text className="mt-4">
+            Wir erhalten keinen Zugriff auf Ihre E-Mails, Dateien oder anderen Dienste bei Google oder
+            Microsoft. Es gelten zusätzlich die Datenschutzbestimmungen von{' '}
             <ExternalLink href="https://policies.google.com/privacy">Google</ExternalLink> und{' '}
             <ExternalLink href="https://privacy.microsoft.com/">Microsoft</ExternalLink>.
           </Text>

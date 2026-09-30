@@ -4,11 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
 import { SsoProvider } from '@prisma/client';
 import { createHash, randomBytes } from 'crypto';
+import { SsoLoginException } from './sso-login.exception';
 
 interface SsoUser {
   provider: SsoProvider;
   providerUserId: string;
   email: string;
+  // Only set by providers that report it (Google); unverified emails can't create accounts
+  emailVerified?: boolean;
   firstName: string;
   lastName: string;
 }
@@ -22,9 +25,19 @@ export class AuthService {
   ) {}
 
   async validateSsoUser(ssoUser: SsoUser) {
-    // Check if SSO account exists
-    let user = await this.prisma.user.findFirst({
+    // Prisma drops undefined filters, which would match any account of the provider
+    if (!ssoUser.providerUserId) {
+      throw new UnauthorizedException('Missing provider user id');
+    }
+
+    const email = ssoUser.email.trim().toLowerCase();
+    if (!email) {
+      throw new SsoLoginException('email_missing');
+    }
+
+    const linkedUser = await this.prisma.user.findFirst({
       where: {
+        deletedAt: null,
         ssoAccounts: {
           some: {
             provider: ssoUser.provider,
@@ -37,33 +50,39 @@ export class AuthService {
       },
     });
 
-    if (user) {
-      return user;
+    if (linkedUser) {
+      return linkedUser;
     }
 
-    // Check if user exists with same email (account linking)
-    user = await this.prisma.user.findUnique({
-      where: { email: ssoUser.email },
-      include: { ssoAccounts: true },
-    });
-
-    if (user) {
-      // Link new SSO account to existing user
-      await this.prisma.ssoAccount.create({
-        data: {
-          userId: user.id,
-          provider: ssoUser.provider,
-          providerUserId: ssoUser.providerUserId,
-          providerEmail: ssoUser.email,
-        },
-      });
-      return user;
+    if (ssoUser.emailVerified === false) {
+      throw new SsoLoginException('email_not_verified');
     }
 
-    // Create new user with SSO account
+    await this.assertEmailUnused(email);
+    return this.createSsoUser(ssoUser, email);
+  }
+
+  // Never link by email: Microsoft does not verify mail/UPN (any tenant admin
+  // can set them) and Google addresses can be reassigned to a new account.
+  // lower() because older rows may be mixed-case (Prisma's mode: 'insensitive'
+  // compiles to ILIKE, where _ and % in an address act as wildcards).
+  // Includes soft-deleted users, whose email stays taken.
+  private async assertEmailUnused(email: string) {
+    const [existingUser] = await this.prisma.$queryRaw<
+      { deleted_at: Date | null }[]
+    >`SELECT deleted_at FROM users WHERE lower(email) = ${email} LIMIT 1`;
+
+    if (existingUser) {
+      throw new SsoLoginException(
+        existingUser.deleted_at ? 'account_deleted' : 'account_exists',
+      );
+    }
+  }
+
+  private createSsoUser(ssoUser: SsoUser, email: string) {
     return this.prisma.user.create({
       data: {
-        email: ssoUser.email,
+        email,
         firstName: ssoUser.firstName,
         lastName: ssoUser.lastName,
         consentGivenAt: new Date(),
@@ -71,7 +90,7 @@ export class AuthService {
           create: {
             provider: ssoUser.provider,
             providerUserId: ssoUser.providerUserId,
-            providerEmail: ssoUser.email,
+            providerEmail: email,
           },
         },
       },

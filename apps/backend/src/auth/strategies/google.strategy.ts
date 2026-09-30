@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Profile, Strategy } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
 import { SsoProvider } from '@prisma/client';
@@ -20,21 +20,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
+    _accessToken: string,
+    _refreshToken: string,
+    profile: Profile,
   ): Promise<any> {
-    const { id, emails, name } = profile;
+    const { id, emails, name, displayName } = profile;
+    const [displayFirstName = '', ...displayLastNames] = (displayName || '')
+      .trim()
+      .split(/\s+/);
+    const firstName = name ? name.givenName || '' : displayFirstName;
+    const lastName = name ? name.familyName || '' : displayLastNames.join(' ');
 
-    const user = await this.authService.validateSsoUser({
+    return this.authService.validateSsoUser({
       provider: SsoProvider.GOOGLE,
       providerUserId: id,
-      email: emails[0].value,
-      firstName: (name.givenName || '').trim().substring(0, 50),
-      lastName: (name.familyName || '').trim().substring(0, 50),
+      email: emails?.[0]?.value ?? '',
+      emailVerified: emails?.[0]?.verified === true,
+      firstName: firstName.trim().substring(0, 50),
+      lastName: lastName.trim().substring(0, 50),
     });
-
-    done(null, user);
   }
 }

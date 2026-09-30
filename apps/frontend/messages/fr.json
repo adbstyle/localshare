@@ -60,7 +60,16 @@
     "valueProp2Text": "Économise argent et ressources",
     "valueProp3Title": "Tu décides qui participe",
     "valueProp3Text": "Invite simplement par lien",
-    "heroImageAlt": "Voisins partageant des gilets de sauvetage dans leur communauté"
+    "heroImageAlt": "Voisins partageant des gilets de sauvetage dans leur communauté",
+    "loginErrors": {
+      "title": "Connexion impossible",
+      "email_missing": "Ton compte Google ou Microsoft ne nous a transmis aucune adresse e-mail.",
+      "email_not_verified": "Ton adresse e-mail n'est pas confirmée chez Google. Confirme-la chez Google, puis réessaie.",
+      "account_exists": "Un compte existe déjà avec cette adresse e-mail. Connecte-toi avec le fournisseur que tu as utilisé jusqu'ici.",
+      "account_deleted": "Le compte associé à cette adresse e-mail a été supprimé. Il n'est actuellement pas possible de te réinscrire avec la même adresse. Écris-nous à info@localshare.ch.",
+      "unknown": "Une erreur s'est produite lors de la connexion. Réessaie.",
+      "backToLogin": "Retour à la connexion"
+    }
   },
   "profile": {
     "title": "Profil",

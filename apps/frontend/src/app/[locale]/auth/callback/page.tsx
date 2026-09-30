@@ -2,13 +2,17 @@
 
 import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useRouter } from '@/navigation';
+import { Link, useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
+import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // Backend InviteStateService generates redirectTo via OAuth flow with UUID validation
 const ALLOWED_REDIRECT_PREFIXES = ['/communities/join', '/groups/join'];
+
+// Error codes set by the backend SsoLoginExceptionFilter
+const LOGIN_ERROR_CODES = ['email_missing', 'email_not_verified', 'account_exists', 'account_deleted'];
 
 // Defense-in-depth: validate even backend-provided redirects to prevent open redirect (CWE-601)
 function isValidRedirectUrl(url: string): boolean {
@@ -19,13 +23,33 @@ function isValidRedirectUrl(url: string): boolean {
   );
 }
 
+function LoginError({ code }: { code: string }) {
+  const t = useTranslations('auth.loginErrors');
+  const messageKey = LOGIN_ERROR_CODES.includes(code) ? code : 'unknown';
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="text-center max-w-md">
+        <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
+        <p className="text-muted-foreground mb-6">{t(messageKey)}</p>
+        <Button asChild>
+          <Link href="/">{t('backToLogin')}</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations();
   const { fetchUser } = useAuth();
+  const loginError = searchParams.get('error');
 
   useEffect(() => {
+    if (loginError) return;
+
     // No token in URL needed - HTTPOnly cookies are set by backend
     // Just fetch user to verify auth and get user data
     fetchUser().then(() => {
@@ -54,7 +78,11 @@ function AuthCallbackContent() {
       // Auth failed, redirect to home
       router.replace('/');
     });
-  }, [searchParams, router, fetchUser]);
+  }, [loginError, searchParams, router, fetchUser]);
+
+  if (loginError) {
+    return <LoginError code={loginError} />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center">

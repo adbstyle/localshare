@@ -1,6 +1,6 @@
 # Machbarkeits-Analyse: LocalShare auf/mit AT Protocol (Bluesky)
 
-Stand: 9. August 2026 · Recherche-Datum aller Quellen: 2026-08-09 · **Update: 30. September 2026 (siehe Kap. 1a)**
+Stand: 9. August 2026 · Recherche-Datum aller Quellen: 2026-08-09 · **Update: 30. September 2026 (siehe Kap. 1a und PoC-Ergebnis in Kap. 1b)**
 
 ## 1. TL;DR
 
@@ -17,6 +17,56 @@ Die zentrale Wartebedingung aus Kap. 6 hat sich schneller bewegt als erwartet:
 - **Timeline:** Iteration durch den Herbst 2026, erklärtes Ziel: Launch noch 2026.
 
 **Konsequenz für die Empfehlung (Kap. 6):** Weiterhin kein Produktions-Rewrite. Aber die Bedingung für Option C (PoC) ist erfüllt: Ein LocalShare-Space-PoC auf Basis der Alpha-SDKs und der Bulletin-Board-Vorlage ist jetzt möglich. Re-Evaluation konkret terminierbar: beim angekündigten Stable-Launch (Ende 2026).
+
+## 1b. PoC-Ergebnis 2026-09-30: Der Kernkonflikt aus Kap. 4 ist technisch lösbar
+
+Option C wurde umgesetzt und lokal verifiziert. **Ergebnis:** Das Kernmodell von LocalShare funktioniert auf atproto Spaces. Communities sind nur per Einladung zugänglich, Inserate sehen nur Mitglieder, entfernte Mitglieder verlieren den Zugriff. Das gilt über PDS-Grenzen hinweg, und die Zugriffskontrolle setzt der PDS durch, nicht nur die App.
+
+### Aufbau
+
+- Umbau der Beispiel-App [Bulletin](https://github.com/bluesky-social/bulletin) (Next.js, SQLite) auf die LocalShare-Domäne. Getestet gegen ein lokales atproto-Netz (Branch `permissioned-data-alpha` @ `de009e6`, `pnpm start:multi-pds` in `packages/dev-env`) mit 3 PDSes und Test-Accounts auf jedem PDS.
+- **Community = Space** vom Typ `ch.localshare.community` mit `readPolicy`/`writePolicy = managingAppPolicy`. Vor jeder Credential-Ausgabe und jedem Write fragt der PDS die App (`com.atproto.simplespace.checkUserAccess`). Die App antwortet anhand der Mitgliedschaft in ihrer DB.
+- **Invite-Token** nur in der App-DB, nie im Space. Beitritt über den Link `/join/<token>`.
+- **Inserat** = Record `ch.localshare.listing` (Typ, Kategorie, Preis in Rappen, Zeiteinheit, Bild-Blob) im Space-Repo der Person, die es erstellt, auf **deren eigenem PDS**. Community-Name und -Beschreibung liegen als Record `ch.localshare.communityProfile` beim Owner.
+- **Die App ist die AppView:** Sie registriert sich per `space.registerNotify` und bekommt `notifyWrite`-Pushes. Änderungen holt sie per `listRepoOps` bzw. `space.getRepo` direkt vom PDS der Autor:innen und verifiziert die Commit-Signatur vor dem Indexieren.
+- Nicht umgesetzt: Groups, Bookmarks, Bearbeiten, Suche/Filter, i18n.
+
+### Verifizierte Szenarien
+
+Die Protokoll-Checks liefen per Prüfskript direkt gegen die PDSes, an der App vorbei.
+
+| Szenario | Ergebnis |
+|---|---|
+| Community erstellen (`createSpace`), Inserate mit/ohne Bild | ✅ |
+| Beitritt per Invite über PDS-Grenze, Mitglied postet vom eigenen PDS | ✅ `checkUserAccess write → granted`, Sync von fremdem PDS mit Commit-Verifikation |
+| Öffentliches `repo.listRecords` / `sync.getRepo` der Autor:innen | ✅ enthält keine Inserate |
+| Öffentliches `sync.getBlob` für Inserat-Bild | ✅ `BlobNotFound` |
+| Anonymes `space.getRepo` / `space.getBlob` | ✅ `401 AuthMissing` |
+| Space-Credential für Nicht-Mitglied | ✅ `UserNotAuthorized` |
+| Nicht-Mitglied schreibt an der App vorbei direkt in den Space | ✅ vom eigenen PDS angenommen, **nie weitergeleitet oder indexiert** |
+| Owner entfernt Mitglied | ✅ Inserate sofort ausgeblendet, danach `checkUserAccess read → denied` |
+
+### Erkenntnisse
+
+1. **Die Zugriffskontrolle sitzt im Protokoll.** Ohne Space-Credential gibt der PDS nichts heraus. Die App entscheidet nur, *wer* ein Credential bekommt. Damit entfällt der Hauptgrund gegen Option A (Listings müssten öffentlich sein).
+2. **Die Mitgliedschaft lebt bei `managingAppPolicy` in der App-DB**, genau wie heute bei LocalShare, und ist damit nicht portabel. Der Alpha-PDS kennt auch `memberListPolicy` (`putMember`/`removeMember`), dann liegt die Liste beim PDS. Diese Variante ist noch nicht erprobt.
+3. **Schreibschutz heisst Nicht-Weiterleiten.** Jede Person kann in ihr eigenes Repo eines Spaces schreiben. Die Authority trackt und forwardet aber nur berechtigte Writes. Records entfernter Mitglieder bleiben in deren PDS, deshalb muss die App beim Anzeigen nach aktueller Mitgliedschaft filtern.
+4. **Keine Verschlüsselung.** Spaces sind Access Control. Wer einen PDS betreibt, kann die Daten der eigenen User lesen.
+5. **Der Sync braucht eine Mitglieds-Session.** Die App liest Spaces mit dem Credential eines eingeloggten Mitglieds. Ist keines eingeloggt, stoppt der Sync (live beobachtet). Umgekehrt überlebt ein bereits ausgestelltes Space-Credential den Logout bis zu seinem Ablauf.
+6. **Onboarding bleibt die grösste Hürde.** Jede Person braucht einen PDS, der Spaces unterstützt, und das kann heute nur der Alpha-PDS. Für den gehosteten Alpha-PDS bräuchte die App zudem eine öffentlich erreichbare `did:web`-Identität.
+
+### Aktualisierte Empfehlung
+
+Weiterhin kein Produktionsumbau vor dem Stable-Launch. Danach ist Option A auf Basis von Spaces der ernsthafte Kandidat. Entscheidungsgrundlage sind dann Onboarding, DSG/DSGVO und das Mitgliedschafts-Modell (App-DB oder `memberListPolicy`).
+
+### Nachbauen
+
+Der PoC-Code liegt bewusst **nicht** im Repo. Er ist an die Alpha-API gebunden, die sich laufend ändert, er gehört nicht zum LocalShare-Stack, und die Vorlage Bulletin hat (Stand 30.09.2026) keine Lizenz. Zum Wiederholen beim Stable-Launch: Bulletin klonen, lokales Netz wie oben starten, dann die LocalShare-Lexicons und `managingAppPolicy` nach dem Muster dieses Kapitels umsetzen. Die Lexicons sind:
+
+- `ch.localshare.community`: Space-Typ, Key `tid`, Collections `communityProfile` und `listing`.
+- `ch.localshare.communityProfile`: Record mit Key `literal:self`, Felder `name` und `description`.
+- `ch.localshare.listing`: Record mit Key `tid`. Felder `title` (max. 60), `description`, `listingType` (sell/rent/lend/search), `category` (wie Prisma-Enum), `price` (Rappen), `priceTimeUnit` (hour/day/week/month, nur bei rent), `image` (Blob, JPEG/PNG/WebP, max. 1 MB).
+- `ch.localshare.permissions`: Permission-Set mit Space-Resource `ch.localshare.community`, `authority` `*` und ohne `skey` (entspricht der Wildcard).
 
 ## 2. atproto-Primer (nur das Nötigste)
 
@@ -116,3 +166,5 @@ Quellen Update (abgerufen 2026-09-30):
 - [The Atproto Spaces Alpha is Live (20.08.2026)](https://atproto.com/blog/atproto-spaces-alpha) — Alpha-Ankündigung, SDKs, bulletin.my, Limitationen, Timeline
 - [Proposal-PR #115: Rename to atproto spaces (merged 28.09.2026)](https://github.com/bluesky-social/proposals/pull/115)
 - [Spec-Deltas September 2026 (ezpds Spaces-Alpha-Watch)](https://github.com/malpercio-dev/ezpds/pull/660) — laufende Breaking Changes (readPolicy/writePolicy, putMember)
+- [bluesky-social/bulletin @ `0acf237`](https://github.com/bluesky-social/bulletin) — Vorlage des PoC (Kap. 1b)
+- [bluesky-social/atproto, Branch `permissioned-data-alpha`](https://github.com/bluesky-social/atproto/tree/permissioned-data-alpha) — lokales Dev-Netz des PoC

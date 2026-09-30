@@ -1,6 +1,6 @@
 # Migrationsplan: Railway + R2 → Vercel + Supabase
 
-Stand: 30. September 2026 (Schritte 1–4 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits: 2026-09-30
+Stand: 30. September 2026 (Schritte 1–5 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits: 2026-09-30
 
 ## Kontext
 
@@ -133,30 +133,37 @@ Env Backend, **vollständig gesetzt**. Preview hat Staging-Werte, Production hat
 Env Frontend: `NEXT_PUBLIC_API_URL`, Preview `https://api-staging.localshare.ch` und Production `https://api.localshare.ch`, plus `NEXT_TELEMETRY_DISABLED=1`. Railway setzt heute kein `NEXT_PUBLIC_FEEDBACK_EMAIL`, der Fallback im Code bleibt.
 `remotePatterns` in `next.config.js` enthält die beiden Supabase-Hosts `<ref>.supabase.co/storage/v1/object/public/**`.
 
-### Schritt 5: Daten migrieren (erst Staging als Probelauf, dann Prod)
+### Schritt 5: Daten migrieren — Staging komplett, Prod vorab kopiert (2026-09-30, `feature/167-data-migration`)
+Werkzeuge liegen in `scripts/supabase-migration/`, siehe README dort. Sie brauchen die Railway-CLI, `jq`, `python3`, `node` und libpq ≥ 17 (`brew install libpq`, hier 18.1). Credentials kommen aus `apps/backend/.env.supabase-*.local`.
 ```bash
-# Client-Tools >= Server-Major (brew postgresql@17)
-# Voraussetzung: Schritt 4 ist auf Railway live, Railway hat also `enable_rls` angewendet.
-# Dann enthält der Dump RLS und alle 3 Migrationszeilen.
-# _prisma_migrations kommt mit: Die Historie ist seit Schritt 2 korrekt.
-pg_dump "$RAILWAY_DB" -Fc --no-owner --no-privileges --schema=public -f localshare.dump
-# --clean --if-exists: Staging hat schon das Schema aus Schritt 4, Prod ist leer. Das funktioniert für beide.
-pg_restore -d "$SUPABASE_DIRECT_URL" --clean --if-exists \
-  --no-owner --no-privileges --schema=public --exit-on-error localshare.dump
-psql "$SUPABASE_DIRECT_URL" -c "select (select count(*) from users),(select count(*) from listings),(select count(*) from listing_images);"
-DATABASE_URL=… DIRECT_URL=… npx prisma migrate status   # "up to date", kein resolve nötig
+scripts/supabase-migration/migrate-db.sh <staging|production> apps/backend/.env.supabase-<staging|prod>.local
+scripts/supabase-migration/copy-images.sh <staging|production> apps/backend/.env.supabase-<staging|prod>.local
 ```
-Bilder (flache Keys, 1:1):
-```bash
-rclone copy r2:localshare-images supa:listing-images --progress --transfers 16 --size-only
-# Delta beim Cutover: --ignore-existing
-```
-(rclone `supa`-Remote: `provider=Other`, `endpoint=https://<ref>.storage.supabase.co/storage/v1/s3`, `region=eu-central-1`, `force_path_style=true`, `no_check_bucket=true`. Fallback: `aws s3 sync` mit `addressing_style path`.)
+- **`migrate-db.sh`:**
+  - Ablauf: `pg_dump -Fc --schema=public`, TOC ohne die Einträge `SCHEMA public` und `COMMENT ON SCHEMA public` filtern, dann `pg_restore --clean --if-exists -L`, am Schluss alle Tabellen zählen und die Listing-IDs hashen.
+  - Warum der Filter: Mit `--clean` würde `pg_restore` sonst `DROP SCHEMA public` versuchen, und das scheitert auf Supabase.
+  - Der Dump liegt nur in einem temporären Ordner mit Modus 700 und wird danach gelöscht, weil er Personendaten enthält.
+- **`copy-images.sh`:**
+  - Kopiert alle Objekte von R2 nach Supabase Storage und übernimmt dabei den Content-Type. Gesetzt wird `Cache-Control: public, max-age=31536000, immutable`, weil die Keys UUIDs sind.
+  - Es ist idempotent und überspringt gleiche Keys. Ein erneuter Lauf ist also der Delta-Abgleich beim Cutover.
+  - rclone ist nicht nötig.
+- **Bucket:** Prod enthält ältere **JPG**-Uploads, deshalb erlauben die Buckets jetzt `image/webp` und `image/jpeg`. Einige alte JPGs nutzen dieselbe Datei als Voll- und als Vorschaubild.
+
+Ergebnisse:
+
+| | Staging | Prod (Vorab-Kopie, Railway bleibt live) |
+|---|---|---|
+| Tabellen Railway = Supabase | ✅ alle 12, identischer ID-Hash | ✅ alle 12: 22 User, 52 Inserate, 57 Bilder, 480 Refresh-Tokens |
+| RLS / `migrate status` / Drift | 12/12 / up to date / leer | 12/12 / up to date / leer |
+| Bilder | 70/70 kopiert, alle DB-Verweise mit 200 erreichbar | 108/108 kopiert, alle 114 DB-Verweise mit 200 erreichbar |
+| Ende-zu-Ende über Vercel | Preview: Community-Vorschau mit echtem Token liefert 200 | `localshare-backend.vercel.app`: Community-Vorschau mit echtem Token liefert 200 |
+
+Die Prod-Kopie ist nur eine Vorab-Kopie. Railway nimmt weiter Schreibzugriffe an. Beim Cutover (Schritt 6, Phase B) werden deshalb beide Skripte für `production` erneut ausgeführt, nachdem Railway gestoppt ist. `migrate-db.sh` ersetzt dabei den Stand komplett, und `copy-images.sh` kopiert nur das Delta. Seit dieser Kopie liegen Personendaten in Supabase-Prod, geschützt durch RLS, eine abgeschaltete Data API und ein Datenbank-Passwort.
 
 ### Schritt 6: Cutover
-**Phase A (kein Downtime):** Branch mit Schritten 2–3 (Schritt 1 ist dann schon auf Railway live) → Preview deployen → `/api/v1/health/db`, `curl /main.js` (muss 404 sein) und ein Multipart-Upload testen (validiert Kaltstart-Listen, Body-Stream, sharp, Prisma-Engine). DNS-TTL der 4 Hostnames auf 60 s. Staging komplett durchspielen (Dump, Restore, rclone, merge `develop`, CNAMEs → `cname.vercel-dns.com`, Checkliste). Prod-Bucket vorab bulk-kopieren.
+**Phase A (kein Downtime):** Branch mit Schritten 2–3 (Schritt 1 ist dann schon auf Railway live) → Preview deployen → `/api/v1/health/db`, `curl /main.js` (muss 404 sein) und ein Multipart-Upload testen (validiert Kaltstart-Listen, Body-Stream, sharp, Prisma-Engine). DNS-TTL der 4 Hostnames auf 60 s. Staging-Daten und die Vorab-Kopie der Prod-Daten sind seit Schritt 5 erledigt. Es fehlt: Staging-Domains (`staging.`, `api-staging.`) auf die Vercel-Projekte legen, CNAMEs → `cname.vercel-dns.com` und die Checkliste mit Login (OAuth-Callbacks zeigen weiterhin auf `api-staging.localshare.ch`).
 
-**Phase B (30–60 min Fenster):** Railway-Backend stoppen (Write-Freeze) → Dump/Restore/Status-Check → rclone Delta → Domains in Vercel zuweisen → PR nach `main` mergen → CNAMEs `api.` + `app.` umstellen → Checkliste → 24 h Vercel- und Supabase-Logs beobachten.
+**Phase B (30–60 min Fenster):** Railway-Backend stoppen (Write-Freeze) → `migrate-db.sh production …` (Zahlen vergleichen) → `copy-images.sh production …` (Delta) → in Vercel `PRISMA_MIGRATE_ON_DEPLOY=true` setzen (Production und Preview-Branch `develop`) → Git verbinden → Domains in Vercel zuweisen → CNAMEs `api.` + `app.` umstellen → Checkliste → 24 h Vercel- und Supabase-Logs beobachten.
 
 **Rollback:** CNAMEs zurück auf Railway, Railway-Backend starten. Railway-DB und R2 wurden nie verändert; Schreibvorgänge nach Cutover gehen verloren. Railway + R2 1–2 Wochen behalten, dann löschen.
 

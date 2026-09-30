@@ -199,6 +199,7 @@ Migration in progress, see `docs/supabase-vercel-migration.md` (issue #167).
 - Each app has a `vercel.json` with an explicit `buildCommand` (Vercel's Turbo auto-detection breaks on our turbo v1 setup); `.vercelignore` keeps local `.env` files out of CLI uploads
 - Backend build (`npm run vercel-build`) runs `prisma migrate deploy` only if `PRISMA_MIGRATE_ON_DEPLOY=true` is set for that Vercel environment
 - Supabase (separate LocalShare account, Free plan): `localshare-prod` (eu-central-1), `localshare-staging` (eu-central-2), public bucket `listing-images` (WebP only, 5 MB), Data API off, RLS on all tables via migration. Local credentials in `apps/backend/.env.supabase-{staging,prod}.local` (gitignored)
+- Data migration helpers (Railway → Supabase DB + R2 → Supabase Storage): `scripts/supabase-migration/` (temporary, see its README)
 
 ## Environment Setup
 

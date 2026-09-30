@@ -1,42 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { api } from '@/lib/api/client';
-import { Listing, UpdateListingDto } from '@localshare/shared';
+import { UpdateListingDto } from '@localshare/shared';
+import { listingQueries } from '@/lib/api/listings';
 import { ListingForm } from '@/components/listings/listing-form';
 
 export default function EditListingPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const router = useRouter();
   const t = useTranslations();
   const { toast } = useToast();
   const showError = useErrorToast();
-  const [listing, setListing] = useState<Listing | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: listing, isError } = useQuery(listingQueries.detail(params.id));
 
+  // Only the owner may edit; everyone else goes back to the listing (or home)
   useEffect(() => {
-    fetchListing();
-  }, [params.id]);
-
-  const fetchListing = async () => {
-    try {
-      const { data } = await api.get<Listing>(`/listings/${params.id}`);
-      setListing(data);
-    } catch (error) {
-      toast({
-        title: t('errors.notFound'),
-        variant: 'destructive',
-      });
+    if (isError) {
+      toast({ title: t('errors.notFound'), variant: 'destructive' });
       router.push('/');
-    } finally {
-      setLoading(false);
+    } else if (listing && !listing.viewer.canEdit) {
+      router.replace(`/listings/${params.id}`);
     }
-  };
+  }, [isError, listing, params.id, router, t, toast]);
 
   const handleSubmit = async (data: UpdateListingDto, pendingFiles?: File[]) => {
     try {
@@ -52,7 +44,7 @@ export default function EditListingPage() {
     }
   };
 
-  if (loading) {
+  if (!listing?.viewer.canEdit) {
     return (
       <div className="container max-w-3xl py-8">
         <div className="animate-pulse space-y-4">
@@ -61,10 +53,6 @@ export default function EditListingPage() {
         </div>
       </div>
     );
-  }
-
-  if (!listing) {
-    return null;
   }
 
   return (

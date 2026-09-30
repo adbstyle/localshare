@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
-import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { api } from '@/lib/api/client';
@@ -85,7 +84,6 @@ export default function CommunityDetailPage() {
   const t = useTranslations();
   const { toast } = useToast();
   const showError = useErrorToast();
-  const { user } = useAuth();
   const [community, setCommunity] = useState<Community | null>(null);
   const [members, setMembers] = useState<CommunityMember[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -257,7 +255,7 @@ export default function CommunityDetailPage() {
     );
   }
 
-  const isOwner = user?.id === community.ownerId;
+  const { viewer } = community;
   const displayedMembers = showAllMembers ? members : members.slice(0, INITIAL_MEMBERS_SHOWN);
 
   return (
@@ -301,7 +299,7 @@ export default function CommunityDetailPage() {
           <Link2 className="h-4 w-4 mr-2" />
           {t('communities.invite')}
         </Button>
-        {isOwner && (
+        {viewer.canEdit && (
           <Button variant="outline" onClick={() => setShowEditDialog(true)}>
             <Edit className="h-4 w-4 mr-2" />
             {t('common.edit')}
@@ -322,13 +320,13 @@ export default function CommunityDetailPage() {
               <Link2 className="h-4 w-4 mr-2" />
               {t('groups.joinViaLink')}
             </DropdownMenuItem>
-            {isOwner && (
+            {viewer.canEdit && (
               <DropdownMenuItem onClick={handleRefreshInviteLink} disabled={actionLoading}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 {t('communities.refreshInviteLink')}
               </DropdownMenuItem>
             )}
-            {!isOwner && (
+            {viewer.canLeave && (
               <DropdownMenuItem
                 onClick={() => setShowLeaveDialog(true)}
                 className="text-destructive focus:text-destructive"
@@ -337,7 +335,7 @@ export default function CommunityDetailPage() {
                 {t('communities.leave')}
               </DropdownMenuItem>
             )}
-            {isOwner && (
+            {viewer.canDelete && (
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}
                 className="text-destructive focus:text-destructive"
@@ -423,7 +421,7 @@ export default function CommunityDetailPage() {
                   <p className="text-xs text-muted-foreground">
                     {new Date(member.joinedAt).toLocaleDateString()}
                   </p>
-                  {isOwner && member.role !== 'owner' && (
+                  {viewer.canManageMembers && member.role !== 'owner' && (
                     <Button
                       variant="ghost"
                       size="icon"

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
-import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { api } from '@/lib/api/client';
@@ -68,7 +67,6 @@ export default function GroupDetailPage() {
   const t = useTranslations();
   const { toast } = useToast();
   const showError = useErrorToast();
-  const { user } = useAuth();
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -217,7 +215,7 @@ export default function GroupDetailPage() {
     );
   }
 
-  const isOwner = user?.id === group.ownerId;
+  const { viewer } = group;
   const displayedMembers = showAllMembers ? members : members.slice(0, INITIAL_MEMBERS_SHOWN);
 
   return (
@@ -267,7 +265,7 @@ export default function GroupDetailPage() {
           <Link2 className="h-4 w-4 mr-2" />
           {t('groups.invite')}
         </Button>
-        {isOwner && (
+        {viewer.canEdit && (
           <Button variant="outline" onClick={() => setShowEditDialog(true)}>
             <Edit className="h-4 w-4 mr-2" />
             {t('common.edit')}
@@ -281,13 +279,13 @@ export default function GroupDetailPage() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {isOwner && (
+            {viewer.canEdit && (
               <DropdownMenuItem onClick={handleRefreshInviteLink} disabled={actionLoading}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 {t('groups.refreshInviteLink')}
               </DropdownMenuItem>
             )}
-            {!isOwner && (
+            {viewer.canLeave && (
               <DropdownMenuItem
                 onClick={() => setShowLeaveDialog(true)}
                 className="text-destructive focus:text-destructive"
@@ -296,7 +294,7 @@ export default function GroupDetailPage() {
                 {t('groups.leave')}
               </DropdownMenuItem>
             )}
-            {isOwner && (
+            {viewer.canDelete && (
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}
                 className="text-destructive focus:text-destructive"
@@ -339,7 +337,7 @@ export default function GroupDetailPage() {
                   <p className="text-xs text-muted-foreground">
                     {new Date(member.joinedAt).toLocaleDateString()}
                   </p>
-                  {isOwner && member.role !== 'owner' && (
+                  {viewer.canManageMembers && member.role !== 'owner' && (
                     <Button
                       variant="ghost"
                       size="icon"

@@ -7,14 +7,10 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContactButtons } from './contact-buttons';
 
-interface ListingContactCardProps {
-  listing: Listing;
-  isOwner: boolean;
-}
-
 /** Sidebar: the creator's contact details, or for the owner what others will see. */
-export function ListingContactCard({ listing, isOwner }: ListingContactCardProps) {
+export function ListingContactCard({ listing }: { listing: Listing }) {
   const t = useTranslations();
+  const { isOwner } = listing.viewer;
 
   return (
     <Card className="sticky top-8">

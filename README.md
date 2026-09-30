@@ -18,6 +18,7 @@ PWA für Nachbarschafts-Communities zum Teilen von Anzeigen (verkaufen, vermiete
 |-------|------------|
 | Backend | NestJS 10, Prisma, PostgreSQL 15 |
 | Frontend | Next.js 14 (App Router), shadcn/ui, Tailwind CSS |
+| Data fetching | TanStack Query v5 (axios client with single-flight token refresh) |
 | Auth | Passport (Google/Microsoft OAuth2), JWT |
 | i18n | next-intl (de/fr) |
 | Monorepo | Turborepo |

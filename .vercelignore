@@ -1,0 +1,12 @@
+# Only relevant for CLI deploys (`vercel deploy` uploads the working tree).
+# Git-based deploys only see tracked files anyway.
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/uploads
+.playwright-mcp
+docs/verein

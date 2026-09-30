@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "prisma generate",
     "build": "nest build",
+    "vercel-build": "prisma generate && node scripts/migrate-on-deploy.js",
     "start": "node dist/main",
     "predev": "../../scripts/kill-port.sh 3001",
     "dev": "nest start --watch",

@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
-import { SsoLoginException } from '../sso-login.exception';
 import { SsoProvider } from '@prisma/client';
 
 @Injectable()
@@ -26,13 +25,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
   ): Promise<any> {
     const { id, emails, name, displayName } = profile;
-    const email = emails?.[0];
-
-    // AuthService trusts Google emails for account linking
-    if (email?.verified !== true) {
-      throw new SsoLoginException('email_not_verified');
-    }
-
     const [displayFirstName = '', ...displayLastNames] = (displayName || '')
       .trim()
       .split(/\s+/);
@@ -42,7 +34,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     return this.authService.validateSsoUser({
       provider: SsoProvider.GOOGLE,
       providerUserId: id,
-      email: email.value,
+      email: emails?.[0]?.value ?? '',
+      emailVerified: emails?.[0]?.verified === true,
       firstName: firstName.trim().substring(0, 50),
       lastName: lastName.trim().substring(0, 50),
     });

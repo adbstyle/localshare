@@ -158,9 +158,9 @@ All backend routes are prefixed with `/api/v1/`:
 ### Auth Flow
 1. User clicks OAuth login → redirected to Google/Microsoft
 2. Callback returns to backend → `AuthService.validateSsoUser` finds user by SSO account (provider + providerUserId), else creates one. Email rules:
-   - Empty email → rejected. Google email must be `email_verified` (checked in `GoogleStrategy`)
-   - Email of a soft-deleted user → rejected (email stays taken)
-   - Email of an existing user → linked only if login is Google **and** the user already has a Google account; else rejected. Microsoft never links by email (Graph `mail`/UPN unverified, nOAuth)
+   - Empty email or provider user id → rejected. Emails are stored trimmed + lowercase, looked up case-insensitively
+   - **No account linking by email**: email of an existing user → `account_exists`, of a soft-deleted user → `account_deleted` (Microsoft `mail`/UPN unverified (nOAuth), Google addresses can be reassigned)
+   - New account needs a verified email where the provider reports it (Google `email_verified`); returning users are not checked
    - Rejections throw `SsoLoginException`; `SsoLoginExceptionFilter` redirects to `/auth/callback?error=<code>`, which shows `auth.loginErrors.<code>`
 3. Backend issues JWT (15min) + refresh token (90d) as HTTPOnly cookies (refresh token stored as SHA-256 hash, rotated on every refresh)
 4. Frontend redirects to `/auth/callback` (no token in URL)

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { SsoProvider } from '@prisma/client';
 import { GoogleStrategy } from '../../src/auth/strategies/google.strategy';
-import { SsoLoginException } from '../../src/auth/sso-login.exception';
 
 function googleProfile(overrides = {}) {
   return {
@@ -35,26 +34,28 @@ describe('GoogleStrategy.validate', () => {
       provider: SsoProvider.GOOGLE,
       providerUserId: 'google-123',
       email: 'anna@example.com',
+      emailVerified: true,
       firstName: 'Anna',
       lastName: 'Muster',
     });
   });
 
-  it('rejects an email Google has not verified', async () => {
-    const profile = googleProfile({
-      emails: [{ value: 'anna@example.com', verified: false }],
-    });
+  it('reports an email Google has not verified as unverified', async () => {
+    await validate(
+      googleProfile({ emails: [{ value: 'anna@example.com', verified: false }] }),
+    );
 
-    const error = await validate(profile).catch((e) => e);
-    expect(error).toBeInstanceOf(SsoLoginException);
-    expect(error.code).toBe('email_not_verified');
-    expect(authService.validateSsoUser).not.toHaveBeenCalled();
+    expect(authService.validateSsoUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'anna@example.com', emailVerified: false }),
+    );
   });
 
-  it('rejects a profile without email', async () => {
-    const error = await validate(googleProfile({ emails: undefined })).catch((e) => e);
-    expect(error).toBeInstanceOf(SsoLoginException);
-    expect(error.code).toBe('email_not_verified');
+  it('passes an empty, unverified email when Google sends none', async () => {
+    await validate(googleProfile({ emails: undefined }));
+
+    expect(authService.validateSsoUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: '', emailVerified: false }),
+    );
   });
 
   it('falls back to the display name when Google sends no name parts', async () => {

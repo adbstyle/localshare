@@ -220,13 +220,12 @@ export default function PrivacyPage() {
             </li>
           </List>
           <Text className="mt-4">
-            Von Google übernehmen wir nur E-Mail-Adressen, die Google als bestätigt meldet. Microsoft
-            bestätigt nicht, dass eine übermittelte Adresse Ihnen gehört. Deshalb verknüpfen wir einen
-            zweiten Anbieter nicht automatisch über die E-Mail-Adresse mit Ihrem bestehenden Konto. Gibt es
-            zu Ihrer E-Mail-Adresse bereits ein Konto, melden Sie sich mit dem bisher verwendeten Anbieter
-            an. Einzige Ausnahme: Nutzen Sie Ihr Konto bereits mit Google und meldet sich ein neues
-            Google-Konto mit derselben, von Google bestätigten Adresse an (z. B. nach dem Neuanlegen Ihres
-            Google-Kontos), verknüpfen wir es mit Ihrem Konto.
+            Ihr Konto erkennen wir an Ihrer Kennung bei Google bzw. Microsoft, nicht an der E-Mail-Adresse.
+            Einen zweiten Anbieter verknüpfen wir nicht automatisch mit Ihrem bestehenden Konto, auch wenn er
+            dieselbe E-Mail-Adresse liefert: Microsoft bestätigt nicht, dass eine übermittelte Adresse Ihnen
+            gehört, und E-Mail-Adressen können an andere Personen übergehen. Gibt es zu Ihrer E-Mail-Adresse
+            bereits ein Konto, melden Sie sich mit dem bisher verwendeten Anbieter an. Ein neues Konto über
+            Google eröffnen wir nur mit einer von Google bestätigten E-Mail-Adresse.
           </Text>
           <Text className="mt-4">
             Wir erhalten keinen Zugriff auf Ihre E-Mails, Dateien oder anderen Dienste bei Google oder

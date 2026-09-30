@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
-import { SsoAccount, SsoProvider } from '@prisma/client';
+import { SsoProvider } from '@prisma/client';
 import { createHash, randomBytes } from 'crypto';
 import { SsoLoginException } from './sso-login.exception';
 
@@ -10,6 +10,8 @@ interface SsoUser {
   provider: SsoProvider;
   providerUserId: string;
   email: string;
+  // Only set by providers that report it (Google); unverified emails can't create accounts
+  emailVerified?: boolean;
   firstName: string;
   lastName: string;
 }
@@ -23,7 +25,13 @@ export class AuthService {
   ) {}
 
   async validateSsoUser(ssoUser: SsoUser) {
-    if (!ssoUser.email) {
+    // Prisma drops undefined filters, which would match any account of the provider
+    if (!ssoUser.providerUserId) {
+      throw new UnauthorizedException('Missing provider user id');
+    }
+
+    const email = ssoUser.email.trim().toLowerCase();
+    if (!email) {
       throw new SsoLoginException('email_missing');
     }
 
@@ -46,53 +54,35 @@ export class AuthService {
       return linkedUser;
     }
 
-    // Includes soft-deleted users: their email stays taken (unique)
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: ssoUser.email },
-      include: { ssoAccounts: true },
-    });
-
-    if (!existingUser) {
-      return this.createSsoUser(ssoUser);
+    if (ssoUser.emailVerified === false) {
+      throw new SsoLoginException('email_not_verified');
     }
 
-    if (existingUser.deletedAt) {
-      throw new SsoLoginException('account_deleted');
-    }
-
-    if (!this.canLinkByEmail(ssoUser, existingUser.ssoAccounts)) {
-      throw new SsoLoginException('account_exists');
-    }
-
-    await this.prisma.ssoAccount.create({
-      data: {
-        userId: existingUser.id,
-        provider: ssoUser.provider,
-        providerUserId: ssoUser.providerUserId,
-        providerEmail: ssoUser.email,
-      },
-    });
-    return existingUser;
+    await this.assertEmailUnused(email);
+    return this.createSsoUser(ssoUser, email);
   }
 
-  // Only Google verifies email ownership (GoogleStrategy rejects unverified
-  // addresses). Microsoft returns whatever a tenant admin set as mail/UPN, so a
-  // Microsoft login must never link by email, and an account whose email came
-  // only from Microsoft must not receive links either (pre-account takeover).
-  private canLinkByEmail(
-    ssoUser: SsoUser,
-    existingAccounts: Pick<SsoAccount, 'provider'>[],
-  ): boolean {
-    return (
-      ssoUser.provider === SsoProvider.GOOGLE &&
-      existingAccounts.some((account) => account.provider === SsoProvider.GOOGLE)
-    );
+  // Never link by email: Microsoft does not verify mail/UPN (any tenant admin
+  // can set them) and Google addresses can be reassigned to a new account.
+  // lower() because older rows may be mixed-case (Prisma's mode: 'insensitive'
+  // compiles to ILIKE, where _ and % in an address act as wildcards).
+  // Includes soft-deleted users, whose email stays taken.
+  private async assertEmailUnused(email: string) {
+    const [existingUser] = await this.prisma.$queryRaw<
+      { deleted_at: Date | null }[]
+    >`SELECT deleted_at FROM users WHERE lower(email) = ${email} LIMIT 1`;
+
+    if (existingUser) {
+      throw new SsoLoginException(
+        existingUser.deleted_at ? 'account_deleted' : 'account_exists',
+      );
+    }
   }
 
-  private createSsoUser(ssoUser: SsoUser) {
+  private createSsoUser(ssoUser: SsoUser, email: string) {
     return this.prisma.user.create({
       data: {
-        email: ssoUser.email,
+        email,
         firstName: ssoUser.firstName,
         lastName: ssoUser.lastName,
         consentGivenAt: new Date(),
@@ -100,7 +90,7 @@ export class AuthService {
           create: {
             provider: ssoUser.provider,
             providerUserId: ssoUser.providerUserId,
-            providerEmail: ssoUser.email,
+            providerEmail: email,
           },
         },
       },

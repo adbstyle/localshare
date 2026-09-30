@@ -5,7 +5,7 @@ import { FilterListingsDto } from './dto';
 
 export const DEFAULT_PAGE_SIZE = 30;
 
-const creatorSummary = { select: { id: true, firstName: true, lastName: true } } as const;
+export const creatorSummary = { select: { id: true, firstName: true, lastName: true } } as const;
 const imageOrder: Prisma.ListingImageOrderByWithRelationInput[] = [
   { isCover: 'desc' },
   { orderIndex: 'asc' },

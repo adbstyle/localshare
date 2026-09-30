@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Link, useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
@@ -65,9 +65,14 @@ function AuthCallbackContent() {
   const { user, loading } = useAuth();
   const loginError = searchParams.get('error');
 
+  // postLoginTarget() consumes the pending invite, so it must run only once:
+  // a second run (StrictMode, changed deps) would fall back to '/'.
+  const redirected = useRef(false);
+
   useEffect(() => {
     // The backend already set the HTTPOnly cookies; useAuth verifies them.
-    if (loginError || loading) return;
+    if (loginError || loading || redirected.current) return;
+    redirected.current = true;
     router.replace(user ? postLoginTarget(searchParams) : '/');
   }, [loginError, loading, user, searchParams, router]);
 

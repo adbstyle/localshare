@@ -7,7 +7,6 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
   UseInterceptors,
   UploadedFiles,
   HttpCode,
@@ -15,13 +14,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ListingsService } from './listings.service';
 import { CreateListingDto, UpdateListingDto, FilterListingsDto } from './dto';
 
 @Controller('listings')
-@UseGuards(JwtAuthGuard)
 export class ListingsController {
   constructor(private listingsService: ListingsService) {}
 

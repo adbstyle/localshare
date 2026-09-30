@@ -50,29 +50,32 @@ export class OwnershipGuard implements CanActivate {
   ): Promise<boolean> {
     try {
       switch (type) {
-        case 'community':
+        case 'community': {
           const community = await this.prisma.community.findUnique({
             where: { id: resourceId, deletedAt: null },
             select: { ownerId: true },
           });
           if (!community) throw new NotFoundException('Community not found');
           return community.ownerId === userId;
+        }
 
-        case 'group':
+        case 'group': {
           const group = await this.prisma.group.findUnique({
             where: { id: resourceId, deletedAt: null },
             select: { ownerId: true },
           });
           if (!group) throw new NotFoundException('Group not found');
           return group.ownerId === userId;
+        }
 
-        case 'listing':
+        case 'listing': {
           const listing = await this.prisma.listing.findUnique({
             where: { id: resourceId, deletedAt: null },
             select: { creatorId: true },
           });
           if (!listing) throw new NotFoundException('Listing not found');
           return listing.creatorId === userId;
+        }
 
         default:
           return false;

@@ -12,8 +12,8 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response, Request, CookieOptions } from 'express';
+import passport from 'passport';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { InviteStateService } from './invite-state.service';
@@ -73,7 +73,6 @@ export class AuthController {
     }
 
     // Now trigger the OAuth flow via Passport manually
-    const passport = require('passport');
     passport.authenticate('google', { session: false })(req, res);
   }
 
@@ -82,7 +81,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @UseFilters(SsoLoginExceptionFilter)
   async googleAuthCallback(@Req() req, @Res() res: Response) {
-    const { accessToken, refreshToken, user } = await this.authService.login(
+    const { accessToken, refreshToken } = await this.authService.login(
       req.user,
     );
 
@@ -135,7 +134,6 @@ export class AuthController {
     }
 
     // Now trigger the OAuth flow via Passport manually
-    const passport = require('passport');
     passport.authenticate('microsoft', { session: false })(req, res);
   }
 
@@ -144,7 +142,7 @@ export class AuthController {
   @UseGuards(AuthGuard('microsoft'))
   @UseFilters(SsoLoginExceptionFilter)
   async microsoftAuthCallback(@Req() req, @Res() res: Response) {
-    const { accessToken, refreshToken, user } = await this.authService.login(
+    const { accessToken, refreshToken } = await this.authService.login(
       req.user,
     );
 
@@ -197,7 +195,6 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@CurrentUser() user, @Res() res: Response) {
     await this.authService.logout(user.id);
@@ -207,7 +204,6 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user) {
     return {
       id: user.id,

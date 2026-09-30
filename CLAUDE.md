@@ -58,10 +58,15 @@ docker-compose up -d postgres
 ### Database (from apps/backend)
 ```bash
 npx prisma generate          # Generate Prisma client
-npx prisma migrate dev       # Run migrations
+npx prisma migrate dev --name <change>   # Create + apply a migration after editing schema.prisma
+npx prisma migrate status    # Show applied/pending migrations
 npx prisma db seed          # Seed test data
 npx prisma studio           # Open Prisma Studio GUI
 ```
+
+Schema changes go through migrations in `prisma/migrations/` (baseline `0_init` = state of Railway prod as of 2026-09-29). Deploys apply pending migrations via `prisma migrate deploy` (Dockerfile `CMD`). Do not use `prisma db push` or hand-written SQL against shared databases; old hand-written SQL lives in `prisma/legacy-sql/` for reference only.
+
+Existing local DB created via `db push` before the baseline: run `npx prisma migrate resolve --applied 0_init` and `npx prisma migrate resolve --applied 20260929000000_thumbnail_filename_text` once (or `npx prisma migrate reset` to rebuild it).
 
 ### Build & Test
 ```bash
@@ -95,7 +100,7 @@ apps/
 │   │   │   ├── types/       # Pagination types
 │   │   │   └── utils/       # Prisma + storage-provider utilities
 │   │   └── database/ # Prisma service
-│   └── prisma/       # Schema + migrations + seed
+│   └── prisma/       # Schema + migrations + seed (legacy-sql/ = old hand SQL)
 └── frontend/         # Next.js 14 (port 3000)
     ├── public/
     │   └── images/          # Static image assets
@@ -189,6 +194,7 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 
 Copy `.env.example` to `.env` at root level. Key variables:
 - `DATABASE_URL` - PostgreSQL connection (use port 5433 for local Docker)
+- `DIRECT_URL` - Connection used by Prisma for migrations (`directUrl`). Same as `DATABASE_URL` locally and on Railway; differs only behind a transaction pooler (Supabase :6543)
 - `JWT_SECRET` / `JWT_REFRESH_SECRET` - JWT signing keys
 - `GOOGLE_CLIENT_ID/SECRET` - Google OAuth credentials
 - `MICROSOFT_CLIENT_ID/SECRET` - Microsoft OAuth credentials

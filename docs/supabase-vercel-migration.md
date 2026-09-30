@@ -1,6 +1,6 @@
 # Migrationsplan: Railway + R2 → Vercel + Supabase
 
-Stand: 30. September 2026 (Schritte 1–3 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29
+Stand: 30. September 2026 (Schritte 1–4 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits: 2026-09-30
 
 ## Kontext
 
@@ -9,11 +9,11 @@ LocalShare läuft heute auf Railway (NestJS-API, Next.js-Frontend, 2× Postgres)
 Entscheidungen (mit Adrian abgestimmt):
 - **NestJS bleibt 1:1**, läuft als eine Vercel Function (Express-Adapter). Kein Rewrite.
 - **Auth bleibt** (eigenes JWT/Passport, Cookies auf `.localshare.ch`). Kein Wechsel auf Supabase Auth.
-- **Zwei Supabase-Projekte** (`localshare-staging`, `localshare-prod`), Region eu-central-1 (Frankfurt), gepaart mit Vercel-Region `fra1`.
+- **Zwei Supabase-Projekte** (`localshare-staging`, `localshare-prod`). Prod liegt in eu-central-1 (Frankfurt), gepaart mit der Vercel-Region `fra1`, Staging in eu-central-2 (Zürich), siehe Schritt 4.
 
 Warum das «einfach» geht (verifiziert im Code):
-- Backend ist stateless: kein Cron, keine Websockets, kein Cache, keine Queues.
-- Kein Raw-SQL, keine Postgres-Extensions → DB-Wechsel = Connection-String.
+- Backend ist stateless: keine Websockets, kein Cache, keine Queues. Seit Schritt 4 gibt es nur einen täglichen Keep-alive-Cron von Vercel.
+- Kein Raw-SQL, abgesehen von `SELECT 1` im Health-Check seit Schritt 4, und keine Postgres-Extensions → DB-Wechsel = Connection-String.
 - Bild-URLs werden zur Lesezeit aus `filename` gebaut (`listings.service.ts`) → Storage-Wechsel = Env-Vars, kein DB-Backfill.
 - `@localshare/shared` wird vom Backend nicht importiert → Backend-Projekt kann Root Directory `apps/backend` nutzen.
 - Frontend ist eine reine Client-SPA, keine Server-Fetches, kein Custom Server.
@@ -81,31 +81,69 @@ Umsetzung:
 - `next.config.js`: Beide `rewrites` und der dazugehörige `localhost:3000`-Eintrag in `remotePatterns` sind gelöscht. Production rief die API ohnehin direkt auf. Lokal zeigt `NEXT_PUBLIC_API_URL` jetzt auf `http://localhost:3001`, und `BACKEND_URL` entfällt.
 - Verschoben: Die Supabase-Einträge in `remotePatterns` folgen in Schritt 4, weil die Projekt-Refs erst dort entstehen. `*.r2.dev` bleibt bis Schritt 7. `start.sh` und die Railway-Variable `BACKEND_URL` kommen in Schritt 7, weil Railway sie bis zum Cutover nutzt. Die Konsolidierung von `getImageUrl` ist nicht nötig (YAGNI).
 
-### Schritt 4: Infrastruktur anlegen
-Supabase (je staging/prod, eu-central-1):
-- Projekt, Bucket `listing-images` (public), S3 Access Keys (Storage → S3), Data API aus, RLS an.
+### Schritt 4: Infrastruktur anlegen — umgesetzt in `feature/167-vercel-setup`
+Entscheide vom 2026-09-30: **Supabase Free** und **Vercel Hobby**.
 
-Vercel (2 Projekte, gleiche Repo, Production-Branch `main`, Staging = Branch `develop` mit branch-scoped Env + Domains):
+**Supabase**
+- Eigener Account mit der Org «LocalShare». Das Free-Limit von 2 aktiven Projekten gilt pro Person, und Adrians Account ist mit KIFU ausgelastet. Adrians Account ist dort als Developer eingeladen. Damit der MCP-Connector die Org sieht, muss er in claude.ai neu autorisiert werden, die Org ist noch nicht freigegeben.
+- `localshare-prod` in `eu-central-1` (Frankfurt), `localshare-staging` in `eu-central-2` (Zürich).
+- Beide auf Postgres 17.6, die Data API ist aus.
+- Bucket `listing-images` in beiden Projekten: public, nur `image/webp`, max. 5 MB, angelegt per SQL in `storage.buckets`. Die S3-Keys sind getestet: PutObject, öffentlicher GET mit 200 und identischen Bytes, DeleteObject.
+- Migration `20260930000000_enable_rls` aktiviert RLS auf allen 12 Tabellen, `_prisma_migrations` inklusive, nur falls die Tabelle existiert, weil sie der Shadow-DB fehlt. Die App verbindet überall als Tabellen-Owner mit `BYPASSRLS` und ist nicht betroffen. Das ist geprüft auf Railway Staging und Prod, Supabase Staging und lokal.
+- **Staging:** `migrate deploy` ist gelaufen, das Schema mit RLS steht, die DB ist ohne Daten.
+- **Prod:** Die DB ist bewusst leer, bis zum Restore in Schritt 5.
+- Zugangsdaten liegen lokal in `apps/backend/.env.supabase-{staging,prod}.local`, von Git ignoriert.
+- **Pausieren:** Free-Projekte pausieren nach 7 Tagen ohne Aktivität. Der Vercel-Cron `17 4 * * *` ruft täglich `/api/v1/health/db` auf, das `SELECT 1` ausführt. Crons laufen nur auf Production-Deployments. **Bis zum Cutover kann das Prod-Projekt deshalb pausieren.** Schritt 5 sollte innerhalb einer Woche folgen, sonst muss das Projekt im Dashboard wieder gestartet werden. Staging darf pausieren.
+
+**Vercel** (Team `adbstyles-projects`, Hobby):
 
 | | `localshare-frontend` | `localshare-backend` |
 |---|---|---|
 | Root Directory | `apps/frontend` | `apps/backend` |
-| Framework | Next.js | NestJS (Zero-Config) |
-| Ignored Build Step | `npx turbo-ignore` | `npx turbo-ignore` |
-| Domains | `app.localshare.ch` (main), `staging.localshare.ch` (develop) | `api.localshare.ch` (main), `api-staging.localshare.ch` (develop) |
+| Framework | Next.js | NestJS (Zero-Config, Entrypoint `src/main.ts`) |
+| Build Command (`vercel.json`) | `npm run build` | `npm run vercel-build` = `prisma generate` + `scripts/migrate-on-deploy.js` |
+| Node / Region | 22.x / `fra1` | 22.x / `fra1` |
+| Git | erst beim Cutover verbinden | erst beim Cutover verbinden |
+| Domains (Cutover) | `app.localshare.ch` (main), `staging.localshare.ch` (develop) | `api.localshare.ch` (main), `api-staging.localshare.ch` (develop) |
 
-Env Backend: `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `JWT_ACCESS_EXPIRATION`, `JWT_REFRESH_EXPIRATION`, `GOOGLE_*`/`MICROSOFT_*` (Callbacks unverändert, da Domains gleich bleiben), `FRONTEND_URL`, `COOKIE_DOMAIN=.localshare.ch`, `NODE_ENV=production`, `STORAGE_PROVIDER=s3`, `S3_ENDPOINT=https://<ref>.storage.supabase.co/storage/v1/s3`, `S3_REGION=eu-central-1`, `S3_BUCKET=listing-images`, `S3_FORCE_PATH_STYLE=true`, `S3_PUBLIC_URL=https://<ref>.supabase.co/storage/v1/object/public/listing-images`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`.
-Env Frontend: `NEXT_PUBLIC_API_URL=https://api.localshare.ch` bzw. `…api-staging…`, `NEXT_PUBLIC_FEEDBACK_EMAIL`. `BACKEND_URL` entfällt.
-Turbo v1 (`pipeline`-Key) ist mit repo-installiertem turbo 1.13.4 auf Vercel ok.
+Erkenntnisse aus den ersten Deploys:
+- **Expliziter `buildCommand` ist Pflicht.** Sonst erkennt Vercel Turbo und baut mit einem globalen Turbo 2.x. Das bricht ab, weil `packageManager` fehlt und `turbo.json` noch das v1-Format hat. `turbo-ignore` entfällt aus demselben Grund.
+- **`.vercelignore` im Repo-Root ist Pflicht für CLI-Deploys.** Ohne sie lädt die CLI `.env`-Dateien mit hoch, und NestJS würde sie zur Laufzeit laden. Mit ihr umfasst der Upload rund 2,2 MB.
+- **`migrate-on-deploy.js` läuft nur mit `PRISMA_MIGRATE_ON_DEPLOY=true`.** Ein Branch-Check reicht nicht, weil CLI-Deploys den lokalen Branch melden. Das Flag wird erst gesetzt, wenn die jeweilige Supabase-DB die restaurierten Daten enthält, also für Production und für die Preview von `develop`.
+- **Target explizit setzen.** Der erste CLI-Deploy eines Projekts ohne Git wurde trotz `--target=preview` Production, also mit Production-Variablen. Previews haben Vercel Authentication aktiv, getestet wird mit `vercel curl`.
+- **Backend-Preview funktioniert:**
+  - Health liefert 200, auch direkt nach dem Kaltstart. Das 1-s-Fenster für `listen()` reicht also.
+  - `/auth/me` liefert 401.
+  - `/main.js`, `/src/main.ts` und `/package.json` liefern 404, es gibt kein Quellcode-Leak.
+  - Ohne `DATABASE_URL` meldet Prisma sauber den fehlenden Wert.
+- **Frontend-Preview funktioniert:** Der Build dauert 2 min, alle Seiten liefern 200, und `/api/*` liefert 404, weil der Rewrite entfernt ist.
+- **Backend-Preview gegen Supabase-Staging funktioniert:**
+  - `/health/db` liefert 200, der Transaction-Pooler :6543 funktioniert also von `fra1` aus.
+  - Eine echte Prisma-Abfrage (Community-Preview) liefert 404, wie erwartet.
+  - `/auth/me` und `/auth/refresh` liefern 401.
+  - Das Log meldet `ImageService: Using S3 storage`.
+
+Env Backend, **vollständig gesetzt**. Preview hat Staging-Werte, Production hat Prod-Werte:
+- Von Railway übernommen: `JWT_SECRET`, `GOOGLE_*`, `MICROSOFT_*`, `FRONTEND_URL`, `COOKIE_DOMAIN`.
+- Datenbank: `DATABASE_URL` (Pooler :6543 `?pgbouncer=true&connection_limit=5`) und `DIRECT_URL` (Session-Pooler :5432).
+- Speicher: `STORAGE_PROVIDER=s3`, `S3_ENDPOINT`, `S3_REGION` (jeweilige Projektregion), `S3_BUCKET=listing-images`, `S3_FORCE_PATH_STYLE=true`, `S3_PUBLIC_URL`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`.
+- `PRISMA_MIGRATE_ON_DEPLOY` ist noch **nicht** gesetzt, das passiert erst beim Cutover: für Production und als Preview-Variable **nur für den Git-Branch `develop`**, sonst würde jede Feature-Preview die gemeinsame Staging-DB migrieren. Achtung: Ist Staging pausiert, scheitert der `develop`-Build am Migrationsschritt. Dann das Projekt im Dashboard fortsetzen und neu deployen.
+- `NODE_ENV` setzt Vercel selbst.
+
+Env Frontend: `NEXT_PUBLIC_API_URL`, Preview `https://api-staging.localshare.ch` und Production `https://api.localshare.ch`, plus `NEXT_TELEMETRY_DISABLED=1`. Railway setzt heute kein `NEXT_PUBLIC_FEEDBACK_EMAIL`, der Fallback im Code bleibt.
+`remotePatterns` in `next.config.js` enthält die beiden Supabase-Hosts `<ref>.supabase.co/storage/v1/object/public/**`.
 
 ### Schritt 5: Daten migrieren (erst Staging als Probelauf, dann Prod)
 ```bash
 # Client-Tools >= Server-Major (brew postgresql@17)
+# Voraussetzung: Schritt 4 ist auf Railway live, Railway hat also `enable_rls` angewendet.
+# Dann enthält der Dump RLS und alle 3 Migrationszeilen.
 # _prisma_migrations kommt mit: Die Historie ist seit Schritt 2 korrekt.
 pg_dump "$RAILWAY_DB" -Fc --no-owner --no-privileges --schema=public -f localshare.dump
-pg_restore -d "postgresql://postgres.<ref>:<pw>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres" \
+# --clean --if-exists: Staging hat schon das Schema aus Schritt 4, Prod ist leer. Das funktioniert für beide.
+pg_restore -d "$SUPABASE_DIRECT_URL" --clean --if-exists \
   --no-owner --no-privileges --schema=public --exit-on-error localshare.dump
-psql "$SUPABASE_DIRECT" -c "select (select count(*) from users),(select count(*) from listings),(select count(*) from listing_images);"
+psql "$SUPABASE_DIRECT_URL" -c "select (select count(*) from users),(select count(*) from listings),(select count(*) from listing_images);"
 DATABASE_URL=… DIRECT_URL=… npx prisma migrate status   # "up to date", kein resolve nötig
 ```
 Bilder (flache Keys, 1:1):
@@ -116,19 +154,19 @@ rclone copy r2:localshare-images supa:listing-images --progress --transfers 16 -
 (rclone `supa`-Remote: `provider=Other`, `endpoint=https://<ref>.storage.supabase.co/storage/v1/s3`, `region=eu-central-1`, `force_path_style=true`, `no_check_bucket=true`. Fallback: `aws s3 sync` mit `addressing_style path`.)
 
 ### Schritt 6: Cutover
-**Phase A (kein Downtime):** Branch mit Schritten 2–3 (Schritt 1 ist dann schon auf Railway live) → Preview deployen → `/api/v1/auth/health`, `curl /main.js` (muss 404 sein) und ein Multipart-Upload testen (validiert Kaltstart-Listen, Body-Stream, sharp, Prisma-Engine). DNS-TTL der 4 Hostnames auf 60 s. Staging komplett durchspielen (Dump, Restore, rclone, merge `develop`, CNAMEs → `cname.vercel-dns.com`, Checkliste). Prod-Bucket vorab bulk-kopieren.
+**Phase A (kein Downtime):** Branch mit Schritten 2–3 (Schritt 1 ist dann schon auf Railway live) → Preview deployen → `/api/v1/health/db`, `curl /main.js` (muss 404 sein) und ein Multipart-Upload testen (validiert Kaltstart-Listen, Body-Stream, sharp, Prisma-Engine). DNS-TTL der 4 Hostnames auf 60 s. Staging komplett durchspielen (Dump, Restore, rclone, merge `develop`, CNAMEs → `cname.vercel-dns.com`, Checkliste). Prod-Bucket vorab bulk-kopieren.
 
 **Phase B (30–60 min Fenster):** Railway-Backend stoppen (Write-Freeze) → Dump/Restore/Status-Check → rclone Delta → Domains in Vercel zuweisen → PR nach `main` mergen → CNAMEs `api.` + `app.` umstellen → Checkliste → 24 h Vercel- und Supabase-Logs beobachten.
 
 **Rollback:** CNAMEs zurück auf Railway, Railway-Backend starten. Railway-DB und R2 wurden nie verändert; Schreibvorgänge nach Cutover gehen verloren. Railway + R2 1–2 Wochen behalten, dann löschen.
 
 ### Schritt 7: Doku nachziehen
-`CLAUDE.md` (Environments-Tabelle), `README.md`, `docker-compose.yml` (Healthcheck-Pfad `/api/v1/auth/health`). Löschen: `apps/backend/railpack.json`, `apps/frontend/start.sh` (Script `start` → `next start`), `R2_*`-Variablen, Railway-Variable `BACKEND_URL` (Frontend), `*.r2.dev` in `remotePatterns`. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.
+`CLAUDE.md` (Environments-Tabelle), `README.md`, `docker-compose.yml` (erledigt: `/api/v1/health` existiert seit Schritt 4). Löschen: `apps/backend/railpack.json`, `apps/frontend/start.sh` (Script `start` → `next start`), `R2_*`-Variablen, Railway-Variable `BACKEND_URL` (Frontend), `*.r2.dev` in `remotePatterns`. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.
 
 **Datenschutzerklärung** `apps/frontend/src/app/[locale]/privacy/page.tsx` (Zeilen «Datenbank» und «Bilder»): Hosting-Angaben Railway und Cloudflare R2 durch Vercel (Frankfurt) und Supabase (Frankfurt) ersetzen. Das ist Rechtstext, also zeitgleich mit dem Cutover live schalten.
 
 ## Verifikation (Checkliste nach jedem Deploy)
-- `GET /api/v1/auth/health` → 200, Response-Header zeigen Vercel.
+- `GET /api/v1/health/db` → 200 (DB erreichbar), Response-Header zeigen Vercel.
 - Login Google und Microsoft → Redirect auf `/auth/callback`, `/auth/me` 200, Cookies `accessToken`/`refreshToken` mit `Domain=.localshare.ch`.
 - `accessToken`-Cookie löschen → nächster Call triggert `POST /auth/refresh` → 200 (SHA-256-Pfad).
 - Bestehendes Listing: Bilder + Thumbs laden von `<ref>.supabase.co/storage/v1/object/public/listing-images/…`.
@@ -150,7 +188,7 @@ rclone copy r2:localshare-images supa:listing-images --progress --transfers 16 -
 | Feature-Branch-Previews (`*.vercel.app`) können sich nicht einloggen (Cookie-Domain, Single-Origin-CORS) | Dokumentierte Einschränkung; Auth auf Staging testen |
 | Alle User einmal ausgeloggt | Bewusst, beim Release von Schritt 1 |
 | Ab Schritt 1 auch auf Railway kein App-Rate-Limit mehr | Gering: Der Throttler zählte hinter dem Proxy ohnehin alle User als eine IP. Nach dem Cutover übernimmt die Vercel Firewall |
-| Lazy Prisma-Connect: falsche `DATABASE_URL` crasht nicht mehr beim Boot, `/auth/health` prüft die DB nicht | Erster echter Request nach Deploy (Checkliste) deckt es auf |
+| Lazy Prisma-Connect: falsche `DATABASE_URL` crasht nicht mehr beim Boot, `/auth/health` prüft die DB nicht | `/api/v1/health/db` in der Checkliste deckt es auf |
 | Keine Tests im Repo | Manuelle Checkliste; Staging-Probelauf ist der Sicherheitsnetz |
 
 Nicht verifiziert: Tracing von Prisma-Engine und sharp im npm-Monorepo, rclone-Listing gegen Supabase S3, Railway-Postgres-Version, exakte heutige Railway-Env-Werte (Annahme: Frontend ruft `api.localshare.ch` direkt, Rewrites sind in Prod tot).

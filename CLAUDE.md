@@ -66,6 +66,8 @@ npx prisma studio           # Open Prisma Studio GUI
 
 Schema changes go through migrations in `prisma/migrations/` (baseline `0_init` = state of Railway prod as of 2026-09-29). Deploys apply pending migrations via `prisma migrate deploy` (Dockerfile `CMD`). Do not use `prisma db push` or hand-written SQL against shared databases; old hand-written SQL lives in `prisma/legacy-sql/` for reference only.
 
+New tables must enable RLS in their own migration (`ALTER TABLE "x" ENABLE ROW LEVEL SECURITY;`), see `20260930000000_enable_rls`. On Supabase this keeps them unreachable for the Data API roles; the app connects as table owner and is unaffected.
+
 Existing local DB created via `db push` before the baseline: run `npx prisma migrate resolve --applied 0_init` and `npx prisma migrate resolve --applied 20260929000000_thumbnail_filename_text` once (or `npx prisma migrate reset` to rebuild it).
 
 ### Build & Test
@@ -99,7 +101,7 @@ apps/
 │   │   │   ├── decorators/  # @CurrentUser, @Public
 │   │   │   ├── types/       # Pagination types
 │   │   │   └── utils/       # Prisma + storage-provider utilities
-│   │   └── database/ # Prisma service
+│   │   └── database/ # Prisma service, HealthController (/health, /health/db)
 │   └── prisma/       # Schema + migrations + seed (legacy-sql/ = old hand SQL)
 └── frontend/         # Next.js 14 (port 3000)
     ├── public/
@@ -150,6 +152,7 @@ All backend routes are prefixed with `/api/v1/`:
 - `/communities/*` - Community CRUD, join/leave, member management (owner can remove members)
 - `/groups/*` - Group CRUD within communities, member management (owner can remove members)
 - `/listings/*` - Listing CRUD with image upload, bookmarks
+- `/health` - Liveness (no DB), `/health/db` - runs `SELECT 1` (daily Vercel cron keeps the Supabase Free project from pausing); `/auth/health` kept for compatibility
 
 ### Auth Flow
 1. User clicks OAuth login → redirected to Google/Microsoft
@@ -190,11 +193,19 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 - Cookie domain: `.localshare.ch` (shared between frontend/backend, both environments)
 - OAuth callbacks configured for both environments in Google/Microsoft Console
 
+### Vercel + Supabase (prepared, not live yet)
+Migration in progress, see `docs/supabase-vercel-migration.md` (issue #167).
+- Vercel projects `localshare-backend` (NestJS zero-config, entrypoint `src/main.ts`) and `localshare-frontend` (Next.js), Hobby, region `fra1`, root dirs `apps/backend` / `apps/frontend`, not Git-connected until cutover
+- Each app has a `vercel.json` with an explicit `buildCommand` (Vercel's Turbo auto-detection breaks on our turbo v1 setup); `.vercelignore` keeps local `.env` files out of CLI uploads
+- Backend build (`npm run vercel-build`) runs `prisma migrate deploy` only if `PRISMA_MIGRATE_ON_DEPLOY=true` is set for that Vercel environment
+- Supabase (separate LocalShare account, Free plan): `localshare-prod` (eu-central-1), `localshare-staging` (eu-central-2), public bucket `listing-images` (WebP only, 5 MB), Data API off, RLS on all tables via migration. Local credentials in `apps/backend/.env.supabase-{staging,prod}.local` (gitignored)
+
 ## Environment Setup
 
 Copy `.env.example` to `.env` at root level. Key variables:
 - `DATABASE_URL` - PostgreSQL connection (use port 5433 for local Docker)
 - `DIRECT_URL` - Connection used by Prisma for migrations (`directUrl`). Same as `DATABASE_URL` locally and on Railway; differs only behind a transaction pooler (Supabase :6543)
+- `PRISMA_MIGRATE_ON_DEPLOY` - Vercel only: `true` lets the build apply pending migrations
 - `JWT_SECRET` / `JWT_REFRESH_SECRET` - JWT signing keys
 - `GOOGLE_CLIENT_ID/SECRET` - Google OAuth credentials
 - `MICROSOFT_CLIENT_ID/SECRET` - Microsoft OAuth credentials

@@ -1,10 +1,22 @@
 # Machbarkeits-Analyse: LocalShare auf/mit AT Protocol (Bluesky)
 
-Stand: 9. August 2026 · Recherche-Datum aller Quellen: 2026-08-09
+Stand: 9. August 2026 · Recherche-Datum aller Quellen: 2026-08-09 · **Update: 30. September 2026 (siehe Kap. 1a)**
 
 ## 1. TL;DR
 
 Technisch wäre LocalShare als atproto-App baubar — für **öffentliche** Listings sogar gut (eigene Lexicons, OAuth ist produktionsreif, mit Tap ist die Indexer-Infrastruktur klein). Der Kern von LocalShare ist aber **privat**: invite-basierte Communities/Groups, Listings nur für Mitglieder sichtbar. atproto ist public-by-default und kann diese Zugriffskontrolle heute nicht auf Protokollebene erzwingen; «Permissioned Data» ist erst ein Design-Proposal ohne Ship-Termin. Ein Rewrite heute würde entweder die Privatheit opfern oder die Zugriffskontrolle doch wieder komplett app-seitig lösen — dann bringt atproto kaum Nutzen. **Empfehlung: Kein Rewrite jetzt. Optional atproto-OAuth als dritten Login-Provider (kleiner Aufwand), und das Permissioned-Data-Proposal beobachten — dessen «Spaces»-Konzept passt fast 1:1 auf LocalShare-Communities. Re-Evaluation, sobald es produktionsreif ist.**
+
+## 1a. Update 2026-09-30: «Permissioned Data» ist als «atproto Spaces» in der Alpha
+
+Die zentrale Wartebedingung aus Kap. 6 hat sich schneller bewegt als erwartet:
+
+- **20.08.2026:** [Atproto Spaces Alpha](https://atproto.com/blog/atproto-spaces-alpha) öffentlich — laufender Code statt Paper: TypeScript-SDKs (Alpha-Snapshots), gehosteter Test-PDS, Docker-Image für Self-Hosting, Beispiel-App **bulletin.my** (Bulletin Board, Quellcode offen — dem LocalShare-Use-Case sehr nah).
+- **28.09.2026:** [Proposal 0016 gemerged und in «atproto spaces» umbenannt](https://github.com/bluesky-social/proposals/pull/115).
+- **Modell bestätigt das Mapping aus Kap. 4:** Space-Authority (DID) kontrolliert Zugriff, Records liegen in per-Space permissioned Repos auf dem PDS (eigene Lexicons), Sync direkt PDS→App ohne öffentliche Relay-Firehose; seit September getrennte `readPolicy`/`writePolicy` pro Space.
+- **Einschränkungen:** Explizit Alpha — Breaking Changes erwartet, destruktive Migrationen möglich, kein Security-Review, Alpha-Accounts nicht persistent, Produktion abgeraten. Spaces sind **Zugriffskontrolle, keine Verschlüsselung** (wer Space-Zugriff hat, liest alles). Spec ändert sich laufend (API-Umbenennungen im September).
+- **Timeline:** Iteration durch den Herbst 2026, erklärtes Ziel: Launch noch 2026.
+
+**Konsequenz für die Empfehlung (Kap. 6):** Weiterhin kein Produktions-Rewrite. Aber die Bedingung für Option C (PoC) ist erfüllt: Ein LocalShare-Space-PoC auf Basis der Alpha-SDKs und der Bulletin-Board-Vorlage ist jetzt möglich. Re-Evaluation konkret terminierbar: beim angekündigten Stable-Launch (Ende 2026).
 
 ## 2. atproto-Primer (nur das Nötigste)
 
@@ -98,3 +110,9 @@ Begründung:
 - [TechCrunch: Beyond Bluesky — Apps auf AT Protocol](https://techcrunch.com/2025/06/13/beyond-bluesky-these-are-the-apps-building-social-experiences-on-the-at-protocol/) — u.a. Frontpage
 - [Self-hosting — AT Protocol Guide](https://atproto.com/guides/self-hosting) · [PDS-Self-Hosting-Guide 2026 (Pi Stack)](https://www.pistack.xyz/posts/2026-04-23-self-host-bluesky-pds-at-protocol-server-guide-2026/) — Betrieb/Kosten
 - [macwright.com: I haven't made anything with AT Proto yet (03/2026)](https://macwright.com/2026/03/16/atproto) — unabhängige Einschätzung private data
+
+Quellen Update (abgerufen 2026-09-30):
+
+- [The Atproto Spaces Alpha is Live (20.08.2026)](https://atproto.com/blog/atproto-spaces-alpha) — Alpha-Ankündigung, SDKs, bulletin.my, Limitationen, Timeline
+- [Proposal-PR #115: Rename to atproto spaces (merged 28.09.2026)](https://github.com/bluesky-social/proposals/pull/115)
+- [Spec-Deltas September 2026 (ezpds Spaces-Alpha-Watch)](https://github.com/malpercio-dev/ezpds/pull/660) — laufende Breaking Changes (readPolicy/writePolicy, putMember)

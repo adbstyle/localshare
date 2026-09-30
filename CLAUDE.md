@@ -223,6 +223,8 @@ Two storage backends supported for user uploads:
 
 Image URLs are computed at read time from `S3_PUBLIC_URL` + filename, so switching buckets needs no DB change.
 
+Uploads: the frontend downscales every picked image in the browser (`src/lib/image-resize.ts`, JPEG, max 1280 px wide = the width the backend stores) before upload. Downscaling is what keeps a 3-image request below Vercel's 4.5 MB limit; the backend's 4 MB per-file limit is only a backstop. The backend still resizes/re-encodes to WebP + thumbnail with sharp.
+
 ## i18n (Internationalization)
 
 Frontend supports German (de) and French (fr). Translations in `apps/frontend/messages/*.json`. Always add translations for both languages when adding user-facing text.

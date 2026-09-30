@@ -46,6 +46,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const [currentImages, setCurrentImages] = useState(listing?.images || []);
   const [pendingImageFiles, setPendingImageFiles] = useState<File[]>([]);
   const [pendingCoverIndex, setPendingCoverIndex] = useState(0);
+  const [imagesBusy, setImagesBusy] = useState(false);
 
   const {
     register,
@@ -253,6 +254,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
                 setPendingImageFiles(files);
                 setPendingCoverIndex(coverIndex);
               }}
+              onBusyChange={setImagesBusy}
             />
           </div>
         </CardContent>
@@ -443,7 +445,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
       <div className="flex justify-end gap-4">
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || imagesBusy}
           size="lg"
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -292,6 +292,7 @@
     "emptyAction": "Créez une nouvelle annonce.",
     "created": "Annonce créée avec succès",
     "imageUploadFailed": "Échec du téléchargement des images",
+    "imageProcessingFailed": "L'image n'a pas pu être traitée. Veuillez utiliser JPG, PNG ou WebP.",
     "updated": "Annonce mise à jour avec succès",
     "deleted": "Annonce supprimée avec succès",
     "imagesUploaded": "Images téléchargées avec succès",

@@ -69,7 +69,7 @@ export class ListingsController {
   @UseInterceptors(
     FilesInterceptor('images', 3, {
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
+        fileSize: 4 * 1024 * 1024, // 4MB backstop; the frontend downscales to ~0.3-1MB so 3 files fit Vercel's 4.5MB request limit
       },
       fileFilter: (req, file, callback) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|webp|heic)$/)) {

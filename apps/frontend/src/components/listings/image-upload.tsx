@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
+import { downscaleImage } from '@/lib/image-resize';
 import { ListingImage, Listing } from '@localshare/shared';
 import { Camera, GalleryThumbnails, ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import {
@@ -26,6 +27,7 @@ interface ImageUploadProps {
   maxSizeMB?: number;
   onImagesChange?: (images: ListingImage[]) => void;
   onPendingImagesChange?: (files: File[], coverIndex: number) => void;
+  onBusyChange?: (busy: boolean) => void;
 }
 
 export function ImageUpload({
@@ -35,6 +37,7 @@ export function ImageUpload({
   maxSizeMB = 10,
   onImagesChange,
   onPendingImagesChange,
+  onBusyChange,
 }: ImageUploadProps) {
   const t = useTranslations();
   const { toast } = useToast();
@@ -63,6 +66,11 @@ export function ImageUpload({
     setImages(existingImages);
   }, [existingImages]);
 
+  // Lets the parent form block submit while picked images are still being processed/uploaded
+  useEffect(() => {
+    onBusyChange?.(uploading);
+  }, [uploading, onBusyChange]);
+
   // Keep ref in sync with state
   useEffect(() => {
     previewUrlsRef.current = previewUrls;
@@ -79,8 +87,27 @@ export function ImageUpload({
     };
   }, []);
 
+  // Sequential on purpose: decoding several full-size photos at once can exhaust mobile memory
+  const downscaleFiles = async (files: FileList): Promise<File[] | null> => {
+    const processedFiles: File[] = [];
+    try {
+      for (const file of Array.from(files)) {
+        processedFiles.push(await downscaleImage(file));
+      }
+      return processedFiles;
+    } catch {
+      toast({
+        title: t('errors.validation'),
+        description: t('listings.imageProcessingFailed'),
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+    const input = event.target;
+    const files = input.files;
     if (!files || files.length === 0) return;
 
     // Check if adding these files would exceed the limit
@@ -107,46 +134,51 @@ export function ImageUpload({
       }
     }
 
-    // If we have a listingId, upload immediately
-    if (listingId) {
-      await uploadImages(files);
-    } else {
-      // Store files temporarily for upload after listing creation
-      const newFiles = Array.from(files);
-      const updatedFiles = [...pendingFiles, ...newFiles];
-      setPendingFiles(updatedFiles);
-
-      // Create preview URLs using FileReader for better mobile compatibility
-      const newPreviewUrls = await Promise.all(
-        newFiles.map(
-          (file) =>
-            new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.onerror = () => resolve(''); // Empty string on error
-              reader.readAsDataURL(file);
-            })
-        )
-      );
-      setPreviewUrls([...previewUrls, ...newPreviewUrls]);
-
-      // Notify parent component with cover index (0 = first file is cover)
-      if (onPendingImagesChange) {
-        onPendingImagesChange(updatedFiles, pendingCoverIndex);
+    setUploading(true);
+    try {
+      const newFiles = await downscaleFiles(files);
+      if (!newFiles) return;
+      if (listingId) {
+        await uploadImages(newFiles);
+      } else {
+        await addPendingFiles(newFiles);
       }
+    } finally {
+      setUploading(false);
+      input.value = '';
     }
-
-    // Reset the input
-    event.target.value = '';
   };
 
-  const uploadImages = async (files: FileList) => {
+  // Create mode: keep files for upload after the listing exists
+  const addPendingFiles = async (newFiles: File[]) => {
+    const updatedFiles = [...pendingFiles, ...newFiles];
+    setPendingFiles(updatedFiles);
+
+    // Create preview URLs using FileReader for better mobile compatibility
+    const newPreviewUrls = await Promise.all(
+      newFiles.map(
+        (file) =>
+          new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => resolve(''); // Empty string on error
+            reader.readAsDataURL(file);
+          })
+      )
+    );
+    setPreviewUrls([...previewUrls, ...newPreviewUrls]);
+
+    // Notify parent component with cover index (0 = first file is cover)
+    if (onPendingImagesChange) {
+      onPendingImagesChange(updatedFiles, pendingCoverIndex);
+    }
+  };
+
+  const uploadImages = async (files: File[]) => {
     setUploading(true);
     try {
       const formData = new FormData();
-      for (let i = 0; i < files.length; i++) {
-        formData.append('images', files[i]);
-      }
+      files.forEach((file) => formData.append('images', file));
 
       // Backend returns full Listing object, not just new images
       const { data } = await api.post<Listing>(
@@ -374,6 +406,7 @@ export function ImageUpload({
                       size="icon"
                       className="absolute bottom-2 right-2 h-8 w-8 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       onClick={() => handleSetPendingCover(index)}
+                      disabled={uploading}
                       title={t('listings.setCoverImage')}
                     >
                       <GalleryThumbnails className="h-4 w-4" />
@@ -388,6 +421,7 @@ export function ImageUpload({
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => handleDeletePendingFile(index)}
+                    disabled={uploading}
                   >
                     <X className="h-4 w-4" />
                   </Button>

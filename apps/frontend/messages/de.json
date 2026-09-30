@@ -163,7 +163,8 @@
     "removeMember": "Entfernen",
     "removeMemberConfirm": "Mitglied entfernen?",
     "removeMemberWarning": "\"{name}\" wird aus der Community und allen Gruppen entfernt. Gruppen, die {name} gegründet hat, gehen an Sie über.",
-    "memberRemoved": "Mitglied entfernt"
+    "memberRemoved": "Mitglied entfernt",
+    "createDescription": "Erstelle eine neue Community für deine Nachbarschaft, deinen Verein oder deine Freunde"
   },
   "groups": {
     "title": "Gruppen",

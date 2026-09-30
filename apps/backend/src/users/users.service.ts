@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { revokeCommunityMembership } from '../communities/membership.cascade';
+import { revokeMembership } from '../communities/membership.cascade';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +33,7 @@ export class UsersService {
         select: { community: { select: { id: true, ownerId: true } } },
       });
       for (const { community } of memberships) {
-        await revokeCommunityMembership(tx, community, id);
+        await revokeMembership(tx, community, id);
       }
 
       const now = new Date();
@@ -42,7 +42,6 @@ export class UsersService {
       await tx.refreshToken.deleteMany({ where: { userId: id } });
       await tx.ssoAccount.deleteMany({ where: { userId: id } });
       await tx.communityMember.deleteMany({ where: { userId: id } });
-      await tx.groupMember.deleteMany({ where: { userId: id } });
       await tx.user.update({ where: { id }, data: { deletedAt: now } });
     }, { timeout: 15_000 }); // one cascade per community; pooled connections can be slow
   }
@@ -56,12 +55,6 @@ export class UsersService {
         communityMemberships: {
           include: {
             community: true,
-          },
-        },
-        ownedGroups: true,
-        groupMemberships: {
-          include: {
-            group: true,
           },
         },
         listings: {

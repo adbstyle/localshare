@@ -30,7 +30,7 @@ describe('Membership cascades', () => {
     const watcher = await createUser(t, 'Watcher');
     await joinCommunity(t, watcher.id, community);
     await joinGroup(t, watcher.id, group);
-    const listing = await createListing(t, member.id, { communityIds: [community.id], groupIds: [group.id] });
+    const listing = await createListing(t, member.id, { communityIds: [community.id, group.id] });
     return { owner, member, watcher, community, group, listing };
   }
 
@@ -59,7 +59,7 @@ describe('Membership cascades', () => {
 
     expectStatus(await t.request('DELETE', `/communities/${community.id}/leave`, { as: member.id }), 204);
 
-    expect((await t.request('GET', `/groups/${group.id}`, { as: member.id })).status).not.toBe(200);
+    expect((await t.request('GET', `/communities/${group.id}`, { as: member.id })).status).not.toBe(200);
   });
 
   it('transfers the groups of a leaving user to the community owner', async () => {
@@ -68,13 +68,13 @@ describe('Membership cascades', () => {
 
     expectStatus(await t.request('DELETE', `/communities/${community.id}/leave`, { as: member.id }), 204);
 
-    const group = expectStatus(await t.request('GET', `/groups/${ownGroup.id}`, { as: owner.id }), 200).body;
+    const group = expectStatus(await t.request('GET', `/communities/${ownGroup.id}`, { as: owner.id }), 200).body;
     expect(group.ownerId).toBe(owner.id);
   });
 
   it('drops group shares when the community is deleted', async () => {
     const { owner, member, community, group } = await communityWithGroup(t);
-    const listing = await createListing(t, member.id, { groupIds: [group.id] });
+    const listing = await createListing(t, member.id, { communityIds: [group.id] });
 
     expectStatus(await t.request('DELETE', `/communities/${community.id}`, { as: owner.id }), 204);
 
@@ -91,24 +91,24 @@ describe('Membership cascades', () => {
       204,
     );
 
-    const group = expectStatus(await t.request('GET', `/groups/${ownGroup.id}`, { as: owner.id }), 200).body;
+    const group = expectStatus(await t.request('GET', `/communities/${ownGroup.id}`, { as: owner.id }), 200).body;
     expect(group.viewer.role).toBe('owner');
   });
 
   it('drops shares when a group is deleted', async () => {
     const { owner, member, group } = await communityWithGroup(t);
-    await createListing(t, owner.id, { groupIds: [group.id] });
+    await createListing(t, owner.id, { communityIds: [group.id] });
 
-    expectStatus(await t.request('DELETE', `/groups/${group.id}`, { as: owner.id }), 204);
+    expectStatus(await t.request('DELETE', `/communities/${group.id}`, { as: owner.id }), 204);
 
     expect(await t.prisma.listingVisibility.count()).toBe(0);
-    expect((await t.request('GET', `/groups/${group.id}`, { as: member.id })).status).toBe(404);
+    expect((await t.request('GET', `/communities/${group.id}`, { as: member.id })).status).toBe(404);
   });
 
   it('removes shares with a group only when leaving that group', async () => {
     const { member, watcher, community, group, listing } = await groupShareSetup();
 
-    expectStatus(await t.request('DELETE', `/groups/${group.id}/leave`, { as: member.id }), 204);
+    expectStatus(await t.request('DELETE', `/communities/${group.id}/leave`, { as: member.id }), 204);
 
     const rows = await t.prisma.listingVisibility.findMany({ where: { listingId: listing.id } });
     expect(rows.map((r) => r.communityId)).toEqual([community.id]);
@@ -134,7 +134,7 @@ describe('Membership cascades', () => {
 
       expectStatus(await t.request('DELETE', '/users/me', { as: member.id }), 204);
 
-      const stored = await t.prisma.group.findUniqueOrThrow({ where: { id: group.id } });
+      const stored = await t.prisma.community.findUniqueOrThrow({ where: { id: group.id } });
       expect(stored.ownerId).toBe(owner.id);
     });
   });

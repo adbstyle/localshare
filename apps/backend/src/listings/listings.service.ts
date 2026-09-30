@@ -28,7 +28,7 @@ export class ListingsService {
   ) {}
 
   async create(userId: string, dto: CreateListingDto) {
-    const targets = await this.access.assertShareTargets(userId, dto.communityIds, dto.groupIds);
+    const targets = await this.access.assertShareTargets(userId, dto.communityIds);
 
     return this.prisma.listing.create({
       data: {
@@ -78,11 +78,8 @@ export class ListingsService {
 
   async update(id: string, userId: string, dto: UpdateListingDto) {
     const listing = await this.access.assertListingOwner(id, userId);
-    const { communityIds, groupIds, ...fields } = dto;
-    const replaceVisibility = communityIds !== undefined || groupIds !== undefined;
-    const targets = replaceVisibility
-      ? await this.access.assertShareTargets(userId, communityIds, groupIds)
-      : null;
+    const { communityIds, ...fields } = dto;
+    const targets = communityIds !== undefined ? await this.access.assertShareTargets(userId, communityIds) : null;
     const effectiveType = dto.type ?? listing.type;
 
     const updated = await this.prisma.listing.update({

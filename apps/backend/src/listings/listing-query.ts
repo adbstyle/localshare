@@ -1,6 +1,5 @@
 import { Prisma } from '@prisma/client';
 import { shownVisibilityWhere, visibleListingWhere } from '../access/access.where';
-import { ShareTargets } from '../access/access.service';
 import { FilterListingsDto } from './dto';
 
 export const DEFAULT_PAGE_SIZE = 30;
@@ -47,18 +46,12 @@ export function listingDetailInclude(userId: string) {
     images: { orderBy: imageOrder },
     visibility: {
       where: shownVisibilityWhere(userId),
-      include: {
-        community: { select: { id: true, name: true } },
-        group: { select: { id: true, name: true } },
-      },
+      include: { community: { select: { id: true, name: true, parentId: true } } },
     },
     bookmarks: { where: { userId }, select: { id: true } },
   } satisfies Prisma.ListingInclude;
 }
 
-export function visibilityRows(targets: ShareTargets): Prisma.ListingVisibilityCreateManyListingInput[] {
-  return [
-    ...targets.communityIds.map((communityId) => ({ visibilityType: 'COMMUNITY' as const, communityId })),
-    ...targets.groupIds.map((groupId) => ({ visibilityType: 'GROUP' as const, groupId })),
-  ];
+export function visibilityRows(communityIds: string[]): Prisma.ListingVisibilityCreateManyListingInput[] {
+  return communityIds.map((communityId) => ({ communityId }));
 }

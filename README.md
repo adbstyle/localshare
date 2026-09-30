@@ -56,8 +56,8 @@ apps/
 │   ├── src/
 │   │   ├── auth/      # OAuth2 + JWT
 │   │   ├── users/     # Profile management
-│   │   ├── communities/
-│   │   ├── groups/
+│   │   ├── access/    # Visibility + permission rules
+│   │   ├── communities/ # Communities and groups
 │   │   ├── listings/  # + image upload
 │   │   └── database/  # Prisma service
 │   └── prisma/        # Schema + migrations
@@ -67,8 +67,7 @@ apps/
         ├── app/[locale]/  # i18n routing
         │   ├── auth/       # OAuth callback
         │   ├── communities/
-        │   │   └── [id]/   # inkl. Gruppen-Verwaltung
-        │   ├── groups/[id]/ # Gruppen-Detailseite
+        │   │   └── [id]/   # Community- und Gruppen-Detailseite
         │   ├── listings/
         │   ├── profile/
         │   ├── privacy/    # Datenschutz
@@ -77,7 +76,6 @@ apps/
         ├── components/
         │   ├── ui/        # shadcn + breadcrumb, collapsible
         │   ├── communities/
-        │   ├── groups/
         │   └── listings/
         └── messages/      # de.json, fr.json
 
@@ -92,10 +90,9 @@ All routes prefixed with `/api/v1/`:
 | Module | Endpoints |
 |--------|-----------|
 | Auth | `GET /auth/google`, `/auth/microsoft`, `POST /auth/refresh`, `/auth/logout` |
-| Users | `GET/PATCH/DELETE /users/me` |
-| Communities | CRUD + `/join?token=`, `/leave`, `/refresh-invite`, `/members` |
-| Groups | CRUD + `/join?token=`, `/leave`, `/preview/:token` (Filter: `?communityId=`) |
-| Listings | CRUD + `POST /:id/images` |
+| Users | `PATCH/DELETE /users/me`, `GET /users/me/export` |
+| Communities (inkl. Gruppen: `parentId`) | CRUD + `POST /join/:token`, `GET /preview/:token`, `/leave`, `/refresh-invite`, `/members` |
+| Listings | CRUD, `GET /paginated`, `POST /:id/bookmark`, Bilder unter `/:id/images` |
 
 ## Environment Variables
 

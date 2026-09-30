@@ -34,7 +34,7 @@ describe('Listing mutations', () => {
     });
     const toGroup = await t.request('POST', '/listings', {
       as: user.id,
-      body: listingBody({ groupIds: [foreignGroup.id] }),
+      body: listingBody({ communityIds: [foreignGroup.id] }),
     });
 
     expect(toCommunity.status).toBe(403);
@@ -69,12 +69,12 @@ describe('Listing mutations', () => {
     const listing = await createListing(t, owner.id, { communityIds: [community.id] });
 
     expectStatus(
-      await t.request('PATCH', `/listings/${listing.id}`, { as: owner.id, body: { groupIds: [group.id] } }),
+      await t.request('PATCH', `/listings/${listing.id}`, { as: owner.id, body: { communityIds: [group.id] } }),
       200,
     );
 
-    const rows = await t.prisma.listingVisibility.findMany({ select: { communityId: true, groupId: true } });
-    expect(rows).toEqual([{ communityId: null, groupId: group.id }]);
+    const rows = await t.prisma.listingVisibility.findMany({ select: { communityId: true } });
+    expect(rows).toEqual([{ communityId: group.id }]);
   });
 
   it('forbids a viewer who is not the owner to change or delete the listing', async () => {

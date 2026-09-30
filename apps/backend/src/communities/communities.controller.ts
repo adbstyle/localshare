@@ -77,13 +77,13 @@ export class CommunitiesController {
 
   @Post('join/:token')
   async join(@CurrentUser() user, @Param('token', ParseUUIDPipe) token: string) {
-    return this.membershipService.joinCommunity(user.id, token);
+    return this.membershipService.join(user.id, token);
   }
 
   @Delete(':id/leave')
   @HttpCode(HttpStatus.NO_CONTENT)
   async leave(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
-    await this.membershipService.leaveCommunity(user.id, id);
+    await this.membershipService.leave(user.id, id);
   }
 
   @Post(':id/refresh-invite')

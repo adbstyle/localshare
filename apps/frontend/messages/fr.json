@@ -163,7 +163,8 @@
     "removeMember": "Supprimer",
     "removeMemberConfirm": "Supprimer le membre?",
     "removeMemberWarning": "\"{name}\" sera retiré de la communauté et de tous les groupes. Les groupes créés par {name} vous seront transférés.",
-    "memberRemoved": "Membre supprimé"
+    "memberRemoved": "Membre supprimé",
+    "createDescription": "Créez une nouvelle communauté pour votre voisinage, votre association ou vos amis"
   },
   "groups": {
     "title": "Groupes",

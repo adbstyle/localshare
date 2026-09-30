@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // Backend InviteStateService generates redirectTo via OAuth flow with UUID validation
+// '/groups/join' only for invites started before #191; next.config redirects it
 const ALLOWED_REDIRECT_PREFIXES = ['/communities/join', '/groups/join'];
 
 // Error codes set by the backend SsoLoginExceptionFilter
@@ -28,17 +29,11 @@ function postLoginTarget(searchParams: URLSearchParams): string {
   const redirectTo = searchParams.get('redirectTo');
   if (redirectTo && isValidRedirectUrl(redirectTo)) return redirectTo;
 
-  const communityToken = sessionStorage.getItem('pendingInviteToken');
-  if (communityToken) {
-    sessionStorage.removeItem('pendingInviteToken');
-    return `/communities/join?token=${communityToken}`;
-  }
-  const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
-  if (groupToken) {
-    sessionStorage.removeItem('pendingGroupInviteToken');
-    return `/groups/join?token=${groupToken}`;
-  }
-  return '/';
+  // Communities and groups share one join page; the group key only changes wording
+  const token = sessionStorage.getItem('pendingInviteToken') ?? sessionStorage.getItem('pendingGroupInviteToken');
+  sessionStorage.removeItem('pendingInviteToken');
+  sessionStorage.removeItem('pendingGroupInviteToken');
+  return token ? `/communities/join?token=${token}` : '/';
 }
 
 function LoginError({ code }: { code: string }) {

@@ -6,7 +6,6 @@ import { AccessModule } from './access/access.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CommunitiesModule } from './communities/communities.module';
-import { GroupsModule } from './groups/groups.module';
 import { ListingsModule } from './listings/listings.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
@@ -21,7 +20,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     AuthModule,
     UsersModule,
     CommunitiesModule,
-    GroupsModule,
     ListingsModule,
   ],
   providers: [

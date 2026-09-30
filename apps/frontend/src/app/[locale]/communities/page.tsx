@@ -10,16 +10,8 @@ import { communityQueries } from '@/lib/api/communities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Users, MoreVertical, LinkIcon } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { CreateCommunityDialog } from '@/components/communities/create-community-dialog';
-import { JoinCommunityDialog } from '@/components/communities/join-community-dialog';
+import { CommunityFormDialog } from '@/components/communities/community-form-dialog';
+import { JoinDialog } from '@/components/communities/join-dialog';
 import { CommunityCard } from '@/components/communities/community-card';
 import {
   DropdownMenu,
@@ -34,7 +26,8 @@ export default function CommunitiesPage() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const communitiesQuery = useQuery({ ...communityQueries.list(), enabled: !!user });
-  const communities = communitiesQuery.data ?? [];
+  // The flat membership list also holds groups; they appear on their community's page
+  const communities = (communitiesQuery.data ?? []).filter((c) => !c.parentId);
   const loading = communitiesQuery.isPending;
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
@@ -44,11 +37,6 @@ export default function CommunitiesPage() {
   useEffect(() => {
     if (!authLoading && !user) router.push('/');
   }, [user, authLoading, router]);
-
-  const handleCommunityCreated = () => {
-    setCreateDialogOpen(false);
-    communitiesQuery.refetch();
-  };
 
   const handleJoinSuccess = async (communityId: string) => {
     // Set highlight state first (optimistic)
@@ -129,27 +117,11 @@ export default function CommunitiesPage() {
 
         {/* Desktop: Direct buttons */}
         <div className="hidden md:flex gap-2">
-          <JoinCommunityDialog
-            onJoinSuccess={handleJoinSuccess}
-            variant="outline"
-          />
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="mr-2 h-4 w-4" />
-                {t('communities.create')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent closeLabel={t('common.close')}>
-              <DialogHeader>
-                <DialogTitle>{t('communities.create')}</DialogTitle>
-                <DialogDescription>
-                  {t('communities.descriptionPlaceholder')}
-                </DialogDescription>
-              </DialogHeader>
-              <CreateCommunityDialog onSuccess={handleCommunityCreated} />
-            </DialogContent>
-          </Dialog>
+          <JoinDialog kind="communities" onJoined={handleJoinSuccess} />
+          <Button variant="outline" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t('communities.create')}
+          </Button>
         </div>
 
         {/* Mobile: Dropdown menu */}
@@ -179,15 +151,12 @@ export default function CommunitiesPage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Controlled dialogs for mobile (without triggers) */}
-          <JoinCommunityDialog
-            open={joinDialogOpen}
-            onOpenChange={setJoinDialogOpen}
-            hideDefaultTrigger
-            onJoinSuccess={handleJoinSuccess}
-          />
+          {/* Controlled dialog for mobile (without trigger) */}
+          <JoinDialog kind="communities" open={joinDialogOpen} onOpenChange={setJoinDialogOpen} onJoined={handleJoinSuccess} />
         </div>
       </div>
+
+      <CommunityFormDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
 
       {communities.length === 0 ? (
         <Card>

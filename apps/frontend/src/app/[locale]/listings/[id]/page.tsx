@@ -84,7 +84,7 @@ function ListingHeader({ listing }: { listing: Listing }) {
 function ListingMeta({ listing }: { listing: Listing }) {
   const t = useTranslations('listings');
   const locale = useLocale();
-  const sharedWith = listing.visibility?.map((v) => v.community?.name || v.group?.name).filter(Boolean) ?? [];
+  const sharedWith = listing.visibility?.map((v) => v.community.name) ?? [];
 
   return (
     <dl className="space-y-4">

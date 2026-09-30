@@ -57,27 +57,18 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
       price: listing.price || undefined,
       priceTimeUnit: listing.priceTimeUnit || undefined,
       category: listing.category,
-      communityIds: listing.visibility
-        .filter((v) => v.type === 'COMMUNITY')
-        .map((v) => v.communityId!)
-        .filter(Boolean),
-      groupIds: listing.visibility
-        .filter((v) => v.type === 'GROUP')
-        .map((v) => v.groupId!)
-        .filter(Boolean),
+      communityIds: listing.visibility.map((v) => v.communityId),
     } : {
       title: '',
       description: '',
       type: ListingType.LEND,
       category: ListingCategory.OTHER,
       communityIds: [],
-      groupIds: [],
     },
   });
 
   const selectedType = watch('type');
   const selectedCommunityIds = watch('communityIds') || [];
-  const selectedGroupIds = watch('groupIds') || [];
 
   const handleFormSubmit = async (data: CreateListingDto) => {
     setLoading(true);
@@ -306,8 +297,7 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
 
           <ListingVisibilityFields
             communityIds={selectedCommunityIds}
-            groupIds={selectedGroupIds}
-            onChange={(field, ids) => setValue(field, ids)}
+            onChange={(ids) => setValue('communityIds', ids)}
           />
         </CardContent>
       </Card>

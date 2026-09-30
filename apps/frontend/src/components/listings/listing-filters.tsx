@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/hooks/use-auth';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useState, useEffect, useRef } from 'react';
 
@@ -19,7 +18,6 @@ interface ListingFiltersProps {
 
 export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
   const t = useTranslations();
-  const { user } = useAuth();
 
   const types = Object.values(ListingType);
   const categories = Object.values(ListingCategory);
@@ -33,11 +31,14 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
   // Debounce the search value (300ms)
   const debouncedSearch = useDebouncedValue(searchInput, 300);
 
-  // Sync debounced value to URL (only when value actually changes)
+  // Sync debounced value to URL (only when value actually changes). The empty
+  // input maps to "no search"; comparing '' with undefined used to fire on
+  // mount and reset the page to 1.
   useEffect(() => {
-    if (debouncedSearch !== filters.search) {
+    const nextSearch = debouncedSearch.trim() || undefined;
+    if (nextSearch !== filters.search) {
       isInternalUpdateRef.current = true;
-      onChange({ search: debouncedSearch || undefined });
+      onChange({ search: nextSearch });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
@@ -114,36 +115,28 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
         </div>
 
         {/* My Listings */}
-        {user && (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="myListings"
-              checked={filters.myListings || false}
-              onCheckedChange={(checked) =>
-                onChange({ myListings: checked ? true : undefined })
-              }
-            />
-            <Label htmlFor="myListings" className="cursor-pointer">
-              {t('listings.myListings')}
-            </Label>
-          </div>
-        )}
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="myListings"
+            checked={filters.myListings || false}
+            onCheckedChange={(checked) => onChange({ myListings: checked ? true : undefined })}
+          />
+          <Label htmlFor="myListings" className="cursor-pointer">
+            {t('listings.myListings')}
+          </Label>
+        </div>
 
         {/* Bookmarked Listings */}
-        {user && (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="bookmarked"
-              checked={filters.bookmarked || false}
-              onCheckedChange={(checked) =>
-                onChange({ bookmarked: checked ? true : undefined })
-              }
-            />
-            <Label htmlFor="bookmarked" className="cursor-pointer">
-              {t('listings.onlyBookmarks')}
-            </Label>
-          </div>
-        )}
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="bookmarked"
+            checked={filters.bookmarked || false}
+            onCheckedChange={(checked) => onChange({ bookmarked: checked ? true : undefined })}
+          />
+          <Label htmlFor="bookmarked" className="cursor-pointer">
+            {t('listings.onlyBookmarks')}
+          </Label>
+        </div>
 
         <Separator />
 

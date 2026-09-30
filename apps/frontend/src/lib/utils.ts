@@ -6,6 +6,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+/** Storage URLs are absolute; local uploads are served by the API. */
+export function getImageUrl(url: string): string {
+  return url.startsWith('http') ? url : `${API_URL}${url}`;
+}
+
 export function formatDate(date: string | Date, locale: string = 'de-CH'): string {
   return new Date(date).toLocaleDateString(locale, {
     year: 'numeric',

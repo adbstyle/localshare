@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api/client';
-import { Community } from '@localshare/shared';
+import { useQuery } from '@tanstack/react-query';
+import { communityQueries } from '@/lib/api/communities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Users, MoreVertical, LinkIcon } from 'lucide-react';
@@ -33,39 +33,21 @@ export default function CommunitiesPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [loading, setLoading] = useState(true);
+  const communitiesQuery = useQuery({ ...communityQueries.list(), enabled: !!user });
+  const communities = communitiesQuery.data ?? [];
+  const loading = communitiesQuery.isPending;
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [liveMessage, setLiveMessage] = useState('');
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        router.push('/');
-      } else {
-        fetchCommunities();
-      }
-    }
+    if (!authLoading && !user) router.push('/');
   }, [user, authLoading, router]);
-
-  const fetchCommunities = async () => {
-    try {
-      const { data } = await api.get<Community[]>('/communities');
-      setCommunities(data);
-      return data;
-    } catch (error) {
-      console.error('Failed to fetch communities:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCommunityCreated = () => {
     setCreateDialogOpen(false);
-    fetchCommunities();
+    communitiesQuery.refetch();
   };
 
   const handleJoinSuccess = async (communityId: string) => {
@@ -74,7 +56,7 @@ export default function CommunitiesPage() {
 
     try {
       // Fetch updated communities list
-      const updatedCommunities = await fetchCommunities();
+      const { data: updatedCommunities = [] } = await communitiesQuery.refetch({ throwOnError: true });
 
       // Scroll to new community after a brief delay (allow render)
       setTimeout(() => {

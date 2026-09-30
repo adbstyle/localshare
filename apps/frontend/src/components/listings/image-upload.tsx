@@ -9,6 +9,7 @@ import { useErrorToast } from '@/hooks/use-error-toast';
 import { api } from '@/lib/api/client';
 import { downscaleImage } from '@/lib/image-resize';
 import { ListingImage, Listing } from '@localshare/shared';
+import { getImageUrl } from '@/lib/utils';
 import { Camera, GalleryThumbnails, ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import {
   AlertDialog,
@@ -52,16 +53,11 @@ export function ImageUpload({
   const [settingCover, setSettingCover] = useState<string | null>(null);
   const [pendingCoverIndex, setPendingCoverIndex] = useState(0); // For create mode: which pending file is cover
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   const previewUrlsRef = useRef<string[]>([]);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);
 
-  const getImageUrl = (url: string) => {
-    if (url.startsWith('http')) return url;
-    return `${apiUrl}${url}`;
-  };
 
   // Sync images state when existingImages prop changes
   useEffect(() => {

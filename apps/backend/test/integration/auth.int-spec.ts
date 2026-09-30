@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { createTestApp, TestApp } from './helpers/app';
 import { resetDb } from './helpers/db';
+import { AuthService } from '../../src/auth/auth.service';
 import { createCommunity, createUser } from './helpers/factories';
 
 describe('Authentication', () => {
@@ -38,5 +39,34 @@ describe('Authentication', () => {
     await t.prisma.user.update({ where: { id: user.id }, data: { deletedAt: new Date() } });
 
     expect((await t.request('GET', '/auth/me', { as: user.id })).status).toBe(401);
+  });
+
+  describe('refresh tokens', () => {
+    const refresh = (token: string) => t.request('POST', '/auth/refresh', { cookie: `refreshToken=${token}` });
+
+    it('rotates: a used refresh token is consumed and cannot be replayed', async () => {
+      const user = await createUser(t);
+      const { refreshToken } = await t.get(AuthService).login({ id: user.id, email: 'x@test.local' });
+
+      expect((await refresh(refreshToken)).status).toBe(200);
+      expect((await refresh(refreshToken)).status).toBe(401);
+      expect(await t.prisma.refreshToken.count({ where: { userId: user.id } })).toBe(1);
+    });
+
+    it('removes expired and revoked tokens on login and all tokens on logout', async () => {
+      const user = await createUser(t);
+      await t.prisma.refreshToken.createMany({
+        data: [
+          { userId: user.id, tokenHash: 'expired', expiresAt: new Date(Date.now() - 1000) },
+          { userId: user.id, tokenHash: 'revoked', expiresAt: new Date(Date.now() + 1e9), revokedAt: new Date() },
+        ],
+      });
+
+      await t.get(AuthService).login({ id: user.id, email: 'x@test.local' });
+      expect(await t.prisma.refreshToken.count({ where: { userId: user.id } })).toBe(1);
+
+      expect((await t.request('POST', '/auth/logout', { as: user.id })).status).toBe(200);
+      expect(await t.prisma.refreshToken.count({ where: { userId: user.id } })).toBe(0);
+    });
   });
 });

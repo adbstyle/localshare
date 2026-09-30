@@ -100,21 +100,15 @@ export class AuthService {
     });
   }
 
-  async login(user: any) {
-    const payload = { sub: user.id, email: user.email };
-
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = await this.generateRefreshToken(user.id);
+  async login(user: { id: string; email: string }) {
+    // Housekeeping: expired tokens and rows revoked by the old rotation logic
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId: user.id, OR: [{ expiresAt: { lt: new Date() } }, { revokedAt: { not: null } }] },
+    });
 
     return {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
+      accessToken: this.jwtService.sign({ sub: user.id, email: user.email }),
+      refreshToken: await this.generateRefreshToken(user.id),
     };
   }
 
@@ -150,46 +144,26 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token not provided');
     }
 
-    const validToken = await this.prisma.refreshToken.findUnique({
+    const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash: this.hashRefreshToken(refreshToken) },
-      include: { user: true },
+      select: { id: true, expiresAt: true, revokedAt: true, user: { select: { id: true, email: true } } },
     });
 
-    if (!validToken || validToken.revokedAt || validToken.expiresAt < new Date()) {
+    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    // Revoke old token (token rotation)
-    await this.prisma.refreshToken.update({
-      where: { id: validToken.id },
-      data: { revokedAt: new Date() },
-    });
-
-    // Generate new tokens
-    const payload = {
-      sub: validToken.user.id,
-      email: validToken.user.email,
-    };
-    const accessToken = this.jwtService.sign(payload);
-    const newRefreshToken = await this.generateRefreshToken(
-      validToken.user.id,
-    );
+    // Rotation: the used token is consumed. deleteMany (not delete) keeps two
+    // requests that raced with the same token from failing on each other.
+    await this.prisma.refreshToken.deleteMany({ where: { id: stored.id } });
 
     return {
-      accessToken,
-      refreshToken: newRefreshToken,
+      accessToken: this.jwtService.sign({ sub: stored.user.id, email: stored.user.email }),
+      refreshToken: await this.generateRefreshToken(stored.user.id),
     };
   }
 
   async logout(userId: string) {
-    await this.prisma.refreshToken.updateMany({
-      where: {
-        userId,
-        revokedAt: null,
-      },
-      data: {
-        revokedAt: new Date(),
-      },
-    });
+    await this.prisma.refreshToken.deleteMany({ where: { userId } });
   }
 }

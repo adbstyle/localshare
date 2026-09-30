@@ -135,6 +135,7 @@ describe('Listing mutations', () => {
       const cover = uploaded.find((img: any) => img.isCover);
 
       expect(uploaded.filter((img: any) => img.isCover)).toHaveLength(1);
+      expect(uploaded[0].url).toMatch(/^\/uploads\/listings\/.+\.webp$/);
       const after = await t.request('DELETE', `/listings/${listing.id}/images/${cover.id}`, { as: owner.id });
       expect(after.body.images).toHaveLength(1);
       expect(after.body.images[0].isCover).toBe(true);

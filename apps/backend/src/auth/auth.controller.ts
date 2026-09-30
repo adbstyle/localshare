@@ -19,6 +19,8 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { InviteStateService } from './invite-state.service';
 import { SsoLoginExceptionFilter } from './sso-login.exception';
 
+type InviteType = 'community' | 'group';
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -57,23 +59,13 @@ export class AuthController {
 
   @Public()
   @Get('google')
-  async googleAuth(
+  googleAuth(
     @Req() req: Request,
     @Res() res: Response,
     @Query('inviteToken') inviteToken?: string,
-    @Query('inviteType') inviteType?: 'community' | 'group',
+    @Query('inviteType') inviteType?: InviteType,
   ) {
-    // Set cookie BEFORE initiating OAuth flow
-    if (inviteToken && inviteType) {
-      res.cookie(
-        'pendingInvite',
-        JSON.stringify({ token: inviteToken, type: inviteType }),
-        this.getCookieOptions('pending'),
-      );
-    }
-
-    // Now trigger the OAuth flow via Passport manually
-    passport.authenticate('google', { session: false })(req, res);
+    this.startOAuth('google', req, res, inviteToken, inviteType);
   }
 
   @Public()
@@ -81,60 +73,18 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @UseFilters(SsoLoginExceptionFilter)
   async googleAuthCallback(@Req() req, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.login(
-      req.user,
-    );
-
-    // Set refresh token as HTTPOnly cookie (restricted to auth endpoints)
-    res.cookie('refreshToken', refreshToken, this.getCookieOptions('refresh'));
-
-    // Set access token as HTTPOnly cookie (available for all API calls)
-    res.cookie('accessToken', accessToken, this.getCookieOptions('access'));
-
-    // Build redirect URL WITHOUT token in URL (security best practice)
-    let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback`;
-
-    // Check for pending invite in cookie (primary method)
-    const pendingInvite = req.cookies['pendingInvite'];
-    if (pendingInvite) {
-      try {
-        const { token, type } = JSON.parse(pendingInvite);
-        if (token && type) {
-          const joinPath = this.inviteStateService.generateRedirectUrl(
-            token,
-            type,
-          );
-          redirectUrl += `?redirectTo=${encodeURIComponent(joinPath)}`;
-        }
-      } catch (error) {
-        // Invalid cookie data, ignore
-      }
-      // Clear the cookie after use
-      res.clearCookie('pendingInvite', this.getCookieOptions('pending'));
-    }
-
-    res.redirect(redirectUrl);
+    await this.finishLogin(req, res);
   }
 
   @Public()
   @Get('microsoft')
-  async microsoftAuth(
+  microsoftAuth(
     @Req() req: Request,
     @Res() res: Response,
     @Query('inviteToken') inviteToken?: string,
-    @Query('inviteType') inviteType?: 'community' | 'group',
+    @Query('inviteType') inviteType?: InviteType,
   ) {
-    // Set cookie BEFORE initiating OAuth flow
-    if (inviteToken && inviteType) {
-      res.cookie(
-        'pendingInvite',
-        JSON.stringify({ token: inviteToken, type: inviteType }),
-        this.getCookieOptions('pending'),
-      );
-    }
-
-    // Now trigger the OAuth flow via Passport manually
-    passport.authenticate('microsoft', { session: false })(req, res);
+    this.startOAuth('microsoft', req, res, inviteToken, inviteType);
   }
 
   @Public()
@@ -142,39 +92,51 @@ export class AuthController {
   @UseGuards(AuthGuard('microsoft'))
   @UseFilters(SsoLoginExceptionFilter)
   async microsoftAuthCallback(@Req() req, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.login(
-      req.user,
-    );
+    await this.finishLogin(req, res);
+  }
 
-    // Set refresh token as HTTPOnly cookie (restricted to auth endpoints)
+  /** Parks a pending invite in a cookie, then hands over to the provider. */
+  private startOAuth(
+    provider: 'google' | 'microsoft',
+    req: Request,
+    res: Response,
+    inviteToken?: string,
+    inviteType?: InviteType,
+  ) {
+    if (inviteToken && inviteType) {
+      res.cookie(
+        'pendingInvite',
+        JSON.stringify({ token: inviteToken, type: inviteType }),
+        this.getCookieOptions('pending'),
+      );
+    }
+    passport.authenticate(provider, { session: false })(req, res);
+  }
+
+  /** Sets the session cookies and redirects to the frontend (no token in the URL). */
+  private async finishLogin(req, res: Response) {
+    const { accessToken, refreshToken } = await this.authService.login(req.user);
     res.cookie('refreshToken', refreshToken, this.getCookieOptions('refresh'));
-
-    // Set access token as HTTPOnly cookie (available for all API calls)
     res.cookie('accessToken', accessToken, this.getCookieOptions('access'));
 
-    // Build redirect URL WITHOUT token in URL (security best practice)
     let redirectUrl = `${process.env.FRONTEND_URL}/auth/callback`;
-
-    // Check for pending invite in cookie (primary method)
-    const pendingInvite = req.cookies['pendingInvite'];
-    if (pendingInvite) {
-      try {
-        const { token, type } = JSON.parse(pendingInvite);
-        if (token && type) {
-          const joinPath = this.inviteStateService.generateRedirectUrl(
-            token,
-            type,
-          );
-          redirectUrl += `?redirectTo=${encodeURIComponent(joinPath)}`;
-        }
-      } catch (error) {
-        // Invalid cookie data, ignore
-      }
-      // Clear the cookie after use
+    const joinPath = this.pendingInvitePath(req.cookies['pendingInvite']);
+    if (joinPath) redirectUrl += `?redirectTo=${encodeURIComponent(joinPath)}`;
+    if (req.cookies['pendingInvite']) {
       res.clearCookie('pendingInvite', this.getCookieOptions('pending'));
     }
 
     res.redirect(redirectUrl);
+  }
+
+  private pendingInvitePath(cookie?: string): string | null {
+    if (!cookie) return null;
+    try {
+      const { token, type } = JSON.parse(cookie);
+      return token && type ? this.inviteStateService.generateRedirectUrl(token, type) : null;
+    } catch {
+      return null; // malformed cookie or token: log in without the invite
+    }
   }
 
   @Public()

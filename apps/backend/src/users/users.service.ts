@@ -7,29 +7,6 @@ import { revokeCommunityMembership } from '../communities/membership.cascade';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findById(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id, deletedAt: null },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        homeAddress: true,
-        phoneNumber: true,
-        preferredLanguage: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
-  }
-
   async update(id: string, dto: UpdateUserDto) {
     return this.prisma.user.update({
       where: { id, deletedAt: null },

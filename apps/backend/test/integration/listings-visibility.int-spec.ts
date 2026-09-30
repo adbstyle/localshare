@@ -132,6 +132,11 @@ describe('Listing visibility', () => {
     expect(await feedIds(member.id)).toEqual([listing.id]);
   });
 
+  it('caps the page size at 100', async () => {
+    const user = await createUser(t);
+    expect((await t.request('GET', '/listings/paginated?limit=101', { as: user.id })).status).toBe(400);
+  });
+
   it('answers 400 for a malformed listing id', async () => {
     const user = await createUser(t);
     expect((await t.request('GET', '/listings/not-a-uuid', { as: user.id })).status).toBe(400);

@@ -4,6 +4,7 @@ import { PrismaService } from '../database/prisma.service';
 import { AccessService } from '../access/access.service';
 import { visibleListingWhere } from '../access/access.where';
 import { listingViewer } from '../access/permissions';
+import { toListingDetail, toListingListItem } from './listing.mapper';
 import { isUniqueViolation } from '../common/utils/prisma-errors';
 import { PaginatedResponse } from '../common/types';
 import { CreateListingDto, UpdateListingDto, FilterListingsDto } from './dto';
@@ -60,12 +61,7 @@ export class ListingsService {
       this.prisma.listing.count({ where }),
     ]);
 
-    const data = rows.map(({ bookmarks, images, ...listing }) => ({
-      ...listing,
-      isBookmarked: bookmarks.length > 0,
-      images: images.map((img) => this.withImageUrls(img)),
-      viewer: listingViewer(listing, userId),
-    }));
+    const data = rows.map((row) => toListingListItem(row, userId, this.toImage));
 
     return { data, total, limit, offset };
   }
@@ -77,24 +73,7 @@ export class ListingsService {
     });
     if (!listing) throw new NotFoundException('Listing not found');
 
-    const { bookmarks, visibility, images, creator, ...rest } = listing;
-    const viewer = listingViewer(listing, userId);
-
-    return {
-      ...rest,
-      // Own contact details are pointless on one's own listing
-      creator: viewer.isOwner ? { ...creator, email: '', homeAddress: null, phoneNumber: null } : creator,
-      isBookmarked: bookmarks.length > 0,
-      visibility: visibility.map((v) => ({
-        type: v.visibilityType,
-        communityId: v.communityId,
-        groupId: v.groupId,
-        community: v.community,
-        group: v.group,
-      })),
-      images: images.map((img) => this.withImageUrls(img)),
-      viewer,
-    };
+    return toListingDetail(listing, userId, this.toImage);
   }
 
   async update(id: string, userId: string, dto: UpdateListingDto) {
@@ -118,7 +97,7 @@ export class ListingsService {
       include: { images: true },
     });
 
-    return { ...updated, images: updated.images.map((img) => this.withImageUrls(img)) };
+    return { ...updated, images: updated.images.map(this.toImage) };
   }
 
   async delete(id: string, userId: string) {
@@ -152,39 +131,42 @@ export class ListingsService {
   async uploadImages(listingId: string, userId: string, files: Express.Multer.File[]) {
     await this.access.assertListingOwner(listingId, userId);
 
-    const currentCount = await this.prisma.listingImage.count({ where: { listingId } });
-    if (currentCount + files.length > MAX_IMAGES_PER_LISTING) {
+    const existing = await this.prisma.listingImage.findMany({
+      where: { listingId },
+      select: { isCover: true, orderIndex: true },
+    });
+    if (existing.length + files.length > MAX_IMAGES_PER_LISTING) {
       throw new BadRequestException(`Maximum ${MAX_IMAGES_PER_LISTING} images per listing`);
     }
 
-    await this.imageService.processAndStore(listingId, files);
-    return this.findOne(listingId, userId);
+    await this.imageService.processAndStore(listingId, files, existing);
+    return this.imagesOf(listingId);
   }
 
   async deleteImage(listingId: string, imageId: string, userId: string) {
-    await this.assertOwnImage(listingId, imageId, userId);
-    await this.imageService.deleteImage(imageId);
-    return this.findOne(listingId, userId);
+    const image = await this.assertOwnImage(listingId, imageId, userId);
+    await this.imageService.deleteImage(image);
+    return this.imagesOf(listingId);
   }
 
   async setCoverImage(listingId: string, imageId: string, userId: string) {
     await this.assertOwnImage(listingId, imageId, userId);
     await this.imageService.setCoverImage(listingId, imageId);
-    return this.findOne(listingId, userId);
+    return this.imagesOf(listingId);
+  }
+
+  /** Response of the image endpoints: the listing's current images. */
+  private async imagesOf(listingId: string) {
+    return { id: listingId, images: await this.imageService.listForListing(listingId) };
   }
 
   private async assertOwnImage(listingId: string, imageId: string, userId: string) {
     await this.access.assertListingOwner(listingId, userId);
     // The image must belong to this listing (prevents IDOR via a foreign imageId)
-    const image = await this.prisma.listingImage.findFirst({
-      where: { id: imageId, listingId },
-      select: { id: true },
-    });
+    const image = await this.prisma.listingImage.findFirst({ where: { id: imageId, listingId } });
     if (!image) throw new NotFoundException('Image not found in this listing');
+    return image;
   }
 
-  private withImageUrls(img: ListingImage) {
-    const url = this.imageService.getImageUrl(img.filename);
-    return { ...img, url, thumbnailUrl: this.imageService.getThumbnailUrl(img.thumbnailFilename) || url };
-  }
+  private toImage = (img: ListingImage) => this.imageService.toDto(img);
 }

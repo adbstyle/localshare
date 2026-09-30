@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/navigation';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { useAuth } from '@/hooks/use-auth';
 import { Bookmark } from 'lucide-react';
 import Image from 'next/image';

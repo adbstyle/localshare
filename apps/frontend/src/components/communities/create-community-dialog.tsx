@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useErrorToast } from '@/hooks/use-error-toast';
+import { api } from '@/lib/api/client';
 import { Loader2 } from 'lucide-react';
 
 interface CreateCommunityDialogProps {
@@ -21,6 +22,7 @@ interface CreateCommunityDialogProps {
 export function CreateCommunityDialog({ onSuccess }: CreateCommunityDialogProps) {
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -41,11 +43,7 @@ export function CreateCommunityDialog({ onSuccess }: CreateCommunityDialogProps)
       });
       onSuccess();
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToCreateCommunity'),
-        variant: 'destructive',
-      });
+      showError(error, 'errors.failedToCreateCommunity');
     } finally {
       setLoading(false);
     }

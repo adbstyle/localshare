@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { Loader2 } from 'lucide-react';
 import { ImageUpload } from './image-upload';
 

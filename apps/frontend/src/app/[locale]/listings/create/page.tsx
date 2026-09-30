@@ -4,13 +4,15 @@ import { ListingForm } from '@/components/listings/listing-form';
 import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useErrorToast } from '@/hooks/use-error-toast';
+import { api } from '@/lib/api/client';
 import { CreateListingDto } from '@localshare/shared';
 
 export default function CreateListingPage() {
   const router = useRouter();
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
 
   const handleSubmit = async (data: CreateListingDto, pendingFiles?: File[]) => {
     try {
@@ -50,11 +52,7 @@ export default function CreateListingPage() {
 
       router.push(`/listings/${listing.id}`);
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToCreateListing'),
-        variant: 'destructive',
-      });
+      showError(error, 'errors.failedToCreateListing');
       throw error;
     }
   };

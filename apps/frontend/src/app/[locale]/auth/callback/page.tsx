@@ -23,6 +23,24 @@ function isValidRedirectUrl(url: string): boolean {
   );
 }
 
+/** Where to go after login: backend invite redirect, then a pending invite, else home. */
+function postLoginTarget(searchParams: URLSearchParams): string {
+  const redirectTo = searchParams.get('redirectTo');
+  if (redirectTo && isValidRedirectUrl(redirectTo)) return redirectTo;
+
+  const communityToken = sessionStorage.getItem('pendingInviteToken');
+  if (communityToken) {
+    sessionStorage.removeItem('pendingInviteToken');
+    return `/communities/join?token=${communityToken}`;
+  }
+  const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
+  if (groupToken) {
+    sessionStorage.removeItem('pendingGroupInviteToken');
+    return `/groups/join?token=${groupToken}`;
+  }
+  return '/';
+}
+
 function LoginError({ code }: { code: string }) {
   const t = useTranslations('auth.loginErrors');
   const messageKey = LOGIN_ERROR_CODES.includes(code) ? code : 'unknown';
@@ -44,41 +62,14 @@ function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations();
-  const { fetchUser } = useAuth();
+  const { user, loading } = useAuth();
   const loginError = searchParams.get('error');
 
   useEffect(() => {
-    if (loginError) return;
-
-    // No token in URL needed - HTTPOnly cookies are set by backend
-    // Just fetch user to verify auth and get user data
-    fetchUser().then(() => {
-      // Check URL params for redirect (from backend invite flow)
-      const redirectTo = searchParams.get('redirectTo');
-
-      if (redirectTo && isValidRedirectUrl(redirectTo)) {
-        router.replace(redirectTo);
-        return;
-      }
-
-      // Fallback: Check sessionStorage for pending invites
-      const communityToken = sessionStorage.getItem('pendingInviteToken');
-      const groupToken = sessionStorage.getItem('pendingGroupInviteToken');
-
-      if (communityToken) {
-        sessionStorage.removeItem('pendingInviteToken');
-        router.replace(`/communities/join?token=${communityToken}`);
-      } else if (groupToken) {
-        sessionStorage.removeItem('pendingGroupInviteToken');
-        router.replace(`/groups/join?token=${groupToken}`);
-      } else {
-        router.replace('/');
-      }
-    }).catch(() => {
-      // Auth failed, redirect to home
-      router.replace('/');
-    });
-  }, [loginError, searchParams, router, fetchUser]);
+    // The backend already set the HTTPOnly cookies; useAuth verifies them.
+    if (loginError || loading) return;
+    router.replace(user ? postLoginTarget(searchParams) : '/');
+  }, [loginError, loading, user, searchParams, router]);
 
   if (loginError) {
     return <LoginError code={loginError} />;

@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorToast } from '@/hooks/use-error-toast';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { parseInviteInput } from '@/lib/utils/parse-invite';
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ export function JoinCommunityDialog({
 }: JoinCommunityDialogProps = {}) {
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
 
   // Support both controlled and uncontrolled modes
   const isControlled = typeof openProp !== 'undefined';
@@ -134,11 +136,7 @@ export function JoinCommunityDialog({
         });
         setOpen(false);
       } else {
-        toast({
-          title: t('errors.generic'),
-          description: err.response?.data?.message || t('communities.errors.tokenNotFound'),
-          variant: 'destructive',
-        });
+        showError(err, 'communities.errors.tokenNotFound');
       }
     } finally {
       setJoining(false);

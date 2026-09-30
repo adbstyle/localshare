@@ -76,6 +76,7 @@ npm run build               # Build all packages
 npm run lint                # Lint all packages
 npm run test                # Run tests
 npm run type-check          # TypeScript check (frontend)
+cd apps/frontend && npm test  # Frontend unit tests (node:test via tsx, src/**/*.test.ts)
 ```
 
 Backend integration tests (`apps/backend/test/integration/*.int-spec.ts`) run the real Nest app over HTTP against a local database `localshare_test` (same Docker Postgres, port 5433; override with `TEST_DATABASE_URL`). The global setup rebuilds that database from the migrations and refuses any URL that is not localhost and `*_test`:
@@ -135,8 +136,9 @@ apps/
         │   ├── groups/       # Group dialogs
         │   ├── listings/     # Listing cards, forms, filters
         │   └── how-it-works.tsx  # How-it-works section
-        ├── hooks/         # use-auth, use-toast
-        └── lib/           # API client, utilities
+        ├── hooks/         # use-auth, use-toast, use-error-toast
+        └── lib/
+            ├── api/       # client (axios + refresh), errors, per-resource queries
             └── utils/     # url-filters, parse-invite
 packages/
 └── shared/           # Shared types (future)
@@ -175,7 +177,11 @@ All backend routes are prefixed with `/api/v1/`:
 6. On 401, client calls `/auth/refresh` to get new tokens via cookies
 
 ### Frontend State
-Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand). The `api.ts` client handles token refresh automatically via HTTPOnly cookies.
+Server state goes through TanStack Query (`QueryProvider` in `[locale]/layout.tsx`); no Redux/Zustand.
+- `lib/api/client.ts`: axios instance with HTTPOnly cookies. On 401 it refreshes once and retries; parallel 401s share one refresh (the backend rotates the refresh token). If the refresh fails, the cached user is set to `null`.
+- `lib/api/<resource>.ts`: query keys, fetchers and `queryOptions()`. Keys are hierarchical by REST resource (`['me']`, `['listings','detail',id]`, …) so a prefix invalidates everything below it.
+- `useAuth()` reads `meQuery`: `{ user, loading, logout }`. After changing the profile, write the response with `queryClient.setQueryData(authKeys.me, …)`.
+- Error toasts: `useErrorToast()(error, 'errors.failedToX')`. It maps 403/404/network errors to i18n keys; backend messages (English) are never shown.
 
 ## Key Patterns
 

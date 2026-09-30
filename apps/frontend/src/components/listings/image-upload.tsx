@@ -5,7 +5,8 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useErrorToast } from '@/hooks/use-error-toast';
+import { api } from '@/lib/api/client';
 import { downscaleImage } from '@/lib/image-resize';
 import { ListingImage, Listing } from '@localshare/shared';
 import { Camera, GalleryThumbnails, ImageIcon, Loader2, Upload, X } from 'lucide-react';
@@ -41,6 +42,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
   const [images, setImages] = useState<ListingImage[]>(existingImages);
   const [uploading, setUploading] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<string | null>(null);
@@ -203,11 +205,7 @@ export function ImageUpload({
         title: t('listings.imagesUploaded'),
       });
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToUploadImages'),
-        variant: 'destructive',
-      });
+      showError(error, 'errors.failedToUploadImages');
     } finally {
       setUploading(false);
     }
@@ -232,11 +230,7 @@ export function ImageUpload({
         title: t('listings.imageDeleted'),
       });
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToDeleteImage'),
-        variant: 'destructive',
-      });
+      showError(error, 'errors.failedToDeleteImage');
     } finally {
       setDeleting(false);
       setImageToDelete(null);
@@ -299,11 +293,7 @@ export function ImageUpload({
         title: t('listings.coverImageSet'),
       });
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToSetCoverImage'),
-        variant: 'destructive',
-      });
+      showError(error, 'errors.failedToSetCoverImage');
     } finally {
       setSettingCover(null);
     }

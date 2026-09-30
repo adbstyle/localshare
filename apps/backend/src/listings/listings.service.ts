@@ -10,6 +10,7 @@ import { PaginatedResponse } from '../common/types';
 import { CreateListingDto, UpdateListingDto, FilterListingsDto } from './dto';
 import { ImageService } from './image.service';
 import {
+  creatorSummary,
   DEFAULT_PAGE_SIZE,
   listingCardInclude,
   listingDetailInclude,
@@ -41,7 +42,7 @@ export class ListingsService {
         category: dto.category,
         visibility: { createMany: { data: visibilityRows(targets) } },
       },
-      include: { creator: { select: { id: true, firstName: true, lastName: true } } },
+      include: { creator: creatorSummary },
     });
   }
 

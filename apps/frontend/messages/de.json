@@ -133,7 +133,6 @@
       "alreadyMember": "Du bist bereits Mitglied dieser Community."
     },
     "joinedAnnouncement": "Community {name} wurde zu deiner Liste hinzugefügt",
-    "refreshFailed": "Liste konnte nicht aktualisiert werden. Bitte Seite neu laden.",
     "removeMember": "Entfernen",
     "removeMemberConfirm": "Mitglied entfernen?",
     "removeMemberWarning": "\"{name}\" wird aus der Community und allen Gruppen entfernt. Gruppen, die {name} gegründet hat, gehen an Sie über.",

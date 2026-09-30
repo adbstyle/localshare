@@ -5,6 +5,8 @@ import { ImageTile } from './image-tile';
 import { readAsDataUrl } from '@/lib/utils/image-files';
 
 export interface PendingImage {
+  /** Stable key; the same photo picked twice has the same preview URL. */
+  id: string;
   file: File;
   previewUrl: string;
 }
@@ -30,7 +32,9 @@ export function PendingImagesEditor({ value, onChange }: PendingImagesEditorProp
   const { images, coverIndex } = value;
 
   const add = async (files: File[]) => {
-    const added = await Promise.all(files.map(async (file) => ({ file, previewUrl: await readAsDataUrl(file) })));
+    const added = await Promise.all(
+      files.map(async (file) => ({ id: crypto.randomUUID(), file, previewUrl: await readAsDataUrl(file) })),
+    );
     onChange({ images: [...images, ...added], coverIndex });
   };
 
@@ -43,7 +47,7 @@ export function PendingImagesEditor({ value, onChange }: PendingImagesEditorProp
         <div className="grid grid-cols-3 gap-4">
           {images.map((image, index) => (
             <ImageTile
-              key={image.previewUrl || index}
+              key={image.id}
               src={image.previewUrl}
               alt={image.file.name}
               isLocalPreview

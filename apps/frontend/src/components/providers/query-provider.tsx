@@ -10,9 +10,9 @@ function createQueryClient(): QueryClient {
   const client = new QueryClient({
     defaultOptions: {
       queries: {
-        // staleTime stays 0: many writes still call the API directly (no
-        // invalidation yet), so a remount must refetch. Cached data still
-        // renders instantly while that refetch runs.
+        // Every write goes through a mutation that updates or invalidates the
+        // affected queries, so briefly cached data is safe to show.
+        staleTime: 30_000,
         // Retry network/server hiccups once; a 4xx will not change on retry.
         retry: (failureCount, error) => {
           const status = getApiStatus(error);

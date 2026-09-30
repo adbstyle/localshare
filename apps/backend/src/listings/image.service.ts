@@ -35,7 +35,10 @@ export class ImageService {
     const needsCover = !existing.some((img) => img.isCover);
     const startOrderIndex = Math.max(-1, ...existing.map((img) => img.orderIndex)) + 1;
 
-    const processed = await Promise.all(files.map((file) => this.process(file)));
+    // One file at a time: each decode holds a full-size bitmap, and several at
+    // once can exhaust a small serverless instance.
+    const processed: ProcessedImage[] = [];
+    for (const file of files) processed.push(await this.process(file));
     await this.storage.put(
       processed.flatMap((p) => [
         { key: p.filename, body: p.full, contentType: 'image/webp' },
@@ -59,7 +62,8 @@ export class ImageService {
 
   /** Deletes one image; if it was the cover, the next image by order takes over. */
   async deleteImage(image: Pick<ListingImage, 'id' | 'listingId' | 'isCover'> & StoredImage): Promise<void> {
-    await this.storage.remove(storageKeys([image]));
+    // Row first: if the transaction fails, the image is still intact. A failed
+    // file removal afterwards only leaves an orphaned object.
     await this.prisma.$transaction(async (tx) => {
       await tx.listingImage.delete({ where: { id: image.id } });
       if (!image.isCover) return;
@@ -71,6 +75,7 @@ export class ImageService {
       });
       if (next) await tx.listingImage.update({ where: { id: next.id }, data: { isCover: true } });
     });
+    await this.storage.remove(storageKeys([image]));
   }
 
   async deleteAllForListing(listingId: string): Promise<void> {
@@ -78,8 +83,8 @@ export class ImageService {
       where: { listingId },
       select: { filename: true, thumbnailFilename: true },
     });
-    await this.storage.remove(storageKeys(images));
     await this.prisma.listingImage.deleteMany({ where: { listingId } });
+    await this.storage.remove(storageKeys(images));
   }
 
   /** Exactly one cover per listing. */

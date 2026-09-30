@@ -60,7 +60,16 @@
     "valueProp2Text": "Spart Geld – und Ressourcen",
     "valueProp3Title": "Du entscheidest, wer mitmacht",
     "valueProp3Text": "Einfach per Link einladen",
-    "heroImageAlt": "Nachbarn teilen Rettungswesten in ihrer Community"
+    "heroImageAlt": "Nachbarn teilen Rettungswesten in ihrer Community",
+    "loginErrors": {
+      "title": "Anmeldung nicht möglich",
+      "email_missing": "Dein Google- bzw. Microsoft-Konto hat uns keine E-Mail-Adresse übermittelt.",
+      "email_not_verified": "Deine E-Mail-Adresse ist bei Google nicht bestätigt. Bestätige sie bei Google und versuche es dann erneut.",
+      "account_exists": "Zu dieser E-Mail-Adresse gibt es schon ein Konto. Melde dich mit dem Anbieter an, den du bisher verwendet hast.",
+      "account_deleted": "Das Konto zu dieser E-Mail-Adresse wurde gelöscht. Mit derselben Adresse ist derzeit keine neue Registrierung möglich. Schreib uns an info@localshare.ch.",
+      "unknown": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+      "backToLogin": "Zurück zur Anmeldung"
+    }
   },
   "profile": {
     "title": "Profil",

@@ -28,7 +28,7 @@ export class AuthController {
     type: 'access' | 'refresh' | 'pending',
   ): CookieOptions {
     const cookieDomain = process.env.COOKIE_DOMAIN;
-    // Auto-detect: COOKIE_DOMAIN is only set in deployed environments (Railway)
+    // Auto-detect: COOKIE_DOMAIN is only set in deployed environments (Vercel)
     const isProduction = process.env.NODE_ENV === 'production' || !!cookieDomain;
 
     const baseOptions: CookieOptions = {

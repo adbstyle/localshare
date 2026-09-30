@@ -115,7 +115,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 # Image Storage (local or s3)
 STORAGE_PROVIDER=local
 
-# S3-compatible storage, e.g. Supabase Storage or Cloudflare R2 (only if STORAGE_PROVIDER=s3)
+# S3-compatible storage, production: Supabase Storage (only if STORAGE_PROVIDER=s3)
 S3_ENDPOINT=...
 S3_REGION=auto
 S3_BUCKET=localshare-images
@@ -144,7 +144,7 @@ scripts/kill-port.sh     # Kill process on port (default: 3001)
 
 ## Recent Changes (v1.2)
 
-- **S3-kompatibler Image Storage**: lokal für Entwicklung, S3-kompatibler Object Store (Cloudflare R2, Supabase Storage) für Produktion (`STORAGE_PROVIDER`, `S3_*`)
+- **S3-kompatibler Image Storage**: lokal für Entwicklung, Supabase Storage (S3-kompatibel) für Produktion (`STORAGE_PROVIDER`, `S3_*`)
 
 ## Recent Changes (v1.1)
 

@@ -2,8 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
-import { SsoProvider } from '@prisma/client';
+import { SsoAccount, SsoProvider } from '@prisma/client';
 import { createHash, randomBytes } from 'crypto';
+import { SsoLoginException } from './sso-login.exception';
 
 interface SsoUser {
   provider: SsoProvider;
@@ -22,9 +23,13 @@ export class AuthService {
   ) {}
 
   async validateSsoUser(ssoUser: SsoUser) {
-    // Check if SSO account exists
-    let user = await this.prisma.user.findFirst({
+    if (!ssoUser.email) {
+      throw new SsoLoginException('email_missing');
+    }
+
+    const linkedUser = await this.prisma.user.findFirst({
       where: {
+        deletedAt: null,
         ssoAccounts: {
           some: {
             provider: ssoUser.provider,
@@ -37,30 +42,54 @@ export class AuthService {
       },
     });
 
-    if (user) {
-      return user;
+    if (linkedUser) {
+      return linkedUser;
     }
 
-    // Check if user exists with same email (account linking)
-    user = await this.prisma.user.findUnique({
+    // Includes soft-deleted users: their email stays taken (unique)
+    const existingUser = await this.prisma.user.findUnique({
       where: { email: ssoUser.email },
       include: { ssoAccounts: true },
     });
 
-    if (user) {
-      // Link new SSO account to existing user
-      await this.prisma.ssoAccount.create({
-        data: {
-          userId: user.id,
-          provider: ssoUser.provider,
-          providerUserId: ssoUser.providerUserId,
-          providerEmail: ssoUser.email,
-        },
-      });
-      return user;
+    if (!existingUser) {
+      return this.createSsoUser(ssoUser);
     }
 
-    // Create new user with SSO account
+    if (existingUser.deletedAt) {
+      throw new SsoLoginException('account_deleted');
+    }
+
+    if (!this.canLinkByEmail(ssoUser, existingUser.ssoAccounts)) {
+      throw new SsoLoginException('account_exists');
+    }
+
+    await this.prisma.ssoAccount.create({
+      data: {
+        userId: existingUser.id,
+        provider: ssoUser.provider,
+        providerUserId: ssoUser.providerUserId,
+        providerEmail: ssoUser.email,
+      },
+    });
+    return existingUser;
+  }
+
+  // Only Google verifies email ownership (GoogleStrategy rejects unverified
+  // addresses). Microsoft returns whatever a tenant admin set as mail/UPN, so a
+  // Microsoft login must never link by email, and an account whose email came
+  // only from Microsoft must not receive links either (pre-account takeover).
+  private canLinkByEmail(
+    ssoUser: SsoUser,
+    existingAccounts: Pick<SsoAccount, 'provider'>[],
+  ): boolean {
+    return (
+      ssoUser.provider === SsoProvider.GOOGLE &&
+      existingAccounts.some((account) => account.provider === SsoProvider.GOOGLE)
+    );
+  }
+
+  private createSsoUser(ssoUser: SsoUser) {
     return this.prisma.user.create({
       data: {
         email: ssoUser.email,

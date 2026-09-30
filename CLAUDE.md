@@ -102,7 +102,8 @@ apps/
 │   │   │   ├── types/       # Pagination types
 │   │   │   └── utils/       # Prisma + storage-provider utilities
 │   │   └── database/ # Prisma service, HealthController (/health, /health/db)
-│   └── prisma/       # Schema + migrations + seed (legacy-sql/ = old hand SQL)
+│   ├── prisma/       # Schema + migrations + seed (legacy-sql/ = old hand SQL)
+│   └── test/         # Jest unit tests (`*.spec.ts`, import from `@jest/globals`)
 └── frontend/         # Next.js 14 (port 3000)
     ├── public/
     │   └── images/          # Static image assets
@@ -156,7 +157,11 @@ All backend routes are prefixed with `/api/v1/`:
 
 ### Auth Flow
 1. User clicks OAuth login → redirected to Google/Microsoft
-2. Callback returns to backend → validates & creates/links user
+2. Callback returns to backend → `AuthService.validateSsoUser` finds user by SSO account (provider + providerUserId), else creates one. Email rules:
+   - Empty email → rejected. Google email must be `email_verified` (checked in `GoogleStrategy`)
+   - Email of a soft-deleted user → rejected (email stays taken)
+   - Email of an existing user → linked only if login is Google **and** the user already has a Google account; else rejected. Microsoft never links by email (Graph `mail`/UPN unverified, nOAuth)
+   - Rejections throw `SsoLoginException`; `SsoLoginExceptionFilter` redirects to `/auth/callback?error=<code>`, which shows `auth.loginErrors.<code>`
 3. Backend issues JWT (15min) + refresh token (90d) as HTTPOnly cookies (refresh token stored as SHA-256 hash, rotated on every refresh)
 4. Frontend redirects to `/auth/callback` (no token in URL)
 5. API client sends cookies automatically (`withCredentials: true`)

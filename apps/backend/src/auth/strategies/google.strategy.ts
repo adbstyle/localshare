@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Profile, Strategy } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { SsoLoginException } from '../sso-login.exception';
 import { SsoProvider } from '@prisma/client';
 
 @Injectable()
@@ -20,21 +21,30 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
+    _accessToken: string,
+    _refreshToken: string,
+    profile: Profile,
   ): Promise<any> {
-    const { id, emails, name } = profile;
+    const { id, emails, name, displayName } = profile;
+    const email = emails?.[0];
 
-    const user = await this.authService.validateSsoUser({
+    // AuthService trusts Google emails for account linking
+    if (email?.verified !== true) {
+      throw new SsoLoginException('email_not_verified');
+    }
+
+    const [displayFirstName = '', ...displayLastNames] = (displayName || '')
+      .trim()
+      .split(/\s+/);
+    const firstName = name ? name.givenName || '' : displayFirstName;
+    const lastName = name ? name.familyName || '' : displayLastNames.join(' ');
+
+    return this.authService.validateSsoUser({
       provider: SsoProvider.GOOGLE,
       providerUserId: id,
-      email: emails[0].value,
-      firstName: (name.givenName || '').trim().substring(0, 50),
-      lastName: (name.familyName || '').trim().substring(0, 50),
+      email: email.value,
+      firstName: firstName.trim().substring(0, 50),
+      lastName: lastName.trim().substring(0, 50),
     });
-
-    done(null, user);
   }
 }

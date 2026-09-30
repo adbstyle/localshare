@@ -34,40 +34,27 @@ export class MicrosoftStrategy extends PassportStrategy(
     });
   }
 
-  async validate(
-    accessToken: string,
-    _refreshToken: string,
-    _profile: any,
-    done: any,
-  ): Promise<any> {
-    try {
-      // Fetch user info from Microsoft Graph API
-      const userInfoResponse = await fetch(
-        'https://graph.microsoft.com/v1.0/me',
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
+  async validate(accessToken: string): Promise<any> {
+    // Fetch user info from Microsoft Graph API
+    const userInfoResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-      if (!userInfoResponse.ok) {
-        return done(new Error('Failed to fetch user profile'), null);
-      }
-
-      const userInfo: MicrosoftUserInfo = await userInfoResponse.json();
-
-      const user = await this.authService.validateSsoUser({
-        provider: SsoProvider.MICROSOFT,
-        providerUserId: userInfo.id,
-        email: userInfo.mail || userInfo.userPrincipalName || '',
-        firstName: (userInfo.givenName || '').trim().substring(0, 50),
-        lastName: (userInfo.surname || '').trim().substring(0, 50),
-      });
-
-      done(null, user);
-    } catch (error) {
-      done(error, null);
+    if (!userInfoResponse.ok) {
+      throw new Error('Failed to fetch user profile');
     }
+
+    const userInfo: MicrosoftUserInfo = await userInfoResponse.json();
+
+    // mail/UPN are not verified by Microsoft; AuthService never links by them
+    return this.authService.validateSsoUser({
+      provider: SsoProvider.MICROSOFT,
+      providerUserId: userInfo.id,
+      email: userInfo.mail || userInfo.userPrincipalName || '',
+      firstName: (userInfo.givenName || '').trim().substring(0, 50),
+      lastName: (userInfo.surname || '').trim().substring(0, 50),
+    });
   }
 }

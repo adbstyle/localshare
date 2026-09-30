@@ -29,7 +29,7 @@ export function ContactButtons({ email, phoneNumber, title }: ContactButtonsProp
     if (!phoneNumber) return;
     // WhatsApp format: https://wa.me/41791234567?text=...
     const cleanPhone = phoneNumber.replace(/[^\d]/g, '');
-    const text = encodeURIComponent(`Hi! I'm interested in: ${title}`);
+    const text = encodeURIComponent(t('listings.whatsappMessage', { title }));
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
   };
 
@@ -48,7 +48,7 @@ export function ContactButtons({ email, phoneNumber, title }: ContactButtonsProp
             className="w-full justify-start"
           >
             <MessageCircle className="h-4 w-4 mr-2" />
-            Signal
+            {t('listings.signal')}
           </Button>
 
           <Button
@@ -57,7 +57,7 @@ export function ContactButtons({ email, phoneNumber, title }: ContactButtonsProp
             className="w-full justify-start"
           >
             <Phone className="h-4 w-4 mr-2" />
-            WhatsApp
+            {t('listings.whatsapp')}
           </Button>
         </>
       )}

@@ -324,7 +324,14 @@
     "yourListing": "Ihr Inserat",
     "yourListingDescription": "Dies ist Ihr Inserat. Andere Benutzer sehen hier Ihre Kontaktinformationen.",
     "visibleToOthers": "Für andere sichtbar",
-    "notFoundDescription": "Inserat nicht gefunden"
+    "notFoundDescription": "Inserat nicht gefunden",
+    "typeAndCategory": "Typ und Kategorie",
+    "priceLabel": "Preis: {price}",
+    "gallery": "Produktbilder",
+    "imageView": "{title} – Ansicht {index} von {total}",
+    "showImage": "Bild {index} von {total} anzeigen",
+    "imageThumbnail": "{title} – Vorschau {index}",
+    "whatsappMessage": "Hallo! Ich interessiere mich für: {title}"
   },
   "legal": {
     "privacy": "Datenschutzerklärung",
@@ -360,11 +367,6 @@
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten"
   },
   "pages": {
-    "offline": {
-      "title": "Sie sind offline",
-      "description": "Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
-      "retry": "Erneut versuchen"
-    },
     "error": {
       "title": "Ein Fehler ist aufgetreten",
       "description": "Entschuldigung, etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
@@ -374,8 +376,7 @@
     "notFound": {
       "title": "Seite nicht gefunden",
       "description": "Die Seite, nach der Sie suchen, existiert nicht oder wurde verschoben.",
-      "backHome": "Zur Startseite",
-      "viewListings": "Inserate ansehen"
+      "backHome": "Zur Startseite"
     }
   },
   "invite": {

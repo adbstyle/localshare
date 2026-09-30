@@ -16,7 +16,7 @@ export default function TermsPage() {
           <h3 className="text-xl font-semibold mt-6 mb-3">1.1 Geltungsbereich</h3>
           <p className="text-muted-foreground">
             Diese Nutzungsbedingungen gelten für die Nutzung der LocalShare-Plattform
-            ("die Plattform"), einer Progressive Web App für nachbarschaftliches Teilen
+            („die Plattform“), einer Progressive Web App für nachbarschaftliches Teilen
             innerhalb von Communitys. Die Plattform wird betrieben vom Verein LocalShare,
             einem nicht gewinnorientierten Verein nach Art. 60 ff. ZGB mit Sitz in der Schweiz.
           </p>
@@ -175,9 +175,9 @@ export default function TermsPage() {
         <section>
           <h2 className="text-2xl font-semibold mt-8 mb-4">8. Haftungsausschluss und Risikoübernahme</h2>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">8.1 "Wie besehen" Bereitstellung</h3>
+          <h3 className="text-xl font-semibold mt-6 mb-3">8.1 „Wie besehen“-Bereitstellung</h3>
           <p className="text-muted-foreground">
-            Die Plattform wird "wie besehen" und "wie verfügbar" ohne jegliche ausdrückliche
+            Die Plattform wird „wie besehen“ und „wie verfügbar“ ohne jegliche ausdrückliche
             oder stillschweigende Gewährleistung bereitgestellt. Der Betreiber garantiert nicht,
             dass die Plattform (a) unterbrechungsfrei, fehlerfrei oder sicher ist, (b) frei von
             technischen Mängeln, Viren oder schädlichen Komponenten ist, oder (c) genaue oder

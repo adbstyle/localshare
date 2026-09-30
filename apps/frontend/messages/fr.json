@@ -324,7 +324,14 @@
     "yourListing": "Votre annonce",
     "yourListingDescription": "Ceci est votre annonce. Les autres utilisateurs verront vos coordonnées ici.",
     "visibleToOthers": "Visible par les autres",
-    "notFoundDescription": "Annonce non trouvée"
+    "notFoundDescription": "Annonce non trouvée",
+    "typeAndCategory": "Type et catégorie",
+    "priceLabel": "Prix : {price}",
+    "gallery": "Images du produit",
+    "imageView": "{title} – vue {index} sur {total}",
+    "showImage": "Afficher l'image {index} sur {total}",
+    "imageThumbnail": "{title} – aperçu {index}",
+    "whatsappMessage": "Bonjour ! Je suis intéressé·e par : {title}"
   },
   "legal": {
     "privacy": "Politique de confidentialité",
@@ -360,11 +367,6 @@
     "unexpectedError": "Une erreur inattendue s'est produite"
   },
   "pages": {
-    "offline": {
-      "title": "Vous êtes hors ligne",
-      "description": "Veuillez vérifier votre connexion internet et réessayer.",
-      "retry": "Réessayer"
-    },
     "error": {
       "title": "Une erreur s'est produite",
       "description": "Désolé, quelque chose s'est mal passé. Veuillez réessayer.",
@@ -374,8 +376,7 @@
     "notFound": {
       "title": "Page non trouvée",
       "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
-      "backHome": "Retour à l'accueil",
-      "viewListings": "Voir les annonces"
+      "backHome": "Retour à l'accueil"
     }
   },
   "invite": {

@@ -140,7 +140,7 @@ export default function ListingDetailPage() {
                   <div>
                     {/* LEVEL 1: Type & Category + Bookmark */}
                     <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-2" role="group" aria-label="Listing type and category">
+                      <div className="flex items-center gap-2" role="group" aria-label={t('listings.typeAndCategory')}>
                         <Badge variant="secondary" className="text-sm">
                           {t(`listings.types.${listing.type}`)}
                         </Badge>
@@ -174,7 +174,7 @@ export default function ListingDetailPage() {
                     {listing.price !== null && shouldShowPrice(listing.type) && (
                       <p
                         className="text-xl font-semibold text-muted-foreground mb-6"
-                        aria-label={`Preis: ${formatPrice(listing.price, listing.priceTimeUnit, t)}`}
+                        aria-label={t('listings.priceLabel', { price: formatPrice(listing.price, listing.priceTimeUnit, t) })}
                       >
                         {formatPrice(listing.price, listing.priceTimeUnit, t)}
                       </p>
@@ -268,13 +268,14 @@ export default function ListingDetailPage() {
               <CardContent className="space-y-6">
                 {/* LEVEL 4: Images - CONDITIONAL (only if exists) */}
                 {images.length > 0 && (
-                  <figure aria-label="Produktbilder">
+                  <figure aria-label={t('listings.gallery')}>
                     {/* Main Image */}
                     <div className="relative h-96 bg-muted rounded-lg overflow-hidden">
                       <Image
                         src={getImageUrl(images[selectedImageIndex].url)}
-                        alt={`${listing.title} - Ansicht ${selectedImageIndex + 1} von ${images.length}`}
+                        alt={t('listings.imageView', { title: listing.title, index: selectedImageIndex + 1, total: images.length })}
                         fill
+                        sizes="(min-width: 1024px) 66vw, 100vw"
                         className="object-contain"
                         priority
                       />
@@ -292,12 +293,13 @@ export default function ListingDetailPage() {
                                 ? 'border-primary'
                                 : 'border-transparent'
                             }`}
-                            aria-label={`Bild ${index + 1} von ${images.length} anzeigen`}
+                            aria-label={t('listings.showImage', { index: index + 1, total: images.length })}
                           >
                             <Image
-                              src={getImageUrl(image.url)}
-                              alt={`${listing.title} - Vorschau ${index + 1}`}
+                              src={getImageUrl(image.thumbnailUrl || image.url)}
+                              alt={t('listings.imageThumbnail', { title: listing.title, index: index + 1 })}
                               fill
+                              sizes="(min-width: 768px) 16vw, 33vw"
                               className="object-cover"
                             />
                           </button>

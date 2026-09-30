@@ -55,11 +55,11 @@ function HeaderContent() {
   // Handle filter apply - navigate to /listings with new filter params
   const handleFilterApply = useCallback(
     (filters: Partial<FilterListingsDto>) => {
-      const urlString = buildURLFromFilters(filters, searchParams, 1);
+      const urlString = buildURLFromFilters(filters, 1);
       router.push(`/?${urlString}`);
       setMobileFilterOpen(false);
     },
-    [searchParams, router]
+    [router]
   );
 
   const handleFeedback = () => {
@@ -131,7 +131,7 @@ function HeaderContent() {
             <button
               className="p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Menu"
+              aria-label={t('nav.menu')}
               aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

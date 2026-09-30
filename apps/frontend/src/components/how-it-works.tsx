@@ -63,7 +63,7 @@ export function HowItWorks() {
                     src={step.illustration}
                     alt={t(`steps.${step.key}.illustrationAlt`)}
                     fill
-                    unoptimized
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     className="object-contain rounded-2xl"
                   />
                 </div>

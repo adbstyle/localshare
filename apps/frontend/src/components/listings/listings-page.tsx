@@ -83,12 +83,12 @@ function ListingsPageContent() {
     (newFilters: Partial<FilterListingsDto>) => {
       // Merge current filters with new filters and reset to page 1
       const updatedFilters = { ...filters, ...newFilters };
-      const urlString = buildURLFromFilters(updatedFilters, searchParams, 1);
+      const urlString = buildURLFromFilters(updatedFilters, 1);
 
       // Use replace for filter changes (don't add to browser history)
       router.replace(`${pathname}?${urlString}`);
     },
-    [filters, searchParams, pathname, router]
+    [filters, pathname, router]
   );
 
   // Handle page changes - update URL (use push to enable browser back/forward)
@@ -101,7 +101,7 @@ function ListingsPageContent() {
       if (newPage > totalPages && totalPages > 0) newPage = totalPages;
 
       // Build URL with new page number
-      const urlString = buildURLFromFilters(filters, searchParams, newPage);
+      const urlString = buildURLFromFilters(filters, newPage);
 
       // Use push for pagination (enable browser back/forward navigation)
       router.push(`${pathname}?${urlString}`);
@@ -109,7 +109,7 @@ function ListingsPageContent() {
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [filters, searchParams, pathname, router, total]
+    [filters, pathname, router, total]
   );
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
@@ -188,7 +188,7 @@ function ListingsPageContent() {
                 <ListingCard
                   key={listing.id}
                   listing={listing}
-                  priority={index < 9}
+                  priority={index < 3}
                 />
               ))}
             </div>

@@ -125,8 +125,7 @@ apps/
         │   ├── profile/        # User profile
         │   ├── imprint/        # Legal: Impressum
         │   ├── privacy/        # Legal: Privacy policy
-        │   ├── terms/          # Legal: Terms of service
-        │   └── offline/        # PWA offline page
+        │   └── terms/          # Legal: Terms of service
         ├── components/
         │   ├── ui/           # shadcn/ui components
         │   ├── auth/         # Login components (login-page.tsx)
@@ -135,7 +134,7 @@ apps/
         │   ├── groups/       # Group dialogs
         │   ├── listings/     # Listing cards, forms, filters
         │   └── how-it-works.tsx  # How-it-works section
-        ├── hooks/         # use-auth, use-toast, use-media-query
+        ├── hooks/         # use-auth, use-toast
         └── lib/           # API client, utilities
             └── utils/     # url-filters, parse-invite
 packages/

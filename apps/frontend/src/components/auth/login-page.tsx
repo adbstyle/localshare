@@ -72,7 +72,7 @@ export function LoginPage() {
             alt={t('auth.heroImageAlt')}
             fill
             priority
-            unoptimized
+            sizes="100vw"
             className="object-cover"
           />
         </div>

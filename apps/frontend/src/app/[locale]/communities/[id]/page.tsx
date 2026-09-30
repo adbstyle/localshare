@@ -497,7 +497,7 @@ export default function CommunityDetailPage() {
           </DialogHeader>
           <CreateGroupDialog
             onSuccess={handleGroupCreated}
-            preselectedCommunityId={community.id}
+            communityId={community.id}
           />
         </DialogContent>
       </Dialog>

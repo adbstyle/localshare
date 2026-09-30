@@ -30,7 +30,7 @@ npm run dev
 - Profile page (view/edit/delete/export)
 - Listings page (grid view with filters)
 - Legal pages (Privacy, Terms, Imprint)
-- PWA configuration (manifest + service worker)
+- PWA manifest (installable; no service worker)
 - Layout (Header, Footer, Beta badge)
 
 ### 🚧 Remaining (50%)
@@ -71,7 +71,6 @@ src/
 │       ├── privacy/       # Privacy policy
 │       ├── terms/         # Terms of service
 │       ├── imprint/       # Imprint
-│       └── offline/       # PWA offline page
 │
 ├── components/
 │   ├── ui/                # shadcn/ui components (12)
@@ -95,7 +94,6 @@ messages/
 
 public/
 ├── manifest.json          # PWA manifest
-├── sw.js                  # Service worker
 └── icons/                 # App icons (need to add)
 ```
 
@@ -263,16 +261,11 @@ The API client automatically:
 - Installable on iOS, Android, Desktop
 - Standalone display mode
 
-### Service Worker
-- `/sw.js` - Caches assets for offline use
-- Network-first strategy
-- Offline fallback page at `/offline`
-
 ### Testing PWA
 
 1. Build production version: `npm run build && npm start`
 2. Open Chrome DevTools → Application
-3. Check "Manifest" and "Service Workers"
+3. Check "Manifest"
 4. Test "Add to Home Screen"
 
 ## 🎯 Next Steps for Developers

@@ -1,6 +1,6 @@
 # Migrationsplan: Railway + R2 → Vercel + Supabase
 
-Stand: 30. September 2026 (Schritte 1–5 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits: 2026-09-30
+Stand: 30. September 2026 (Cutover erledigt, Schritt 7 offen) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits: 2026-09-30
 
 ## Kontext
 
@@ -160,12 +160,56 @@ Ergebnisse:
 
 Die Prod-Kopie ist nur eine Vorab-Kopie. Railway nimmt weiter Schreibzugriffe an. Beim Cutover (Schritt 6, Phase B) werden deshalb beide Skripte für `production` erneut ausgeführt, nachdem Railway gestoppt ist. `migrate-db.sh` ersetzt dabei den Stand komplett, und `copy-images.sh` kopiert nur das Delta. Seit dieser Kopie liegen Personendaten in Supabase-Prod, geschützt durch RLS, eine abgeschaltete Data API und ein Datenbank-Passwort.
 
-### Schritt 6: Cutover
-**Phase A (kein Downtime):** Branch mit Schritten 2–3 (Schritt 1 ist dann schon auf Railway live) → Preview deployen → `/api/v1/health/db`, `curl /main.js` (muss 404 sein) und ein Multipart-Upload testen (validiert Kaltstart-Listen, Body-Stream, sharp, Prisma-Engine). DNS-TTL der 4 Hostnames auf 60 s. Staging-Daten und die Vorab-Kopie der Prod-Daten sind seit Schritt 5 erledigt. Es fehlt: Staging-Domains (`staging.`, `api-staging.`) auf die Vercel-Projekte legen, CNAMEs → `cname.vercel-dns.com` und die Checkliste mit Login (OAuth-Callbacks zeigen weiterhin auf `api-staging.localshare.ch`).
+### Schritt 6: Cutover — erledigt am 2026-09-30
+**DNS:** Die Zone liegt bei **Infomaniak** (`ns11/ns12.infomaniak.ch`). Adrian ändert die Einträge im Infomaniak Manager. Die minimale TTL dort ist 15 Minuten.
 
-**Phase B (30–60 min Fenster):** Railway-Backend stoppen (Write-Freeze) → `migrate-db.sh production …` (Zahlen vergleichen) → `copy-images.sh production …` (Delta) → in Vercel `PRISMA_MIGRATE_ON_DEPLOY=true` setzen (Production und Preview-Branch `develop`) → Git verbinden → Domains in Vercel zuweisen → CNAMEs `api.` + `app.` umstellen → Checkliste → 24 h Vercel- und Supabase-Logs beobachten.
+| Host | Railway (Rollback-Ziel) | Vercel (neu) |
+|---|---|---|
+| `app.localshare.ch` | `cspfojwa.up.railway.app` | `dc8e680caae4e3bd.vercel-dns-017.com` |
+| `api.localshare.ch` | `rsz3hn03.up.railway.app` | `961c294fd1e96df9.vercel-dns-017.com` |
+| `staging.localshare.ch` | `ktxnjjll.up.railway.app` | `dc8e680caae4e3bd.vercel-dns-017.com` |
+| `api-staging.localshare.ch` | `1ors1apr.up.railway.app` | `961c294fd1e96df9.vercel-dns-017.com` |
 
-**Rollback:** CNAMEs zurück auf Railway, Railway-Backend starten. Railway-DB und R2 wurden nie verändert; Schreibvorgänge nach Cutover gehen verloren. Railway + R2 1–2 Wochen behalten, dann löschen.
+**Phase A (ohne Downtime), erledigt:**
+- **Git-Verbindung:** Beide Vercel-Projekte hängen am GitHub-Repo, Production-Branch `main`. Pushes auf beliebige Branches bauen Previews.
+- **Zugriffsschutz:** Backend `ssoProtection` ist aus. Die API muss öffentlich sein, sonst blockiert Vercel die Staging-Aufrufe. Das Frontend behält den Vercel-Login für Previews und damit auch für `staging.localshare.ch`.
+- **Migrations-Flag:** `PRISMA_MIGRATE_ON_DEPLOY=true` ist für Production und für Preview **nur Git-Branch `develop`** gesetzt. Beide Supabase-DBs haben den vollen Migrationsstand, der erste Lauf ist also ein No-op.
+- **Domains:** `api.`/`app.` hängen an Production, `api-staging.`/`staging.` an Git-Branch `develop`. Keine TXT-Verifizierung war nötig.
+- **DNS um 08:48:** Die Staging-CNAMEs zeigen auf Vercel, die TTL aller vier Einträge ist auf 15 Minuten gesenkt. Vercel hat die Let's-Encrypt-Zertifikate automatisch ausgestellt.
+- **Staging-Tests über Vercel:**
+  - Health und DB liefern 200, `/auth/me` liefert 401.
+  - CORS erlaubt `staging.localshare.ch` mit Credentials.
+  - Die OAuth-Redirects zeigen auf `api-staging.localshare.ch`.
+  - Der Header `x-vercel-id` bestätigt `fra1`.
+- **Rollback-Test:** Ein per `railway down` gestopptes Deployment kommt per GraphQL `deploymentRedeploy(id)` in **25 s** wieder, weil das Image wiederverwendet wird.
+- **Staging-Probe bestanden** (Adrian eingeloggt mit Google):
+  - Refresh liefert 200.
+  - Ein Upload von 3 Bildern mit 1,1 MB liefert 201. Die Bilder landen mit 1280 px und 400-px-Thumbnails im Supabase-Storage.
+  - Die Anzeige über `/_next/image` funktioniert, und nach dem Löschen sind die Objekte weg.
+  - Der Microsoft-Login ist nur über die Redirect-URI geprüft.
+  - Ein erster Upload-Versuch scheiterte clientseitig mit «Failed to fetch», ohne dass der Request im Vercel-Log auftauchte. Das fiel mit der VPN-Trennung zusammen und war danach nicht mehr reproduzierbar.
+- **DNS-Caches:** Adrians VPN-DNS (`10.2.0.1`) hielt den alten Railway-Eintrag bis zum Ende seiner Stunde, erkennbar an der Seite «Not Found – The train has not arrived». Abhilfe: VPN trennen oder warten.
+
+**Phase B, erledigt.** Das Wartungsfenster lief von 09:08 bis 09:20, rund 12 Minuten. Gestartet wurde auf Adrians «Go» um 09:08, also vor 09:50. Alle geprüften Resolver hatten da bereits die TTL von 15 Minuten.
+1. 09:08:31: `railway down -s backend -e production`. Die Rollback-IDs sind Backend `16c9a8be-0699-4a09-b13b-7062b9daf2eb` und Frontend `66c97b80-afde-4c12-9a44-f4a1bbda5ead`.
+2. 09:08 bis 09:09: `migrate-db.sh production`. Alle 12 Tabellen und der ID-Hash sind identisch, RLS ist auf 12 von 12 aktiv.
+3. 09:09: `copy-images.sh production`. 108 von 108 Objekten wurden übersprungen, es gab kein Delta.
+4. 09:10 bis 09:13: Vercel-Production aus `main` (`e00f55f`) deployt. Das Backend meldet `migrate-on-deploy: running prisma migrate deploy`, danach «No pending migrations». Der Frontend-Alias heisst `localshare-frontend-six.vercel.app`. Die Bildoptimierung liefert ein echtes Prod-Bild aus Supabase mit 200.
+5. 09:16: Adrian stellt die CNAMEs `app` und `api` auf Vercel um. Vercel stellt die Zertifikate automatisch aus. Etwa 3 Minuten lang brachen einzelne TLS-Verbindungen noch ab (`ERR_CONNECTION_CLOSED`), bis das Zertifikat auf allen Edges verteilt war. Ab 09:20 liefen 10 von 10 Anfragen stabil.
+6. **Checkliste:**
+   - Adrian ist auf app.localshare.ch eingeloggt, die Session hat den Umzug überlebt.
+   - Seine Inserate, Bilder, Communities und Kontaktdaten sind vollständig da.
+   - Die Vercel-Logs der ersten 30 Minuten enthalten keinen 5xx.
+7. Das Railway-Frontend in Production ist gestoppt.
+8. Alle 4 Railway-GitHub-Trigger sind gelöscht, damit Pushes das gestoppte Railway nicht wiederbeleben:
+   - Backend und Frontend, jeweils `main` → production und `develop` → staging, Repo `adbstyle/localshare`.
+   - Wiederherstellen per GraphQL `deploymentTriggerCreate` oder im Dashboard.
+   - Die Railway-DB bleibt für den Rollback in Betrieb.
+
+**Rollback** (innerhalb von Minuten):
+- CNAMEs `api`/`app` zurück auf die Railway-Ziele aus der Tabelle.
+- Railway-Backend per `deploymentRedeploy(<notierte ID>)` starten, das dauert etwa 25 s.
+- Die Railway-DB und R2 wurden nie verändert. Schreibvorgänge nach dem Cutover gehen dabei verloren.
 
 ### Schritt 7: Doku nachziehen
 `CLAUDE.md` (Environments-Tabelle), `README.md`, `docker-compose.yml` (erledigt: `/api/v1/health` existiert seit Schritt 4). Löschen: `apps/backend/railpack.json`, `apps/frontend/start.sh` (Script `start` → `next start`), `R2_*`-Variablen, Railway-Variable `BACKEND_URL` (Frontend), `*.r2.dev` in `remotePatterns`. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.

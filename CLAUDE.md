@@ -181,25 +181,21 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 - Protected pages use `useAuth()` hook
 - Static images go in `public/images/` directory
 
-## Environments (Railway)
+## Environments (Vercel + Supabase, live since 2026-09-30)
 
-| Environment | Frontend | Backend | Branch | R2 Bucket |
-|-------------|----------|---------|--------|-----------|
-| Production | app.localshare.ch | api.localshare.ch | `main` | localshare-images |
-| Staging | staging.localshare.ch | api-staging.localshare.ch | `develop` | localshare-images-staging |
+| Environment | Frontend | Backend | Branch | Supabase project |
+|-------------|----------|---------|--------|------------------|
+| Production | app.localshare.ch | api.localshare.ch | `main` | `localshare-prod` (eu-central-1) |
+| Staging | staging.localshare.ch | api-staging.localshare.ch | `develop` | `localshare-staging` (eu-central-2) |
 
-- Auto-deploy: Push to `develop` → Staging, Push to `main` → Production
-- Each environment has separate PostgreSQL database
-- Cookie domain: `.localshare.ch` (shared between frontend/backend, both environments)
-- OAuth callbacks configured for both environments in Google/Microsoft Console
-
-### Vercel + Supabase (prepared, not live yet)
-Migration in progress, see `docs/supabase-vercel-migration.md` (issue #167).
-- Vercel projects `localshare-backend` (NestJS zero-config, entrypoint `src/main.ts`) and `localshare-frontend` (Next.js), Hobby, region `fra1`, root dirs `apps/backend` / `apps/frontend`, not Git-connected until cutover
-- Each app has a `vercel.json` with an explicit `buildCommand` (Vercel's Turbo auto-detection breaks on our turbo v1 setup); `.vercelignore` keeps local `.env` files out of CLI uploads
-- Backend build (`npm run vercel-build`) runs `prisma migrate deploy` only if `PRISMA_MIGRATE_ON_DEPLOY=true` is set for that Vercel environment
-- Supabase (separate LocalShare account, Free plan): `localshare-prod` (eu-central-1), `localshare-staging` (eu-central-2), public bucket `listing-images` (WebP only, 5 MB), Data API off, RLS on all tables via migration. Local credentials in `apps/backend/.env.supabase-{staging,prod}.local` (gitignored)
-- Data migration helpers (Railway → Supabase DB + R2 → Supabase Storage): `scripts/supabase-migration/` (temporary, see its README)
+- Vercel projects `localshare-frontend` / `localshare-backend` (Hobby, region `fra1`), Git-connected: push to `main` → production, push to `develop` → staging (branch domains); other branches → preview deployments (staging DB)
+- Backend = NestJS zero-config (entrypoint `src/main.ts`); each app has a `vercel.json` with an explicit `buildCommand` (Vercel's Turbo auto-detection breaks on our turbo v1 setup); `.vercelignore` keeps local `.env` files out of CLI uploads
+- Backend build (`npm run vercel-build`) applies pending migrations when `PRISMA_MIGRATE_ON_DEPLOY=true` (set for production and the `develop` branch only)
+- Frontend previews and `staging.localshare.ch` require Vercel login (Deployment Protection); the backend project has protection off
+- Daily Vercel cron `/api/v1/health/db` keeps the Supabase Free project from pausing (runs on production only; staging may pause and must then be resumed in the Supabase dashboard)
+- Supabase (separate LocalShare account, Free plan): public bucket `listing-images` (WebP/JPEG, 5 MB), Data API off, RLS on all tables via migration. Local credentials in `apps/backend/.env.supabase-{staging,prod}.local` (gitignored)
+- DNS at Infomaniak (CNAMEs to `*.vercel-dns-017.com`, TTL 15 min); cookie domain `.localshare.ch`; OAuth callbacks unchanged (`api[-staging].localshare.ch/api/v1/auth/{google|microsoft}/callback`)
+- Railway (old stack) is stopped and kept only for rollback until the step-7 cleanup, see `docs/supabase-vercel-migration.md`; data migration helpers in `scripts/supabase-migration/`
 
 ## Environment Setup
 

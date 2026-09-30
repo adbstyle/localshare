@@ -1,6 +1,6 @@
 # Migrationsplan: Railway + R2 → Vercel + Supabase
 
-Stand: 30. September 2026 (Schritte 1–3 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29
+Stand: 30. September 2026 (Schritte 1–4 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits: 2026-09-30
 
 ## Kontext
 
@@ -81,22 +81,49 @@ Umsetzung:
 - `next.config.js`: Beide `rewrites` und der dazugehörige `localhost:3000`-Eintrag in `remotePatterns` sind gelöscht. Production rief die API ohnehin direkt auf. Lokal zeigt `NEXT_PUBLIC_API_URL` jetzt auf `http://localhost:3001`, und `BACKEND_URL` entfällt.
 - Verschoben: Die Supabase-Einträge in `remotePatterns` folgen in Schritt 4, weil die Projekt-Refs erst dort entstehen. `*.r2.dev` bleibt bis Schritt 7. `start.sh` und die Railway-Variable `BACKEND_URL` kommen in Schritt 7, weil Railway sie bis zum Cutover nutzt. Die Konsolidierung von `getImageUrl` ist nicht nötig (YAGNI).
 
-### Schritt 4: Infrastruktur anlegen
-Supabase (je staging/prod, eu-central-1):
-- Projekt, Bucket `listing-images` (public), S3 Access Keys (Storage → S3), Data API aus, RLS an.
+### Schritt 4: Infrastruktur anlegen — in Arbeit (`feature/167-vercel-setup`)
+Entscheide vom 2026-09-30: **Supabase Free** und **Vercel Hobby**.
 
-Vercel (2 Projekte, gleiche Repo, Production-Branch `main`, Staging = Branch `develop` mit branch-scoped Env + Domains):
+**Supabase** (je Staging und Prod, Region `eu-central-1` Frankfurt):
+- Das Free-Limit von 2 aktiven Projekten gilt **pro Person**, über alle Orgs mit Owner/Admin-Rolle. Adrians Account ist mit KIFU ausgelastet. Deshalb bekommt LocalShare einen **eigenen Supabase-Account** (Vereins-Adresse) mit der Org «LocalShare» und den Projekten `localshare-prod` und `localshare-staging`. Diese legt Adrian an.
+- Pro Projekt: Data API aus (Zugriff nur über Prisma), Bucket `listing-images` (public) und S3-Access-Key.
+- Zugangsdaten liegen lokal in `apps/backend/.env.supabase-{staging,prod}.local`. Beide Dateien sind von Git ignoriert.
+- **Risiko Free-Plan:** Projekte pausieren nach einer Woche ohne Aktivität. Geplant ist ein täglicher Keep-alive per Vercel-Cron. Weitere Limits: 500 MB DB und 5 GB Egress.
+
+**Vercel** (Team `adbstyles-projects`, Hobby):
 
 | | `localshare-frontend` | `localshare-backend` |
 |---|---|---|
 | Root Directory | `apps/frontend` | `apps/backend` |
-| Framework | Next.js | NestJS (Zero-Config) |
-| Ignored Build Step | `npx turbo-ignore` | `npx turbo-ignore` |
-| Domains | `app.localshare.ch` (main), `staging.localshare.ch` (develop) | `api.localshare.ch` (main), `api-staging.localshare.ch` (develop) |
+| Framework | Next.js | NestJS (Zero-Config, Entrypoint `src/main.ts`) |
+| Build Command (`vercel.json`) | `npm run build` | `npm run vercel-build` = `prisma generate` + `scripts/migrate-on-deploy.js` |
+| Node / Region | 22.x / `fra1` | 22.x / `fra1` |
+| Git | erst beim Cutover verbinden | erst beim Cutover verbinden |
+| Domains (Cutover) | `app.localshare.ch` (main), `staging.localshare.ch` (develop) | `api.localshare.ch` (main), `api-staging.localshare.ch` (develop) |
 
-Env Backend: `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `JWT_ACCESS_EXPIRATION`, `JWT_REFRESH_EXPIRATION`, `GOOGLE_*`/`MICROSOFT_*` (Callbacks unverändert, da Domains gleich bleiben), `FRONTEND_URL`, `COOKIE_DOMAIN=.localshare.ch`, `NODE_ENV=production`, `STORAGE_PROVIDER=s3`, `S3_ENDPOINT=https://<ref>.storage.supabase.co/storage/v1/s3`, `S3_REGION=eu-central-1`, `S3_BUCKET=listing-images`, `S3_FORCE_PATH_STYLE=true`, `S3_PUBLIC_URL=https://<ref>.supabase.co/storage/v1/object/public/listing-images`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`.
-Env Frontend: `NEXT_PUBLIC_API_URL=https://api.localshare.ch` bzw. `…api-staging…`, `NEXT_PUBLIC_FEEDBACK_EMAIL`. `BACKEND_URL` entfällt.
-Turbo v1 (`pipeline`-Key) ist mit repo-installiertem turbo 1.13.4 auf Vercel ok.
+Erkenntnisse aus den ersten Deploys:
+- **Expliziter `buildCommand` ist Pflicht.** Sonst erkennt Vercel Turbo und baut mit einem globalen Turbo 2.x. Das bricht ab, weil `packageManager` fehlt und `turbo.json` noch das v1-Format hat. `turbo-ignore` entfällt aus demselben Grund.
+- **`.vercelignore` im Repo-Root ist Pflicht für CLI-Deploys.** Ohne sie lädt die CLI `.env`-Dateien mit hoch, und NestJS würde sie zur Laufzeit laden. Mit ihr umfasst der Upload rund 2,2 MB.
+- **`migrate-on-deploy.js` läuft nur mit `PRISMA_MIGRATE_ON_DEPLOY=true`.** Ein Branch-Check reicht nicht, weil CLI-Deploys den lokalen Branch melden. Das Flag wird erst gesetzt, wenn die jeweilige Supabase-DB die restaurierten Daten enthält, also für Production und für die Preview von `develop`.
+- **Target explizit setzen.** Der erste CLI-Deploy eines Projekts ohne Git wurde trotz `--target=preview` Production, also mit Production-Variablen. Previews haben Vercel Authentication aktiv, getestet wird mit `vercel curl`.
+- **Backend-Preview funktioniert:**
+  - Health liefert 200, auch direkt nach dem Kaltstart. Das 1-s-Fenster für `listen()` reicht also.
+  - `/auth/me` liefert 401.
+  - `/main.js`, `/src/main.ts` und `/package.json` liefern 404, es gibt kein Quellcode-Leak.
+  - Ohne `DATABASE_URL` meldet Prisma sauber den fehlenden Wert.
+- **Frontend-Preview funktioniert:** Der Build dauert 2 min, alle Seiten liefern 200, und `/api/*` liefert 404, weil der Rewrite entfernt ist.
+
+Env Backend:
+- Preview (Staging-Werte von Railway, schon gesetzt): `JWT_SECRET`, `GOOGLE_*`, `MICROSOFT_*`, `FRONTEND_URL`, `COOKIE_DOMAIN`.
+- Noch offen: `DATABASE_URL` (Pooler :6543 `?pgbouncer=true&connection_limit=5`), `DIRECT_URL` (Session-Pooler :5432) und die Speicher-Variablen:
+  - `STORAGE_PROVIDER=s3`
+  - `S3_ENDPOINT=https://<ref>.storage.supabase.co/storage/v1/s3`
+  - `S3_REGION=eu-central-1`, `S3_BUCKET=listing-images`, `S3_FORCE_PATH_STYLE=true`
+  - `S3_PUBLIC_URL=https://<ref>.supabase.co/storage/v1/object/public/listing-images`
+  - `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`
+- Production: dieselben Variablen mit Prod-Werten. `NODE_ENV` setzt Vercel selbst.
+
+Env Frontend: `NEXT_PUBLIC_API_URL`, Preview `https://api-staging.localshare.ch` und Production `https://api.localshare.ch`, plus `NEXT_TELEMETRY_DISABLED=1`. Railway setzt heute kein `NEXT_PUBLIC_FEEDBACK_EMAIL`, der Fallback im Code bleibt.
 
 ### Schritt 5: Daten migrieren (erst Staging als Probelauf, dann Prod)
 ```bash

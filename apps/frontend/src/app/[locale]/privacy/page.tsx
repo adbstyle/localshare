@@ -1,297 +1,399 @@
+import type { ReactNode } from 'react';
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section>
+      <h2 className="text-2xl font-semibold mt-8 mb-4">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function SubTitle({ children }: { children: ReactNode }) {
+  return <h3 className="text-xl font-semibold mt-6 mb-3">{children}</h3>;
+}
+
+function Text({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <p className={`text-muted-foreground ${className}`}>{children}</p>;
+}
+
+function List({ children }: { children: ReactNode }) {
+  return <ul className="list-disc pl-6 space-y-2 text-muted-foreground mt-2">{children}</ul>;
+}
+
+function ExternalLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a href={href} className="underline" target="_blank" rel="noopener">
+      {children}
+    </a>
+  );
+}
+
 export default function PrivacyPage() {
   return (
     <div className="container max-w-4xl py-8">
       <h1 className="text-4xl font-bold mb-6">Datenschutzerklärung</h1>
 
       <div className="prose prose-slate max-w-none space-y-6">
-        <p className="text-muted-foreground">
-          Der Verein LocalShare ("wir", "uns", "Betreiber") betreibt die LocalShare-Plattform.
-          Wir verpflichten uns zum Schutz Ihrer Privatsphäre und zur Einhaltung des Schweizer
-          Datenschutzgesetzes (DSG) und der EU-Datenschutzgrundverordnung (DSGVO).
-        </p>
+        <Text>
+          Der Verein LocalShare («wir») betreibt die Plattform LocalShare. Diese Erklärung beschreibt
+          so genau wie möglich, welche Personendaten die Plattform bearbeitet, wer sie sehen kann,
+          wo sie gespeichert sind und wie lange. Wo die Plattform heute noch nicht so arbeitet, wie
+          wir es uns wünschen, sagen wir das offen. Massgebend sind das Schweizer
+          Datenschutzgesetz (DSG) und, soweit anwendbar, die EU-Datenschutz-Grundverordnung (DSGVO).
+        </Text>
 
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">1. Verantwortlicher</h2>
-          <p className="text-muted-foreground">
-            Verantwortlich für die Datenverarbeitung ist:
-          </p>
-          <p className="text-muted-foreground mt-2">
-            <strong>Verein LocalShare</strong><br />
-            Sitz: Bern, Schweiz<br />
+        <Section title="1. Verantwortlicher">
+          <Text>Verantwortlich für die Datenbearbeitung ist:</Text>
+          <Text className="mt-2">
+            <strong>Verein LocalShare</strong>
+            <br />
+            Sitz: Bern, Schweiz
+            <br />
             <br />
             <strong>E-Mail:</strong> info@localshare.ch
-          </p>
-        </section>
+          </Text>
+        </Section>
 
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">2. Erhobene Daten</h2>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">2.1 Personenbezogene Daten</h3>
-          <p className="text-muted-foreground">Wir erheben folgende Daten:</p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>E-Mail-Adresse, Vor- und Nachname (von Google/Microsoft SSO)</li>
-            <li>Adresse (optional, von Ihnen angegeben)</li>
-            <li>Telefonnummer (optional, von Ihnen angegeben)</li>
-            <li>Inhalt Ihrer Inserate (Titel, Beschreibung, Bilder, Kategorie, Preis)</li>
-            <li>Mitgliedschaften in Communitys und Gruppen</li>
-          </ul>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">2.2 Technische Daten</h3>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>IP-Adresse (anonymisiert)</li>
-            <li>Browser-Typ und -Version</li>
-            <li>Betriebssystem</li>
-            <li>Zeitpunkt des Zugriffs</li>
-          </ul>
-          <p className="text-muted-foreground mt-4">
-            <strong>Hinweis:</strong> Wir verwenden <strong>keine</strong> Tracking-Tools wie
-            Google Analytics oder vergleichbare Dienste.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">3. Verwendung der Daten</h2>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">3.1 Wir verwenden Ihre Daten für:</h3>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Authentifizierung und Account-Verwaltung</li>
-            <li>Anzeigen von Inseraten innerhalb Ihrer Communitys</li>
-            <li>Kontaktaufnahme zwischen Nutzern (E-Mail, Signal, WhatsApp)</li>
-            <li>Verwaltung von Communitys und Gruppen</li>
-            <li>Sicherheit der Plattform (Missbrauchsprävention)</li>
-            <li>Benachrichtigungen über Änderungen an der Plattform oder Ihrem Account</li>
-          </ul>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">3.2 Wir verwenden Ihre Daten NICHT für:</h3>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Werbung oder Marketing</li>
-            <li>Weitergabe oder Verkauf an Dritte</li>
-            <li>Profiling oder automatisierte Entscheidungsfindung</li>
-            <li>Tracking oder Verhaltensanalyse</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">4. Rechtsgrundlage der Bearbeitung</h2>
-          <p className="text-muted-foreground">
-            Nach Schweizer Datenschutzgesetz (DSG) bearbeiten wir Personendaten nach Treu und
-            Glauben, zweckgebunden und verhältnismässig (Art. 6 DSG). Die Bearbeitung erfolgt für:
-          </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+        <Section title="2. Welche Daten wir bearbeiten">
+          <SubTitle>2.1 Ihr Konto</SubTitle>
+          <List>
             <li>
-              <strong>Vertragserfüllung:</strong> Bereitstellung der Plattform-Funktionen
-              gemäss Nutzungsbedingungen
+              E-Mail-Adresse, Vor- und Nachname: Diese übernehmen wir bei Ihrer ersten Anmeldung von
+              Google oder Microsoft. Spätere Änderungen bei Google oder Microsoft übernehmen wir nicht
+              automatisch. Vor- und Nachname können Sie im Profil ändern.
+            </li>
+            <li>Kennung Ihres Kontos bei Google bzw. Microsoft und die dort hinterlegte E-Mail-Adresse</li>
+            <li>Bevorzugte Sprache (Deutsch oder Französisch)</li>
+            <li>Zeitpunkt, zu dem Sie bei der Registrierung den Nutzungsbedingungen und dieser Datenschutzerklärung zugestimmt haben</li>
+            <li>Zeitpunkt der Erstellung und der letzten Änderung Ihres Kontos</li>
+          </List>
+
+          <SubTitle>2.2 Freiwillige Angaben</SubTitle>
+          <List>
+            <li>Wohnadresse</li>
+            <li>Telefonnummer</li>
+          </List>
+          <Text className="mt-2">
+            Beide Angaben sind freiwillig. Sie können sie im Profil jederzeit ändern oder entfernen.
+          </Text>
+
+          <SubTitle>2.3 Inhalte, die Sie erstellen</SubTitle>
+          <List>
+            <li>Inserate: Titel, Beschreibung, Art (verkaufen, vermieten, verleihen, suchen), Kategorie, Preis und Zeiteinheit</li>
+            <li>
+              Bilder zu Inseraten: Wir speichern eine verkleinerte Fassung (max. 1280 Pixel breit) und ein
+              Vorschaubild. Gespeicherte Bilder enthalten keine Metadaten, also auch keine GPS-Standortdaten.
+              Zusätzlich speichern wir den ursprünglichen Dateinamen (z. B. «IMG_1234.jpg») und die Dateigrösse.
+            </li>
+            <li>Mit welchen Communitys und Gruppen Sie ein Inserat teilen</li>
+            <li>Ihre Merkliste (gemerkte Inserate)</li>
+            <li>Communitys und Gruppen, die Sie gründen: Name, Beschreibung und Einladungslink</li>
+            <li>Ihre Mitgliedschaften in Communitys und Gruppen, jeweils mit dem Beitrittsdatum</li>
+          </List>
+
+          <SubTitle>2.4 Anmeldesitzungen</SubTitle>
+          <Text>
+            Damit Sie angemeldet bleiben, speichern wir bei jeder Anmeldung und bei jeder automatischen
+            Verlängerung der Sitzung (bei aktiver Nutzung etwa alle 15 Minuten) einen Eintrag mit einem
+            nicht umkehrbaren Prüfwert (Hash) des Sitzungsschlüssels, dem Zeitpunkt und dem Ablaufdatum. Aus diesen Einträgen
+            lässt sich ablesen, wann Sie die Plattform ungefähr genutzt haben. Wir werten sie dafür nicht
+            aus. Die Einträge werden derzeit erst gelöscht, wenn Sie Ihr Konto löschen.
+          </Text>
+
+          <SubTitle>2.5 Technische Daten bei unseren Hosting-Anbietern</SubTitle>
+          <Text>
+            Bei jedem Aufruf der Plattform verarbeiten unsere Hosting-Anbieter (siehe Abschnitt 7)
+            technisch notwendige Daten: Ihre IP-Adresse und den daraus abgeleiteten ungefähren Standort,
+            den Browser und das Betriebssystem, die aufgerufene Adresse inklusive Parametern (z. B.
+            Suchbegriffe oder Einladungscodes), den Zeitpunkt und das Ergebnis der Anfrage. Die Plattform
+            selbst speichert keine IP-Adressen und wertet diese Daten nicht aus. Wir anonymisieren sie auch
+            nicht; sie liegen in den Protokollen der Anbieter vor (Aufbewahrung siehe Abschnitt 10).
+          </Text>
+
+          <SubTitle>2.6 Was wir nicht erheben</SubTitle>
+          <List>
+            <li>Keine Analyse- oder Tracking-Werkzeuge (z. B. kein Google Analytics), keine Werbung</li>
+            <li>Keine Schriften, Skripte oder Inhalte von Drittanbietern in Ihrem Browser</li>
+            <li>Kein Profilbild und kein Zugriff auf Ihre E-Mails, Kontakte, Kalender oder Dateien bei Google oder Microsoft</li>
+            <li>Keine Standortdaten</li>
+          </List>
+        </Section>
+
+        <Section title="3. Wofür wir die Daten verwenden">
+          <List>
+            <li>Anmeldung und Verwaltung Ihres Kontos</li>
+            <li>Anzeige Ihrer Inserate in den Communitys und Gruppen, die Sie auswählen</li>
+            <li>Kontaktaufnahme zwischen Mitgliedern</li>
+            <li>Verwaltung von Communitys, Gruppen und Einladungen</li>
+            <li>Betrieb, Fehlersuche und Sicherheit der Plattform (technische Daten gemäss Abschnitt 2.5)</li>
+          </List>
+          <Text className="mt-4">
+            Wir verwenden Ihre Daten nicht für Werbung, verkaufen sie nicht und erstellen keine Profile.
+            Die Plattform versendet keine E-Mails. Falls wir Sie kontaktieren müssen (z. B. bei wesentlichen
+            Änderungen), schreiben wir Ihnen persönlich an Ihre E-Mail-Adresse.
+          </Text>
+        </Section>
+
+        <Section title="4. Rechtsgrundlagen">
+          <Text>
+            Wir bearbeiten Personendaten nach Treu und Glauben, zweckgebunden und verhältnismässig
+            (Art. 6 DSG). Soweit die DSGVO anwendbar ist, stützen wir uns auf:
+          </Text>
+          <List>
+            <li>
+              <strong>Vertrag</strong> (Art. 6 Abs. 1 lit. b DSGVO): Bereitstellung der Plattform gemäss
+              den Nutzungsbedingungen
             </li>
             <li>
-              <strong>Einwilligung:</strong> Für optionale Funktionen wie erweiterte
-              Benachrichtigungen
+              <strong>Einwilligung</strong> (Art. 6 Abs. 1 lit. a DSGVO): freiwillige Angaben wie Adresse
+              und Telefonnummer; Sie können sie jederzeit entfernen
             </li>
             <li>
-              <strong>Überwiegende Interessen:</strong> Sicherheit der Plattform und
-              Missbrauchsprävention
+              <strong>Berechtigtes Interesse</strong> (Art. 6 Abs. 1 lit. f DSGVO): sicherer und
+              funktionierender Betrieb (technische Daten)
+            </li>
+          </List>
+        </Section>
+
+        <Section title="5. Wer Ihre Daten sieht">
+          <SubTitle>5.1 Andere Mitglieder</SubTitle>
+          <List>
+            <li>
+              <strong>Alle Mitglieder</strong> einer Community oder Gruppe, der Sie angehören, sehen Ihren
+              Vor- und Nachnamen und in der Mitgliederliste Ihre <strong>E-Mail-Adresse</strong> und Ihr
+              Beitrittsdatum.
             </li>
             <li>
-              <strong>Gesetzliche Pflichten:</strong> Erfüllung gesetzlicher
-              Aufbewahrungspflichten
-            </li>
-          </ul>
-          <p className="text-muted-foreground mt-4">
-            Für EU-Nutzer gelten zusätzlich die Rechtsgrundlagen nach Art. 6 DSGVO
-            (Vertragserfüllung, Einwilligung, berechtigtes Interesse, rechtliche Verpflichtung).
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">5. Speicherort und Datensicherheit</h2>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">5.1 Speicherort</h3>
-          <p className="text-muted-foreground">
-            Daten werden auf folgenden Servern gespeichert und verarbeitet:
-          </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground mt-2">
-            <li><strong>Datenbank (PostgreSQL):</strong> EU West (Amsterdam, Niederlande) via Railway</li>
-            <li><strong>Bilder:</strong> Cloudflare R2 (Eastern Europe) - US-Anbieter mit EU-Speicherort</li>
-          </ul>
-          <p className="text-muted-foreground mt-4">
-            Cloudflare Inc. ist ein US-Unternehmen, das dem EU-US Data Privacy Framework unterliegt.
-            Die Daten werden in der EU gespeichert.
-          </p>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">5.2 Sicherheitsmassnahmen</h3>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>HTTPS-Verschlüsselung für alle Verbindungen</li>
-            <li>Regelmässige Sicherheitsupdates</li>
-            <li>Zugriffsbeschränkungen auf Datenbankebene</li>
-            <li>HttpOnly-Cookies für Authentifizierungs-Tokens</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">6. SSO-Provider (Google, Microsoft)</h2>
-          <p className="text-muted-foreground">
-            Wir nutzen Google und Microsoft für die Authentifizierung (Single Sign-On).
-            Beim Login werden folgende Daten von diesen Providern abgerufen:
-          </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>E-Mail-Adresse</li>
-            <li>Vorname und Nachname</li>
-            <li>Profil-ID (zur Verknüpfung Ihres Accounts)</li>
-          </ul>
-          <p className="text-muted-foreground mt-4">
-            Wir fordern <strong>keine</strong> Zugriffe auf Gmail, Google Drive, OneDrive oder
-            andere Dienste an. Bitte beachten Sie die Datenschutzrichtlinien von{' '}
-            <a href="https://policies.google.com/privacy" className="underline" target="_blank" rel="noopener">
-              Google
-            </a>{' '}
-            und{' '}
-            <a href="https://privacy.microsoft.com/" className="underline" target="_blank" rel="noopener">
-              Microsoft
-            </a>.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">7. Cookies</h2>
-          <p className="text-muted-foreground">
-            Wir verwenden nur technisch notwendige Cookies:
-          </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>
-              <strong>Refresh Token</strong> (httpOnly Cookie): Für die Authentifizierung,
-              Gültigkeitsdauer 90 Tage
+              <strong>Wer eines Ihrer Inserate sehen kann</strong> (die Mitglieder der Communitys und Gruppen,
+              mit denen Sie es teilen), sieht Ihren Namen, Ihre E-Mail-Adresse und, falls angegeben, Ihre
+              Adresse und Telefonnummer sowie die ursprünglichen Dateinamen der Bilder.
             </li>
             <li>
-              <strong>Access Token</strong> (httpOnly Cookie): Für API-Anfragen,
-              kurze Gültigkeitsdauer
+              <strong>Wer einen Einladungslink erhält</strong>, sieht auch ohne Anmeldung Name und
+              Beschreibung der Community, den Vor- und Nachnamen der Person, die sie gegründet hat, und
+              die Anzahl Mitglieder. Bei Gruppen werden keine Namen angezeigt.
+            </li>
+          </List>
+
+          <SubTitle>5.2 Bilder</SubTitle>
+          <Text>
+            Bilder werden unter einer zufällig erzeugten, nicht erratbaren Adresse gespeichert. Wer diese
+            Adresse kennt (z. B. weil sie weitergegeben wurde), kann das Bild ohne Anmeldung abrufen.
+          </Text>
+
+          <SubTitle>5.3 Kontakt über Signal, WhatsApp und E-Mail</SubTitle>
+          <Text>
+            Auf einem Inserat können Sie die inserierende Person per E-Mail, Signal oder WhatsApp
+            kontaktieren. Erst wenn Sie darauf klicken, öffnet sich Ihr E-Mail-Programm bzw. Signal oder
+            WhatsApp. Dabei werden die E-Mail-Adresse bzw. die Telefonnummer der inserierenden Person und
+            bei E-Mail und WhatsApp auch der Titel des Inserats an die jeweilige Anwendung übergeben. Für
+            die weitere Bearbeitung gelten die Bestimmungen von Signal bzw. WhatsApp (Meta).
+          </Text>
+
+          <SubTitle>5.4 Weitere Empfänger</SubTitle>
+          <List>
+            <li>Google bzw. Microsoft bei der Anmeldung (Abschnitt 6)</li>
+            <li>Unsere Hosting-Anbieter, die Daten in unserem Auftrag bearbeiten (Abschnitt 7)</li>
+            <li>Behörden oder Gerichte, wenn wir rechtlich dazu verpflichtet sind</li>
+          </List>
+          <Text className="mt-2">Darüber hinaus geben wir keine Daten weiter.</Text>
+        </Section>
+
+        <Section title="6. Anmeldung über Google und Microsoft">
+          <Text>
+            Die Anmeldung erfolgt ausschliesslich über Google oder Microsoft. Diese Anbieter erfahren
+            dadurch, dass Sie sich bei LocalShare anmelden.
+          </Text>
+          <List>
+            <li>
+              <strong>Google</strong> (Berechtigungen «email» und «profile»): Google übermittelt uns u. a.
+              Name, E-Mail-Adresse und Profilbild. Wir speichern nur Vor- und Nachname, E-Mail-Adresse und
+              Ihre Google-Kennung, nicht das Profilbild.
             </li>
             <li>
-              <strong>Pending Invite</strong> (httpOnly Cookie): Temporär während des
-              Login-Prozesses bei Einladungslinks
+              <strong>Microsoft</strong> (Berechtigungen «openid», «profile», «email», «User.Read»): Microsoft
+              übermittelt uns Ihr Basisprofil, das neben Name und E-Mail auch Angaben wie Berufsbezeichnung,
+              Telefonnummern oder Bürostandort enthalten kann, sofern diese in Ihrem Microsoft-Konto
+              hinterlegt sind. Wir speichern nur Vor- und Nachname, E-Mail-Adresse und Ihre
+              Microsoft-Kennung. Die übrigen Angaben verwerfen wir sofort.
+            </li>
+          </List>
+          <Text className="mt-4">
+            Melden Sie sich mit einem zweiten Anbieter an, der dieselbe E-Mail-Adresse liefert, verknüpfen
+            wir diesen automatisch mit Ihrem bestehenden Konto. Wir erhalten keinen Zugriff auf Ihre E-Mails,
+            Dateien oder anderen Dienste bei Google oder Microsoft. Es gelten zusätzlich die
+            Datenschutzbestimmungen von{' '}
+            <ExternalLink href="https://policies.google.com/privacy">Google</ExternalLink> und{' '}
+            <ExternalLink href="https://privacy.microsoft.com/">Microsoft</ExternalLink>.
+          </Text>
+        </Section>
+
+        <Section title="7. Hosting und Speicherort">
+          <List>
+            <li>
+              <strong>Vercel Inc., USA</strong> – betreibt die Webseite und den Server der Plattform. Die
+              Anwendung läuft in Frankfurt (Deutschland). Anfragen gelangen über das weltweite Netzwerk von
+              Vercel zum nächstgelegenen Standort, in Europa z. B. nach Paris oder Frankfurt.
             </li>
             <li>
-              <strong>Locale</strong>: Speichert Ihre Sprachpräferenz (Deutsch/Französisch)
+              <strong>Supabase Pte. Ltd., Singapur</strong> – betreibt die Datenbank und den Speicher für
+              Bilder. Die Daten liegen in Frankfurt (Deutschland) auf Servern von Amazon Web Services.
             </li>
-          </ul>
-          <p className="text-muted-foreground mt-4">
-            Wir verwenden <strong>keine</strong> Tracking-Cookies, Marketing-Cookies oder
-            Cookies von Drittanbietern.
-          </p>
-        </section>
+          </List>
+          <Text className="mt-4">
+            Beide Anbieter haben ihren Sitz ausserhalb der Schweiz und der EU und können aus diesen Ländern
+            auf die Daten zugreifen.
+          </Text>
+          <List>
+            <li>
+              Vercel ist unter dem EU-U.S. und dem Swiss-U.S. Data Privacy Framework zertifiziert. Wir nutzen
+              den kostenlosen Tarif «Hobby» von Vercel. Den Auftragsbearbeitungsvertrag (Data Processing
+              Addendum) bietet Vercel nach eigenen Angaben nur für die kostenpflichtigen Tarife an. Für unseren
+              Tarif besteht deshalb <strong>kein</strong> separater Auftragsbearbeitungsvertrag mit Vercel.
+            </li>
+            <li>
+              Mit Supabase besteht ein Auftragsbearbeitungsvertrag als Teil der Nutzungsbedingungen. Allfällige
+              Übermittlungen stützt Supabase auf die Standardvertragsklauseln der EU-Kommission.
+            </li>
+          </List>
+          <Text className="mt-4">
+            Wenn Sie uns per E-Mail schreiben, wird Ihre Nachricht bei unserem E-Mail-Anbieter Proton AG
+            (Schweiz) gespeichert.
+          </Text>
+        </Section>
 
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">8. Datenweitergabe an Dritte</h2>
+        <Section title="8. Datensicherheit">
+          <List>
+            <li>Alle Verbindungen sind verschlüsselt (HTTPS).</li>
+            <li>Anmelde-Cookies sind für Skripte im Browser nicht lesbar (httpOnly).</li>
+            <li>Die Kennwerte der Anmeldesitzungen speichern wir nur als Hash.</li>
+            <li>Die Datenbank ist nur mit Zugangsdaten erreichbar, die ausschliesslich der Server der Plattform kennt. Die öffentliche Datenschnittstelle von Supabase ist abgeschaltet, und Zugriffsregeln (Row Level Security) sperren alle Tabellen für anonyme Zugriffe.</li>
+            <li>Bilder werden ohne Metadaten gespeichert.</li>
+          </List>
+          <Text className="mt-4">
+            Offen gesagt: Wir nutzen den kostenlosen Tarif von Supabase. Dieser erstellt{' '}
+            <strong>keine automatischen Datensicherungen</strong>. Bei einem schweren technischen Ausfall
+            könnten Daten verloren gehen. Bilder sind, wie in Abschnitt 5.2 beschrieben, über ihre Adresse
+            ohne Anmeldung abrufbar.
+          </Text>
+        </Section>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">8.1 Sichtbarkeit für andere Nutzer</h3>
-          <p className="text-muted-foreground">
-            Ihre Kontaktdaten (E-Mail, optionale Adresse, optionale Telefonnummer) werden <strong>nur</strong>{' '}
-            anderen Nutzern bzw. Community- und Gruppenmitgliedern angezeigt, wenn diese eines Ihrer Inserate ansehen. Dies ist notwendig,
-            damit Interessenten Sie kontaktieren können.
-          </p>
+        <Section title="9. Cookies und Speicher im Browser">
+          <Text>Wir verwenden nur technisch notwendige Cookies, keine Tracking- oder Werbe-Cookies:</Text>
+          <List>
+            <li>
+              <strong>accessToken</strong> – hält Sie angemeldet, gültig 15 Minuten
+            </li>
+            <li>
+              <strong>refreshToken</strong> – verlängert Ihre Anmeldung, gültig 90 Tage
+            </li>
+            <li>
+              <strong>pendingInvite</strong> – merkt sich einen Einladungslink während der Anmeldung, gültig
+              15 Minuten
+            </li>
+            <li>
+              <strong>NEXT_LOCALE</strong> – speichert Ihre Sprache (Deutsch/Französisch), gültig 1 Jahr
+            </li>
+          </List>
+          <Text className="mt-4">
+            Die Anmelde-Cookies gelten für alle Adressen unter localshare.ch und sind für Skripte nicht
+            lesbar. Beim Abmelden leeren wir sie. Zusätzlich legt die Plattform im Sitzungsspeicher Ihres
+            Browsers (sessionStorage) vorübergehend einen Einladungscode und den Namen der eingeladenen
+            Community oder Gruppe ab, bis Sie das Browserfenster schliessen oder sich abmelden.
+          </Text>
+        </Section>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">8.2 Keine Weitergabe an Dritte</h3>
-          <p className="text-muted-foreground">
-            Wir verkaufen, vermieten oder teilen Ihre Daten <strong>nicht</strong> mit Dritten, ausser:
-          </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Bei rechtlicher Verpflichtung (z.B. Gerichtsbeschluss, behördliche Anfrage)</li>
-            <li>Zum Schutz unserer Rechte oder der Sicherheit anderer Nutzer</li>
-          </ul>
-          <p className="text-muted-foreground mt-4">
-            <strong>Hinweis zu SSO:</strong> Bei der Anmeldung über Google oder Microsoft werden
-            Daten ausschliesslich <em>von</em> diesen Anbietern abgerufen (siehe Abschnitt 6).
-            Wir senden keine Ihrer Nutzerdaten an diese Anbieter zurück.
-          </p>
-        </section>
+        <Section title="10. Aufbewahrung und Löschung">
+          <List>
+            <li>
+              <strong>Konto und Inhalte:</strong> solange Ihr Konto besteht.
+            </li>
+            <li>
+              <strong>Gelöschtes Inserat:</strong> Die Bilder werden sofort gelöscht. Titel, Beschreibung und
+              Preis bleiben als «gelöscht» markiert in der Datenbank, sind aber für niemanden mehr sichtbar.
+            </li>
+            <li>
+              <strong>Anmeldesitzungen:</strong> bis zur Löschung Ihres Kontos (siehe Abschnitt 2.4).
+            </li>
+            <li>
+              <strong>Technische Protokolle:</strong> Wir können die Protokolle von Vercel 1 Stunde und die von
+              Supabase 1 Tag lang einsehen. Wie lange die Anbieter eigene Daten aufbewahren, richtet sich nach
+              deren Datenschutzbestimmungen.
+            </li>
+          </List>
 
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">9. Aufbewahrungsdauer</h2>
-          <p className="text-muted-foreground">
-            Wir speichern Ihre Daten nur so lange, wie es für die Zwecke erforderlich ist:
-          </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li><strong>Account-Daten:</strong> Bis zur Löschung Ihres Accounts</li>
-            <li><strong>Inserate:</strong> Bis zur Löschung durch den Nutzer oder des Accounts</li>
-            <li><strong>Server-Logs:</strong> 30 Tage (anonymisiert)</li>
-            <li><strong>Gelöschte Accounts:</strong> Sofortige Löschung aller Daten</li>
-          </ul>
-        </section>
+          <SubTitle>Was beim Löschen Ihres Kontos passiert</SubTitle>
+          <Text>
+            Sie können Ihr Konto im Profil selbst löschen. Dabei werden sofort gelöscht: Ihre
+            Anmeldesitzungen, die Verknüpfung mit Google bzw. Microsoft und Ihre Mitgliedschaften in
+            Communitys und Gruppen. Ihre Inserate werden ausgeblendet.
+          </Text>
+          <Text className="mt-2">
+            <strong>Derzeit bleiben jedoch gespeichert:</strong> Ihr Name, Ihre E-Mail-Adresse, Adresse und
+            Telefonnummer (als «gelöscht» markiert), der Text Ihrer Inserate, deren Bilder (weiterhin über die
+            Bildadresse abrufbar) und Ihre Merkliste. Communitys und Gruppen, die Sie gegründet haben, bleiben
+            bestehen, und Ihr Name wird dort weiterhin als Gründer angezeigt. Wir arbeiten daran, dass die
+            Löschung künftig alle Daten vollständig entfernt.
+          </Text>
+          <Text className="mt-2">
+            Weil Ihre E-Mail-Adresse gespeichert bleibt, können Sie sich mit derselben Adresse derzeit nicht
+            neu registrieren. Bis zur Behebung gilt: Schreiben Sie uns an info@localshare.ch, dann löschen wir
+            alle Ihre Daten vollständig, einschliesslich der Bilder, und bestätigen Ihnen die Löschung.
+          </Text>
+        </Section>
 
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">10. Ihre Rechte (DSGVO/DSG)</h2>
-          <p className="text-muted-foreground">Sie haben folgende Rechte:</p>
+        <Section title="11. Ihre Rechte">
+          <List>
+            <li>
+              <strong>Auskunft und Datenherausgabe:</strong> Mit «Daten exportieren» im Profil erhalten Sie Ihr
+              Konto, Ihre Anmeldeverknüpfungen, Ihre Communitys, Gruppen und Mitgliedschaften sowie Ihre aktiven
+              Inserate mit Bildangaben als Datei (JSON). Nicht enthalten sind derzeit Ihre Merkliste, Ihre
+              Anmeldesitzungen, gelöschte Inserate und die Bilddateien selbst. Eine vollständige Auskunft
+              erhalten Sie auf Anfrage per E-Mail.
+            </li>
+            <li>
+              <strong>Berichtigung:</strong> Name, Adresse, Telefonnummer und Sprache ändern Sie im Profil.
+              Für eine Änderung Ihrer E-Mail-Adresse schreiben Sie uns.
+            </li>
+            <li>
+              <strong>Löschung:</strong> siehe Abschnitt 10.
+            </li>
+            <li>
+              <strong>Widerspruch und Widerruf:</strong> Sie können einer Bearbeitung widersprechen und freiwillige
+              Angaben jederzeit entfernen.
+            </li>
+            <li>
+              <strong>Beschwerde:</strong> beim Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten
+              (EDÖB) oder, wenn Sie in der EU wohnen, bei der Datenschutzbehörde Ihres Landes.
+            </li>
+          </List>
+          <Text className="mt-4">Für alle Anfragen erreichen Sie uns unter info@localshare.ch.</Text>
+        </Section>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">10.1 Auskunftsrecht</h3>
-          <p className="text-muted-foreground">
-            Sie können jederzeit Auskunft über die von uns gespeicherten Daten verlangen.
-            Nutzen Sie hierfür die Funktion "Daten exportieren" in Ihrem Profil.
-          </p>
+        <Section title="12. Mindestalter">
+          <Text>
+            Die Plattform richtet sich an Personen ab 18 Jahren. Wir prüfen das Alter technisch nicht. Wenn
+            Sie annehmen, dass wir Daten einer minderjährigen Person bearbeiten, melden Sie sich bitte bei uns.
+          </Text>
+        </Section>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">10.2 Recht auf Löschung</h3>
-          <p className="text-muted-foreground">
-            Sie können Ihren Account und alle damit verbundenen Daten jederzeit in den
-            Account-Einstellungen löschen. Die Löschung erfolgt sofort und unwiderruflich.
-          </p>
+        <Section title="13. Änderungen">
+          <Text>
+            Wir passen diese Erklärung an, wenn sich die Plattform oder die Rechtslage ändert. Die aktuelle
+            Version finden Sie immer unter /privacy. Über wesentliche Änderungen informieren wir Sie per E-Mail.
+          </Text>
+        </Section>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">10.3 Recht auf Datenportabilität</h3>
-          <p className="text-muted-foreground">
-            Nutzen Sie die "Daten exportieren"-Funktion in Ihrem Profil für einen
-            DSGVO-konformen Export Ihrer Daten im JSON-Format.
-          </p>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">10.4 Recht auf Berichtigung</h3>
-          <p className="text-muted-foreground">
-            Bearbeiten Sie Ihre Daten jederzeit in Ihrem Profil.
-          </p>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">10.5 Widerspruchsrecht</h3>
-          <p className="text-muted-foreground">
-            Sie können der Verarbeitung Ihrer Daten widersprechen, sofern die Verarbeitung
-            auf berechtigtem Interesse basiert.
-          </p>
-
-          <h3 className="text-xl font-semibold mt-6 mb-3">10.6 Beschwerderecht</h3>
-          <p className="text-muted-foreground">
-            Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.
-            In der Schweiz ist dies der Eidgenössische Datenschutz- und Öffentlichkeitsbeauftragte
-            (EDÖB).
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">11. Minderjährige</h2>
-          <p className="text-muted-foreground">
-            Die Plattform richtet sich an Personen ab 18 Jahren. Wir erheben wissentlich keine
-            Daten von Minderjährigen unter 18 Jahren. Wenn Sie glauben, dass wir Daten eines
-            Minderjährigen gespeichert haben, kontaktieren Sie uns bitte umgehend.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">12. Änderungen dieser Datenschutzerklärung</h2>
-          <p className="text-muted-foreground">
-            Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte
-            Rechtslage oder Änderungen unserer Dienstleistungen anzupassen. Bei wesentlichen
-            Änderungen werden Sie per E-Mail informiert. Die aktuelle Version ist immer
-            unter /privacy abrufbar.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mt-8 mb-4">13. Kontakt</h2>
-          <p className="text-muted-foreground">
-            Bei Fragen zum Datenschutz oder zur Ausübung Ihrer Rechte kontaktieren Sie uns unter:
-          </p>
-          <p className="text-muted-foreground mt-2">
-            <strong>E-Mail:</strong> support@localshare.ch
-          </p>
-        </section>
+        <Section title="14. Kontakt">
+          <Text>Bei Fragen zum Datenschutz oder zur Ausübung Ihrer Rechte:</Text>
+          <Text className="mt-2">
+            <strong>E-Mail:</strong> info@localshare.ch
+          </Text>
+        </Section>
 
         <div className="mt-12 pt-8 border-t text-sm text-muted-foreground">
-          <p>Stand: Januar 2026</p>
-          <p className="mt-2">
-            Diese Datenschutzerklärung erfüllt die Anforderungen der DSGVO (EU) und des
-            Schweizer Datenschutzgesetzes (DSG).
-          </p>
+          <p>Stand: 30. September 2026</p>
         </div>
       </div>
     </div>

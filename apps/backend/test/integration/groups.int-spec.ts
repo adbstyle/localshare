@@ -20,7 +20,7 @@ describe('Groups', () => {
   beforeEach(() => resetDb(t.prisma));
   afterAll(() => t.close());
 
-  it.failing('answers 404 when an outsider creates a group in a foreign community', async () => {
+  it('answers 404 when an outsider creates a group in a foreign community', async () => {
     const owner = await createUser(t);
     const outsider = await createUser(t);
     const community = await createCommunity(t, owner.id);
@@ -41,6 +41,15 @@ describe('Groups', () => {
     await joinGroup(t, newcomer.id, group);
 
     expect((await t.request('GET', `/communities/${community.id}`, { as: newcomer.id })).status).toBe(200);
+  });
+
+  it('refuses to join a group of a deleted community', async () => {
+    const { owner, community, group } = await communityWithGroup(t);
+    const newcomer = await createUser(t);
+    expectStatus(await t.request('DELETE', `/communities/${community.id}`, { as: owner.id }), 204);
+
+    const response = await t.request('POST', `/groups/join?token=${group.inviteToken}`, { as: newcomer.id });
+    expect(response.status).toBe(404);
   });
 
   it('lists only my groups, optionally per community', async () => {

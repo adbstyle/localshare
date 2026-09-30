@@ -45,7 +45,7 @@ describe('Listing visibility', () => {
     expect((await t.request('GET', `/listings/${listing.id}`, { as: member.id })).status).toBe(200);
   });
 
-  it.failing('answers 404 (not 403) when an outsider opens a listing', async () => {
+  it('answers 404 (not 403) when an outsider opens a listing', async () => {
     const creator = await createUser(t);
     const outsider = await createUser(t);
     const listing = await createListing(t, creator.id);
@@ -132,7 +132,7 @@ describe('Listing visibility', () => {
     expect(await feedIds(member.id)).toEqual([listing.id]);
   });
 
-  it.failing('answers 400 for a malformed listing id', async () => {
+  it('answers 400 for a malformed listing id', async () => {
     const user = await createUser(t);
     expect((await t.request('GET', '/listings/not-a-uuid', { as: user.id })).status).toBe(400);
   });

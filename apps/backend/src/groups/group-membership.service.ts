@@ -1,46 +1,40 @@
 import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  BadRequestException,
-  ForbiddenException,
-  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { AccessService } from '../access/access.service';
+import { isUniqueViolation } from '../common/utils/prisma-errors';
+import { revokeGroupMembership } from '../communities/membership.cascade';
 
 @Injectable()
 export class GroupMembershipService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private access: AccessService,
+  ) {}
 
+  /** Joining a group also joins its community if the user is not a member yet. */
   async joinGroup(userId: string, inviteToken: string) {
-    if (!inviteToken) {
-      throw new BadRequestException('Invite token is required');
-    }
-
     const group = await this.prisma.group.findFirst({
-      where: {
-        inviteToken,
-        deletedAt: null,
-      },
-      include: {
-        community: true,
-      },
+      where: { inviteToken, deletedAt: null, community: { deletedAt: null } },
+      select: { id: true, name: true, description: true, community: { select: { id: true, name: true } } },
     });
+    if (!group) throw new NotFoundException('Invalid or expired invite link');
 
-    if (!group) {
-      throw new NotFoundException('Invalid or expired invite link');
-    }
-
-    // Check if already a member
-    const existingGroupMember = await this.prisma.groupMember.findUnique({
-      where: {
-        groupId_userId: {
-          groupId: group.id,
-          userId,
-        },
-      },
-    });
-
-    if (existingGroupMember) {
+    try {
+      await this.prisma.$transaction([
+        this.prisma.communityMember.createMany({
+          data: [{ communityId: group.community.id, userId }],
+          skipDuplicates: true,
+        }),
+        this.prisma.groupMember.create({ data: { groupId: group.id, userId } }),
+      ]);
+    } catch (error) {
+      if (!isUniqueViolation(error)) throw error;
       throw new ConflictException({
         message: 'You are already a member of this group',
         alreadyMember: true,
@@ -48,145 +42,33 @@ export class GroupMembershipService {
       });
     }
 
-    // Auto-join parent community if not a member
-    const existingCommunityMember = await this.prisma.communityMember.findUnique(
-      {
-        where: {
-          communityId_userId: {
-            communityId: group.communityId,
-            userId,
-          },
-        },
-      },
-    );
-
-    if (!existingCommunityMember) {
-      await this.prisma.communityMember.create({
-        data: {
-          communityId: group.communityId,
-          userId,
-        },
-      });
-    }
-
-    // Join group
-    await this.prisma.groupMember.create({
-      data: {
-        groupId: group.id,
-        userId,
-      },
-    });
-
-    return {
-      message: 'Successfully joined group',
-      group: {
-        id: group.id,
-        name: group.name,
-        description: group.description,
-      },
-      community: {
-        id: group.community.id,
-        name: group.community.name,
-      },
-    };
+    const { community, ...joined } = group;
+    return { message: 'Successfully joined group', group: joined, community };
   }
 
   async leaveGroup(userId: string, groupId: string) {
-    const group = await this.prisma.group.findUnique({
-      where: { id: groupId, deletedAt: null },
-    });
-
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-
+    const group = await this.access.assertGroupMember(groupId, userId);
     if (group.ownerId === userId) {
       throw new ForbiddenException('Owner cannot leave group. Delete it instead.');
     }
 
-    // Check if member
-    const membership = await this.prisma.groupMember.findUnique({
-      where: {
-        groupId_userId: {
-          groupId,
-          userId,
-        },
-      },
-    });
-
-    if (!membership) {
-      throw new BadRequestException('You are not a member of this group');
-    }
-
-    // Remove from group
-    await this.prisma.groupMember.delete({
-      where: {
-        groupId_userId: {
-          groupId,
-          userId,
-        },
-      },
-    });
-
-    // Hide user's listings from this group
-    await this.prisma.listingVisibility.deleteMany({
-      where: {
-        groupId,
-        listing: { creatorId: userId },
-      },
-    });
-
+    await this.prisma.$transaction((tx) => revokeGroupMembership(tx, groupId, userId));
     return { message: 'Successfully left group' };
   }
 
-  async removeMember(ownerId: string, groupId: string, memberToRemoveId: string) {
-    const group = await this.prisma.group.findUnique({
-      where: { id: groupId, deletedAt: null },
-    });
-
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-
-    if (group.ownerId !== ownerId) {
-      throw new ForbiddenException('Only the owner can remove members');
-    }
-
-    if (memberToRemoveId === ownerId) {
+  async removeMember(ownerId: string, groupId: string, memberId: string) {
+    await this.access.assertGroupOwner(groupId, ownerId);
+    if (memberId === ownerId) {
       throw new BadRequestException('Owner cannot remove themselves');
     }
 
     const membership = await this.prisma.groupMember.findUnique({
-      where: {
-        groupId_userId: {
-          groupId,
-          userId: memberToRemoveId,
-        },
-      },
+      where: { groupId_userId: { groupId, userId: memberId } },
+      select: { id: true },
     });
+    if (!membership) throw new NotFoundException('Member not found in this group');
 
-    if (!membership) {
-      throw new NotFoundException('Member not found in this group');
-    }
-
-    // Remove from group
-    await this.prisma.groupMember.delete({
-      where: {
-        groupId_userId: {
-          groupId,
-          userId: memberToRemoveId,
-        },
-      },
-    });
-
-    // Hide member's listings from this group
-    await this.prisma.listingVisibility.deleteMany({
-      where: {
-        groupId,
-        listing: { creatorId: memberToRemoveId },
-      },
-    });
-
+    await this.prisma.$transaction((tx) => revokeGroupMembership(tx, groupId, memberId));
     return { message: 'Member removed successfully' };
   }
 }

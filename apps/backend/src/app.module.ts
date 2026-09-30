@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { DatabaseModule } from './database/database.module';
+import { AccessModule } from './access/access.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CommunitiesModule } from './communities/communities.module';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       envFilePath: ['.env.local', '.env'],
     }),
     DatabaseModule,
+    AccessModule,
     AuthModule,
     UsersModule,
     CommunitiesModule,

@@ -127,7 +127,7 @@
     "join": "Beitreten",
     "leave": "Verlassen",
     "leaveConfirm": "Sind Sie sicher, dass Sie diese Community verlassen möchten?",
-    "leaveWarning": "Sie werden aus allen Gruppen entfernt und Ihre Inserate sind nicht mehr sichtbar.",
+    "leaveWarning": "Sie werden aus allen Gruppen entfernt und Ihre Inserate sind nicht mehr sichtbar. Gruppen, die Sie gegründet haben, gehen an die Person über, der die Community gehört.",
     "edit": "Bearbeiten",
     "delete": "Löschen",
     "deleteConfirm": "Sind Sie sicher, dass Sie diese Community löschen möchten?",
@@ -162,7 +162,7 @@
     "refreshFailed": "Liste konnte nicht aktualisiert werden. Bitte Seite neu laden.",
     "removeMember": "Entfernen",
     "removeMemberConfirm": "Mitglied entfernen?",
-    "removeMemberWarning": "\"{name}\" wird aus der Community und allen Gruppen entfernt.",
+    "removeMemberWarning": "\"{name}\" wird aus der Community und allen Gruppen entfernt. Gruppen, die {name} gegründet hat, gehen an Sie über.",
     "memberRemoved": "Mitglied entfernt"
   },
   "groups": {

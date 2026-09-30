@@ -14,10 +14,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.r2.dev',
-      },
-      {
-        protocol: 'https',
         hostname: 'ubknsruneajnldvbshvr.supabase.co', // Supabase prod
         pathname: '/storage/v1/object/public/**',
       },

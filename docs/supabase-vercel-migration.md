@@ -1,6 +1,6 @@
 # Migrationsplan: Railway + R2 → Vercel + Supabase
 
-Stand: 30. September 2026 (Cutover erledigt, Schritt 7 offen) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits: 2026-09-30
+Stand: 30. September 2026 (Cutover erledigt, Schritt 7 im Repo erledigt) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29, Supabase-Free-Limits und DPAs: 2026-09-30
 
 ## Kontext
 
@@ -134,7 +134,7 @@ Env Frontend: `NEXT_PUBLIC_API_URL`, Preview `https://api-staging.localshare.ch`
 `remotePatterns` in `next.config.js` enthält die beiden Supabase-Hosts `<ref>.supabase.co/storage/v1/object/public/**`.
 
 ### Schritt 5: Daten migrieren — Staging komplett, Prod vorab kopiert (2026-09-30, `feature/167-data-migration`)
-Werkzeuge liegen in `scripts/supabase-migration/`, siehe README dort. Sie brauchen die Railway-CLI, `jq`, `python3`, `node` und libpq ≥ 17 (`brew install libpq`, hier 18.1). Credentials kommen aus `apps/backend/.env.supabase-*.local`.
+Werkzeuge lagen in `scripts/supabase-migration/`, seit Schritt 7 gelöscht und in der Git-Historie abrufbar. Sie brauchen die Railway-CLI, `jq`, `python3`, `node` und libpq ≥ 17 (`brew install libpq`, hier 18.1). Credentials kommen aus `apps/backend/.env.supabase-*.local`.
 ```bash
 scripts/supabase-migration/migrate-db.sh <staging|production> apps/backend/.env.supabase-<staging|prod>.local
 scripts/supabase-migration/copy-images.sh <staging|production> apps/backend/.env.supabase-<staging|prod>.local
@@ -211,10 +211,25 @@ Die Prod-Kopie ist nur eine Vorab-Kopie. Railway nimmt weiter Schreibzugriffe an
 - Railway-Backend per `deploymentRedeploy(<notierte ID>)` starten, das dauert etwa 25 s.
 - Die Railway-DB und R2 wurden nie verändert. Schreibvorgänge nach dem Cutover gehen dabei verloren.
 
-### Schritt 7: Doku nachziehen
-`CLAUDE.md` (Environments-Tabelle), `README.md`, `docker-compose.yml` (erledigt: `/api/v1/health` existiert seit Schritt 4). Löschen: `apps/backend/railpack.json`, `apps/frontend/start.sh` (Script `start` → `next start`), `R2_*`-Variablen, Railway-Variable `BACKEND_URL` (Frontend), `*.r2.dev` in `remotePatterns`. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.
+### Schritt 7: Aufräumen — im Repo erledigt (2026-09-30, `feature/167-cleanup`)
+Entscheid Adrian: Railway wird **sofort** gelöscht, ohne die ursprünglich geplante Rollback-Frist von 1 bis 2 Wochen und ohne zusätzliches Backup. Die Daten existieren damit nur noch in Supabase Free, und dieser Plan hat keine herunterladbaren Backups.
 
-**Datenschutzerklärung** `apps/frontend/src/app/[locale]/privacy/page.tsx` (Zeilen «Datenbank» und «Bilder»): Hosting-Angaben Railway und Cloudflare R2 durch Vercel (Frankfurt) und Supabase (Frankfurt) ersetzen. Das ist Rechtstext, also zeitgleich mit dem Cutover live schalten.
+Im Repo:
+- Gelöscht: `apps/backend/railpack.json`, `apps/frontend/start.sh` (`start` ist jetzt `next start`, Next.js respektiert `PORT`) und `scripts/supabase-migration/`. Die Skripte sind in der Git-Historie abrufbar, zuletzt im Merge von #176.
+- `STORAGE_PROVIDER`: Der Legacy-Wert `r2` ist entfernt, es gibt nur noch `local` oder `s3`. Vercel setzt `s3`.
+- `remotePatterns` ohne `*.r2.dev`. Die R2-Beispiele sind aus `.env.example` (zweimal), `README.md` und `CLAUDE.md` entfernt.
+- `docker-compose.yml`: Der Health-Pfad `/api/v1/health` existiert seit Schritt 4.
+- **Datenschutzerklärung:** Abschnitt 5.1 ist aktualisiert, als separater PR zur Prüfung durch Adrian.
+
+Bei Adrian (Dashboards, ich lösche keine Daten):
+- **Railway:** Projekt `exemplary-education` löschen, unter Project Settings, Danger. Es ist das einzige Projekt im Account. Danach unter Account, Plans/Billing das Abo kündigen.
+- **Cloudflare:** Die R2-Buckets `localshare-images` und `localshare-images-staging` sowie ihre API-Tokens löschen. Die Bilder liegen vollständig in Supabase.
+- **Google Cloud Console und Azure App-Registrierung:** Keine Änderung nötig, die Callback-URLs sind unverändert.
+
+**Rechtlicher Hinweis, geprüft am 2026-09-30:**
+- **Vercel:** Der DPA gilt laut `vercel.com/legal/dpa` **nur für Pro- und Enterprise-Kunden**, nicht für Hobby. Vertragspartner ist Vercel Inc. (Delaware, USA), der Transfer läuft über Standardvertragsklauseln.
+- **Supabase:** Der DPA ist Teil der Terms. Vertragspartner ist **Supabase Pte. Ltd. (Singapur)**, ebenfalls mit Standardvertragsklauseln.
+- **Folgerung:** Für die Verarbeitung von Personendaten der Vereinsmitglieder über Vercel fehlt im Hobby-Plan eine Auftragsverarbeitungsvereinbarung. Der Entscheid Hobby oder Pro liegt beim Verein.
 
 ## Verifikation (Checkliste nach jedem Deploy)
 - `GET /api/v1/health/db` → 200 (DB erreichbar), Response-Header zeigen Vercel.

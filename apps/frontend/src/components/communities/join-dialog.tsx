@@ -36,26 +36,24 @@ export function JoinDialog({ kind, onJoined, open: openProp, onOpenChange }: Joi
   const parsed = parseInviteInput(useDebouncedValue(input, 300));
   const preview = useQuery({ ...communityQueries.preview(confirmedToken ?? ''), enabled: !!confirmedToken });
 
+  const editInput = (value: string) => {
+    setInput(value);
+    setConfirmedToken(null);
+  };
   const setOpen = (next: boolean) => {
     (onOpenChange ?? setInternalOpen)(next);
-    if (!next) {
-      setInput('');
-      setConfirmedToken(null);
-    }
+    if (!next) editInput('');
+  };
+  const done = (joinedId?: string) => {
+    setOpen(false);
+    if (joinedId) onJoined?.(joinedId);
   };
 
   const inputError = parsed.errorKey ? tk(parsed.errorKey) : preview.isError ? tk('errors.tokenNotFound') : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {openProp === undefined && (
-        <DialogTrigger asChild>
-          <Button variant="outline">
-            <LinkIcon className="h-4 w-4 mr-2" />
-            {tk('joinViaLink')}
-          </Button>
-        </DialogTrigger>
-      )}
+      {openProp === undefined && <JoinTrigger label={tk('joinViaLink')} />}
       <DialogContent className="sm:max-w-md" closeLabel={t('common.close')}>
         <DialogHeader>
           <DialogTitle>{tk('joinDialogTitle')}</DialogTitle>
@@ -63,42 +61,66 @@ export function JoinDialog({ kind, onJoined, open: openProp, onOpenChange }: Joi
         </DialogHeader>
 
         {preview.data && confirmedToken ? (
-          <JoinPreview
-            kind={kind}
-            token={confirmedToken}
-            preview={preview.data}
-            onBack={() => setConfirmedToken(null)}
-            onDone={(id) => {
-              setOpen(false);
-              if (id) onJoined?.(id);
-            }}
-          />
+          <JoinPreview kind={kind} token={confirmedToken} preview={preview.data}
+            onBack={() => setConfirmedToken(null)} onDone={done} />
         ) : (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="invite-input">{tk('pastePrompt')}</Label>
-              <Input id="invite-input" placeholder={tk('inputPlaceholder')} value={input} autoFocus
-                onChange={(e) => { setInput(e.target.value); setConfirmedToken(null); }}
-                className={inputError ? 'border-destructive' : ''} />
-              <p className="text-xs text-muted-foreground">{tk('inputHelper')}</p>
-              {inputError && (
-                <div className="flex items-start gap-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>{inputError}</span>
-                </div>
-              )}
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>{t('common.cancel')}</Button>
-              <Button onClick={() => setConfirmedToken(parsed.token)} disabled={!parsed.token || preview.isFetching}>
-                {preview.isFetching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {tk('next')}
-              </Button>
-            </div>
-          </div>
+          <InviteInput kind={kind} value={input} error={inputError} loading={preview.isFetching}
+            canContinue={!!parsed.token} onChange={editInput}
+            onCancel={() => setOpen(false)} onNext={() => setConfirmedToken(parsed.token)} />
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function JoinTrigger({ label }: { label: string }) {
+  return (
+    <DialogTrigger asChild>
+      <Button variant="outline">
+        <LinkIcon className="h-4 w-4 mr-2" />
+        {label}
+      </Button>
+    </DialogTrigger>
+  );
+}
+
+interface InviteInputProps {
+  kind: 'communities' | 'groups';
+  value: string;
+  error: string | null;
+  loading: boolean;
+  canContinue: boolean;
+  onChange: (value: string) => void;
+  onCancel: () => void;
+  onNext: () => void;
+}
+
+function InviteInput({ kind, value, error, loading, canContinue, onChange, onCancel, onNext }: InviteInputProps) {
+  const t = useTranslations();
+  const tk = useTranslations(kind);
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="invite-input">{tk('pastePrompt')}</Label>
+        <Input id="invite-input" placeholder={tk('inputPlaceholder')} value={value} autoFocus
+          onChange={(e) => onChange(e.target.value)} className={error ? 'border-destructive' : ''} />
+        <p className="text-xs text-muted-foreground">{tk('inputHelper')}</p>
+        {error && (
+          <div className="flex items-start gap-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onCancel}>{t('common.cancel')}</Button>
+        <Button onClick={onNext} disabled={!canContinue || loading}>
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {tk('next')}
+        </Button>
+      </div>
+    </div>
   );
 }
 

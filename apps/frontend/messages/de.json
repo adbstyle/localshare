@@ -292,6 +292,7 @@
     "emptyAction": "Erstellen Sie ein neues Inserat.",
     "created": "Inserat erfolgreich erstellt",
     "imageUploadFailed": "Bilder konnten nicht hochgeladen werden",
+    "imageProcessingFailed": "Bild konnte nicht verarbeitet werden. Bitte JPG, PNG oder WebP verwenden.",
     "updated": "Inserat erfolgreich aktualisiert",
     "deleted": "Inserat erfolgreich gelöscht",
     "imagesUploaded": "Bilder erfolgreich hochgeladen",

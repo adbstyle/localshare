@@ -9,12 +9,6 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '3000',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
         port: '3001',
         pathname: '/uploads/**',
       },
@@ -23,18 +17,6 @@ const nextConfig = {
         hostname: '*.r2.dev',
       },
     ],
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/:path*`,
-      },
-      {
-        source: '/uploads/:path*',
-        destination: `${process.env.BACKEND_URL || 'http://localhost:3001'}/uploads/:path*`,
-      },
-    ];
   },
 };
 

@@ -1,6 +1,6 @@
 # Migrationsplan: Railway + R2 → Vercel + Supabase
 
-Stand: 29. September 2026 (Schritte 1 und 2 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29
+Stand: 30. September 2026 (Schritte 1–3 aktualisiert) · Recherche-Datum aller Quellen: 2026-09-06, Vercel-NestJS-Support: 2026-09-29
 
 ## Kontext
 
@@ -22,7 +22,7 @@ Warum das «einfach» geht (verifiziert im Code):
 
 | # | Problem heute | Fix |
 |---|---|---|
-| 1 | Uploads: 3 × 10 MB in **einem** Multipart-Request → Vercel-Limit 4.5 MB (HTTP 413) | Client-seitiges Downscaling vor Upload (Canvas, ≤1600 px JPEG) → ~2 MB total. Server-Sharp-Pipeline (WebP 1280 px + Thumb 400 px, EXIF-Strip) bleibt unverändert. |
+| 1 | Uploads: 3 × 10 MB in **einem** Multipart-Request → Vercel-Limit 4.5 MB (HTTP 413) | Client-seitiges Downscaling vor Upload (Canvas, JPEG, max. 1280 px breit) → ~0,3–1 MB pro Bild. Server-Sharp-Pipeline (WebP 1280 px + Thumb 400 px, EXIF-Strip) bleibt unverändert. |
 | 2 | `refreshTokens()` lädt **alle** aktiven Refresh-Tokens und macht bcrypt.compare in Schleife (O(n)) | SHA-256-Hash + `findUnique` auf `tokenHash` (Spalte ist bereits `@unique`). Kein Schema-Change. Folge: einmaliger Re-Login aller User beim Release von Schritt 1 (Railway). Danach überleben Sessions den Cutover. |
 | 3 | `ThrottlerGuard` in-memory, kein `trust proxy` → hinter Vercel-Proxy teilen sich alle User eine IP | Throttler entfernen; Vercel-DDoS-Schutz / Firewall nutzen. |
 | 4 | Keine echte Prisma-Migrationshistorie (nur 5 lose `.sql`, `.gitignore` ignoriert `migrations/*_*/`!) | `.gitignore` fixen, Baseline `0_init` aus der Railway-DB erzeugen, auf Railway `migrate resolve --applied`. Die Historie wandert danach mit dem Dump zu Supabase. |
@@ -72,13 +72,14 @@ Umsetzung:
 
 `migrate-on-deploy.js` für Vercel wandert in Schritt 4. Es hängt am Vercel-Build und lässt sich erst dort testen.
 
-### Schritt 3: Frontend (`apps/frontend`)
-- `src/lib/image-resize.ts` (neu): `downscaleImage(file, maxEdge=1600, q=0.85)` via `createImageBitmap({imageOrientation:'from-image'})` → Canvas → JPEG; `<img>`-Fallback für alte Safari. Bonus: HEIC von iOS wird im Browser dekodiert.
-- Backend `src/listings/listings.controller.ts`: Multer `fileSize` auf 4 MB, erst zusammen mit dem Downscaling.
-- `src/components/listings/image-upload.tsx`: `downscaleImage` in `handleFileChange` vor beiden Zweigen (Sofort-Upload und Pending-Files); falls Summe > 4 MB, sequentiell ein Request pro Datei; 413 → bestehender `errors.failedToUploadImages`-Toast.
-- `next.config.js`: beide `rewrites` löschen; `remotePatterns` `*.r2.dev` ersetzen durch `<ref>.supabase.co` + `pathname: '/storage/v1/object/public/**'` (staging + prod).
-- Optional: dreifach dupliziertes `getImageUrl` (`listing-card.tsx`, `listings/[id]/page.tsx`, `image-upload.tsx`) nach `src/lib/image-url.ts` ziehen.
-- Löschen: `start.sh` (Script `start` → `next start`), Stray-Ordner `apps/frontend/apps/`.
+### Schritt 3: Frontend (`apps/frontend`) — umgesetzt in `feature/167-client-image-downscale`
+- `src/lib/image-resize.ts` (neu): `downscaleImage(file)` dekodiert per `createImageBitmap({ imageOrientation: 'from-image' })`, mit `<img>` als Fallback für ältere Engines wie iOS 15, die die Option ablehnen. Daraus wird ein JPEG mit Qualität 0,9 und **max. 1280 px Breite**, also genau der Breite, die das Backend speichert. Sichtbar ändert sich deshalb nichts. Pro Bild sind das etwa 0,3 bis 0,8 MB.
+  - Transparente PNGs bekommen einen weissen Hintergrund.
+  - Kann der Browser eine Datei nicht dekodieren, etwa HEIC ausserhalb von Safari, geht das Original hoch, falls es höchstens 4 MB hat. Sonst erscheint die neue Meldung `listings.imageProcessingFailed` (de/fr).
+- `src/components/listings/image-upload.tsx` meldet über `onBusyChange` an `listing-form.tsx`, dass noch Bilder verarbeitet werden. Solange sind «Erstellen/Speichern» sowie Löschen und Cover setzen gesperrt, damit keine gerade gewählten Fotos verloren gehen. Die Komponente verkleinert jedes gewählte Bild, und zwar nacheinander, damit es keine Speicherspitzen auf dem Handy gibt. Das passiert vor beiden Zweigen: beim Sofort-Upload im Bearbeiten-Modus und bei den Pending-Files beim Erstellen. Die Vorschau zeigt schon das verkleinerte Bild. Ein Fallback «ein Request pro Datei» ist nicht nötig, weil 3 verkleinerte Bilder weit unter 4,5 MB bleiben. Nur wenn der Browser mehrere Originale nicht dekodieren kann (je ≤ 4 MB), kann Vercel einen Request mit 413 ablehnen. Dann erscheint die generische Upload-Fehlermeldung. Das ist bewusst akzeptiert, weil solche Dateien sehr selten sind.
+- Backend `src/listings/listings.controller.ts`: Das Multer-Limit `fileSize` sinkt von 10 auf 4 MB. Das Limit bei der Auswahl im Frontend bleibt bei 10 MB.
+- `next.config.js`: Beide `rewrites` und der dazugehörige `localhost:3000`-Eintrag in `remotePatterns` sind gelöscht. Production rief die API ohnehin direkt auf. Lokal zeigt `NEXT_PUBLIC_API_URL` jetzt auf `http://localhost:3001`, und `BACKEND_URL` entfällt.
+- Verschoben: Die Supabase-Einträge in `remotePatterns` folgen in Schritt 4, weil die Projekt-Refs erst dort entstehen. `*.r2.dev` bleibt bis Schritt 7. `start.sh` und die Railway-Variable `BACKEND_URL` kommen in Schritt 7, weil Railway sie bis zum Cutover nutzt. Die Konsolidierung von `getImageUrl` ist nicht nötig (YAGNI).
 
 ### Schritt 4: Infrastruktur anlegen
 Supabase (je staging/prod, eu-central-1):
@@ -122,7 +123,7 @@ rclone copy r2:localshare-images supa:listing-images --progress --transfers 16 -
 **Rollback:** CNAMEs zurück auf Railway, Railway-Backend starten. Railway-DB und R2 wurden nie verändert; Schreibvorgänge nach Cutover gehen verloren. Railway + R2 1–2 Wochen behalten, dann löschen.
 
 ### Schritt 7: Doku nachziehen
-`CLAUDE.md` (Environments-Tabelle), `README.md`, `docker-compose.yml` (Healthcheck-Pfad `/api/v1/auth/health`). Löschen: `apps/backend/railpack.json`, `R2_*`-Variablen. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.
+`CLAUDE.md` (Environments-Tabelle), `README.md`, `docker-compose.yml` (Healthcheck-Pfad `/api/v1/auth/health`). Löschen: `apps/backend/railpack.json`, `apps/frontend/start.sh` (Script `start` → `next start`), `R2_*`-Variablen, Railway-Variable `BACKEND_URL` (Frontend), `*.r2.dev` in `remotePatterns`. `S3_*` in `.env.example` und `CLAUDE.md` ist seit Schritt 1 erledigt, nur der Satz «Supabase Storage after migration» in `CLAUDE.md` (Image Storage) muss aktualisiert werden.
 
 **Datenschutzerklärung** `apps/frontend/src/app/[locale]/privacy/page.tsx` (Zeilen «Datenbank» und «Bilder»): Hosting-Angaben Railway und Cloudflare R2 durch Vercel (Frankfurt) und Supabase (Frankfurt) ersetzen. Das ist Rechtstext, also zeitgleich mit dem Cutover live schalten.
 

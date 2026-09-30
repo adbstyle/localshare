@@ -7,12 +7,9 @@ import { useTranslations } from 'next-intl';
 import {
   Listing,
   CreateListingDto,
-  UpdateListingDto,
   ListingType,
   ListingCategory,
   PriceTimeUnit,
-  Community,
-  Group,
 } from '@localshare/shared';
 import { createListingSchema } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
@@ -26,26 +23,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { api } from '@/lib/api/client';
 import { Loader2 } from 'lucide-react';
-import { ImageUpload } from './image-upload';
+import { ListingImagesEditor } from './listing-images-editor';
+import { ListingVisibilityFields } from './listing-visibility-fields';
+import { filesCoverFirst, PendingImages, PendingImagesEditor } from './pending-images-editor';
 
 interface ListingFormProps {
   listing?: Listing;
-  onSubmit: (data: any, pendingFiles?: File[]) => Promise<void>;
+  /** `files` holds the images to upload after creating (cover first); empty when editing. */
+  onSubmit: (data: CreateListingDto, files: File[]) => Promise<void>;
 }
 
 export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const t = useTranslations();
   const [loading, setLoading] = useState(false);
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loadingData, setLoadingData] = useState(true);
-  const [currentImages, setCurrentImages] = useState(listing?.images || []);
-  const [pendingImageFiles, setPendingImageFiles] = useState<File[]>([]);
-  const [pendingCoverIndex, setPendingCoverIndex] = useState(0);
+  const [pendingImages, setPendingImages] = useState<PendingImages>({ images: [], coverIndex: 0 });
   const [imagesBusy, setImagesBusy] = useState(false);
 
   const {
@@ -86,46 +79,10 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
   const selectedCommunityIds = watch('communityIds') || [];
   const selectedGroupIds = watch('groupIds') || [];
 
-  useEffect(() => {
-    fetchCommunitiesAndGroups();
-  }, []);
-
-  // Sync currentImages when listing prop changes
-  useEffect(() => {
-    if (listing?.images) {
-      setCurrentImages(listing.images);
-    }
-  }, [listing?.images]);
-
-  const fetchCommunitiesAndGroups = async () => {
-    try {
-      const [communitiesRes, groupsRes] = await Promise.all([
-        api.get<Community[]>('/communities'),
-        api.get<Group[]>('/groups'),
-      ]);
-      setCommunities(communitiesRes.data);
-      setGroups(groupsRes.data);
-    } catch (error) {
-      console.error('Failed to fetch communities and groups:', error);
-    } finally {
-      setLoadingData(false);
-    }
-  };
-
   const handleFormSubmit = async (data: CreateListingDto) => {
     setLoading(true);
     try {
-      // For create mode: reorder files so cover image is at index 0
-      // Backend automatically sets first uploaded image as cover
-      let filesToUpload = pendingImageFiles;
-      if (!listing && pendingImageFiles.length > 0 && pendingCoverIndex > 0) {
-        // Move cover image to front
-        const reordered = [...pendingImageFiles];
-        const [coverFile] = reordered.splice(pendingCoverIndex, 1);
-        reordered.unshift(coverFile);
-        filesToUpload = reordered;
-      }
-      await onSubmit(data, listing ? undefined : filesToUpload);
+      await onSubmit(data, listing ? [] : filesCoverFirst(pendingImages));
     } finally {
       setLoading(false);
     }
@@ -154,14 +111,6 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
       setValue('priceTimeUnit', undefined);
     }
   }, [selectedType, setValue]);
-
-  if (loadingData) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
@@ -242,20 +191,11 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
         <CardContent>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">{t('listings.imageLimit')}</p>
-            <ImageUpload
-              listingId={listing?.id}
-              existingImages={currentImages}
-              maxImages={3}
-              maxSizeMB={10}
-              onImagesChange={(images) => {
-                setCurrentImages(images);
-              }}
-              onPendingImagesChange={(files, coverIndex) => {
-                setPendingImageFiles(files);
-                setPendingCoverIndex(coverIndex);
-              }}
-              onBusyChange={setImagesBusy}
-            />
+            {listing ? (
+              <ListingImagesEditor listingId={listing.id} onBusyChange={setImagesBusy} />
+            ) : (
+              <PendingImagesEditor value={pendingImages} onChange={setPendingImages} />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -364,80 +304,11 @@ export function ListingForm({ listing, onSubmit }: ListingFormProps) {
             {t('listings.selectCommunities')}
           </p>
 
-          {/* Communities */}
-          {communities.length > 0 && (
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">{t('nav.communities')}</Label>
-              <div className="space-y-2">
-                {communities.map((community) => (
-                  <div key={community.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`community-${community.id}`}
-                      checked={selectedCommunityIds.includes(community.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setValue('communityIds', [...selectedCommunityIds, community.id]);
-                        } else {
-                          setValue(
-                            'communityIds',
-                            selectedCommunityIds.filter((id) => id !== community.id)
-                          );
-                        }
-                      }}
-                    />
-                    <Label
-                      htmlFor={`community-${community.id}`}
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {community.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Groups */}
-          {groups.length > 0 && (
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">{t('nav.groups')}</Label>
-              <div className="space-y-2">
-                {groups.map((group) => (
-                  <div key={group.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`group-${group.id}`}
-                      checked={selectedGroupIds.includes(group.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setValue('groupIds', [...selectedGroupIds, group.id]);
-                        } else {
-                          setValue(
-                            'groupIds',
-                            selectedGroupIds.filter((id) => id !== group.id)
-                          );
-                        }
-                      }}
-                    />
-                    <Label
-                      htmlFor={`group-${group.id}`}
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {group.name}
-                      <span className="text-muted-foreground text-xs ml-2">
-                        ({group.community.name})
-                      </span>
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {communities.length === 0 && groups.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              {t('communities.empty')} {t('communities.emptyAction')}
-            </p>
-          )}
+          <ListingVisibilityFields
+            communityIds={selectedCommunityIds}
+            groupIds={selectedGroupIds}
+            onChange={(field, ids) => setValue(field, ids)}
+          />
         </CardContent>
       </Card>
 

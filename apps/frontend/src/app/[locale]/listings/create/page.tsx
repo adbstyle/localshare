@@ -1,59 +1,31 @@
 'use client';
 
-import { ListingForm } from '@/components/listings/listing-form';
-import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
+import { CreateListingDto } from '@localshare/shared';
+import { useRouter } from '@/navigation';
+import { useCreateListing } from '@/lib/api/listings';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
-import { api } from '@/lib/api/client';
-import { CreateListingDto } from '@localshare/shared';
+import { ListingForm } from '@/components/listings/listing-form';
 
 export default function CreateListingPage() {
   const router = useRouter();
   const t = useTranslations();
   const { toast } = useToast();
   const showError = useErrorToast();
+  const createListing = useCreateListing();
 
-  const handleSubmit = async (data: CreateListingDto, pendingFiles?: File[]) => {
+  const handleSubmit = async (dto: CreateListingDto, files: File[]) => {
     try {
-      // Step 1: Create the listing
-      const { data: listing } = await api.post('/listings', data);
-
-      // Step 2: Upload images if any
-      if (pendingFiles && pendingFiles.length > 0) {
-        try {
-          const formData = new FormData();
-          pendingFiles.forEach((file) => formData.append('images', file));
-
-          await api.post(`/listings/${listing.id}/images`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-
-          toast({
-            variant: 'success',
-            title: t('listings.created'),
-          });
-        } catch (imageError: any) {
-          // Listing was created but images failed
-          toast({
-            variant: 'warning',
-            title: t('listings.created'),
-            description: t('listings.imageUploadFailed'),
-          });
-        }
-      } else {
-        toast({
-          variant: 'success',
-          title: t('listings.created'),
-        });
-      }
-
+      const { listing, imagesFailed } = await createListing.mutateAsync({ dto, files });
+      toast(
+        imagesFailed
+          ? { variant: 'warning', title: t('listings.created'), description: t('listings.imageUploadFailed') }
+          : { variant: 'success', title: t('listings.created') }
+      );
       router.push(`/listings/${listing.id}`);
-    } catch (error: any) {
+    } catch (error) {
       showError(error, 'errors.failedToCreateListing');
-      throw error;
     }
   };
 

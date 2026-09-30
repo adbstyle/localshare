@@ -7,9 +7,8 @@ import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
-import { api } from '@/lib/api/client';
 import { UpdateListingDto } from '@localshare/shared';
-import { listingQueries } from '@/lib/api/listings';
+import { listingQueries, useUpdateListing } from '@/lib/api/listings';
 import { ListingForm } from '@/components/listings/listing-form';
 
 export default function EditListingPage() {
@@ -19,6 +18,7 @@ export default function EditListingPage() {
   const { toast } = useToast();
   const showError = useErrorToast();
   const { data: listing, isError } = useQuery(listingQueries.detail(params.id));
+  const updateListing = useUpdateListing(params.id);
 
   // Only the owner may edit; everyone else goes back to the listing (or home)
   useEffect(() => {
@@ -30,17 +30,13 @@ export default function EditListingPage() {
     }
   }, [isError, listing, params.id, router, t, toast]);
 
-  const handleSubmit = async (data: UpdateListingDto, pendingFiles?: File[]) => {
+  const handleSubmit = async (dto: UpdateListingDto) => {
     try {
-      await api.patch(`/listings/${params.id}`, data);
-      toast({
-        variant: 'success',
-        title: t('listings.updated'),
-      });
+      await updateListing.mutateAsync(dto);
+      toast({ variant: 'success', title: t('listings.updated') });
       router.push(`/listings/${params.id}`);
-    } catch (error: any) {
+    } catch (error) {
       showError(error, 'errors.failedToUpdateListing');
-      throw error;
     }
   };
 

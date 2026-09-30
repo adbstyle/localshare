@@ -1,5 +1,12 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FilterListingsDto, Listing, PaginatedResponse } from '@localshare/shared';
+import {
+  CreateListingDto,
+  FilterListingsDto,
+  Listing,
+  ListingImage,
+  PaginatedResponse,
+  UpdateListingDto,
+} from '@localshare/shared';
 import { appendFilterParams } from '@/lib/utils/url-filters';
 import { api } from './client';
 
@@ -66,4 +73,68 @@ export function useDeleteListing(listingId: string) {
       queryClient.invalidateQueries({ queryKey: listingKeys.all });
     },
   });
+}
+
+interface ListingImagesResponse {
+  id: string;
+  images: ListingImage[];
+}
+
+function uploadImagesRequest(listingId: string, files: File[]) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('images', file));
+  // The client defaults to JSON, which would serialize the FormData
+  return api.post<ListingImagesResponse>(`/listings/${listingId}/images`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+/** Creates the listing, then uploads its images; a failed upload keeps the listing. */
+export function useCreateListing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ dto, files }: { dto: CreateListingDto; files: File[] }) => {
+      const { data: listing } = await api.post<Listing>('/listings', dto);
+      let imagesFailed = false;
+      if (files.length > 0) {
+        await uploadImagesRequest(listing.id, files).catch(() => {
+          imagesFailed = true;
+        });
+      }
+      return { listing, imagesFailed };
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: listingKeys.all }),
+  });
+}
+
+export function useUpdateListing(listingId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dto: UpdateListingDto) => api.patch(`/listings/${listingId}`, dto),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: listingKeys.all }),
+  });
+}
+
+/** Image changes on an existing listing; the response replaces the cached images. */
+export function useListingImages(listingId: string) {
+  const queryClient = useQueryClient();
+  const onSuccess = ({ data }: { data: ListingImagesResponse }) => {
+    queryClient.setQueryData<Listing>(listingKeys.detail(listingId), (old) => old && { ...old, images: data.images });
+    queryClient.invalidateQueries({ queryKey: listingKeys.lists() }); // cover thumbnails
+  };
+
+  return {
+    upload: useMutation({ mutationFn: (files: File[]) => uploadImagesRequest(listingId, files), onSuccess }),
+    remove: useMutation({
+      mutationFn: (imageId: string) => api.delete<ListingImagesResponse>(`/listings/${listingId}/images/${imageId}`),
+      onSuccess,
+    }),
+    setCover: useMutation({
+      mutationFn: (imageId: string) =>
+        api.patch<ListingImagesResponse>(`/listings/${listingId}/images/${imageId}/cover`),
+      onSuccess,
+    }),
+  };
 }

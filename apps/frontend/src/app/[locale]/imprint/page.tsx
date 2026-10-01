@@ -56,7 +56,7 @@ export default function ImprintPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">Verweise und Links</h3>
           <p className="text-muted-foreground">
-            Bei direkten oder indirekten Verweisen auf fremde Webseiten ("Hyperlinks"),
+            Bei direkten oder indirekten Verweisen auf fremde Webseiten („Hyperlinks“),
             die ausserhalb des Verantwortungsbereiches des Betreibers liegen, würde eine
             Haftungsverpflichtung ausschliesslich in dem Fall in Kraft treten, in dem
             der Betreiber von den Inhalten Kenntnis hat und es ihm technisch möglich und

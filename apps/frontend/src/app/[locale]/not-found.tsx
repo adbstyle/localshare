@@ -21,9 +21,6 @@ export default function NotFound() {
           <Link href="/">
             <Button>{t('backHome')}</Button>
           </Link>
-          <Link href="/listings">
-            <Button variant="outline">{t('viewListings')}</Button>
-          </Link>
         </div>
       </div>
     </div>

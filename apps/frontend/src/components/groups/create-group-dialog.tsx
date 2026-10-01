@@ -1,66 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { CreateGroupDto, Community } from '@localshare/shared';
+import { CreateGroupDto } from '@localshare/shared';
 import { createGroupSchema } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
 
 interface CreateGroupDialogProps {
   onSuccess: () => void;
-  preselectedCommunityId?: string;
+  communityId: string;
 }
 
-export function CreateGroupDialog({ onSuccess, preselectedCommunityId }: CreateGroupDialogProps) {
+export function CreateGroupDialog({ onSuccess, communityId }: CreateGroupDialogProps) {
   const t = useTranslations();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [loadingCommunities, setLoadingCommunities] = useState(!preselectedCommunityId);
 
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<CreateGroupDto>({
     resolver: zodResolver(createGroupSchema),
-    defaultValues: {
-      communityId: preselectedCommunityId,
-    },
+    defaultValues: { communityId },
   });
-
-  useEffect(() => {
-    if (!preselectedCommunityId) {
-      fetchCommunities();
-    }
-  }, [preselectedCommunityId]);
-
-  const fetchCommunities = async () => {
-    try {
-      const { data } = await api.get<Community[]>('/communities');
-      setCommunities(data);
-    } catch (error) {
-      console.error('Failed to fetch communities:', error);
-    } finally {
-      setLoadingCommunities(false);
-    }
-  };
 
   const onSubmit = async (data: CreateGroupDto) => {
     setLoading(true);
@@ -81,23 +52,6 @@ export function CreateGroupDialog({ onSuccess, preselectedCommunityId }: CreateG
       setLoading(false);
     }
   };
-
-  if (loadingCommunities) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!preselectedCommunityId && communities.length === 0) {
-    return (
-      <div className="py-4 text-center text-muted-foreground">
-        <p className="mb-2">{t('communities.empty')}</p>
-        <p className="text-sm">{t('communities.emptyAction')}</p>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -127,38 +81,6 @@ export function CreateGroupDialog({ onSuccess, preselectedCommunityId }: CreateG
           <p className="text-sm text-destructive">{errors.description.message}</p>
         )}
       </div>
-
-      {!preselectedCommunityId && (
-        <div className="space-y-2">
-          <Label htmlFor="communityId">
-            {t('groups.community')} <span className="text-destructive">*</span>
-          </Label>
-          <Controller
-            name="communityId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('groups.selectCommunity')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {communities.map((community) => (
-                    <SelectItem key={community.id} value={community.id}>
-                      {community.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.communityId && (
-            <p className="text-sm text-destructive">{errors.communityId.message}</p>
-          )}
-        </div>
-      )}
 
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={loading}>

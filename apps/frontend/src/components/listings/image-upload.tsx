@@ -321,9 +321,10 @@ export function ImageUpload({
             <div key={image.id} className="relative group">
               <div className={`relative h-32 rounded-lg overflow-hidden border-2 ${image.isCover ? 'border-secondary' : 'border-transparent'}`}>
                 <Image
-                  src={getImageUrl(image.url)}
+                  src={getImageUrl(image.thumbnailUrl || image.url)}
                   alt={image.originalName}
                   fill
+                  sizes="33vw"
                   className="object-cover"
                 />
                 {/* Cover badge - bottom left */}

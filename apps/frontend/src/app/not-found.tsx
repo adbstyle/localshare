@@ -20,9 +20,6 @@ export default function NotFound() {
             <Link href="/de">
               <Button>{t.backHome}</Button>
             </Link>
-            <Link href="/de/listings">
-              <Button variant="outline">{t.viewListings}</Button>
-            </Link>
           </div>
         </div>
       </body>

@@ -67,23 +67,18 @@ export function parseFiltersFromURL(
  * properly encoding all parameters.
  *
  * @param filters - Partial filter object to include in the URL
- * @param currentParams - Reserved for future use (e.g., preserving additional query params).
- *                        Currently unused but maintained for API stability. This parameter
- *                        allows for future enhancements such as merging filter params with
- *                        existing non-filter params without breaking the current API.
  * @param page - Page number to include in the URL (default: 1)
  * @returns URL search parameters string (without leading '?')
  *
  * @example
  * ```ts
  * const filters = { search: 'laptop', types: ['SELL', 'RENT'] };
- * const urlString = buildURLFromFilters(filters, new URLSearchParams(), 2);
+ * const urlString = buildURLFromFilters(filters, 2);
  * // 'page=2&search=laptop&types=SELL&types=RENT'
  * ```
  */
 export function buildURLFromFilters(
   filters: Partial<FilterListingsDto>,
-  currentParams: URLSearchParams,
   page: number = 1
 ): string {
   const params = new URLSearchParams();
@@ -122,50 +117,6 @@ export function buildURLFromFilters(
   }
 
   return params.toString();
-}
-
-/**
- * Compare two FilterListingsDto objects for equality.
- *
- * This function performs a deep comparison of filter objects, including
- * array comparisons for types and categories. Useful for optimization
- * to prevent unnecessary re-renders or API calls.
- *
- * @param a - First filter object to compare
- * @param b - Second filter object to compare
- * @returns true if filters are equal, false otherwise
- *
- * @example
- * ```ts
- * const filters1 = { search: 'laptop', types: ['SELL', 'RENT'] };
- * const filters2 = { search: 'laptop', types: ['RENT', 'SELL'] };
- * areFiltersEqual(filters1, filters2); // true (order doesn't matter)
- * ```
- */
-export function areFiltersEqual(
-  a: FilterListingsDto,
-  b: FilterListingsDto
-): boolean {
-  // Compare primitive values
-  if (a.search !== b.search) return false;
-  if (a.myListings !== b.myListings) return false;
-  if (a.bookmarked !== b.bookmarked) return false;
-  if (a.limit !== b.limit) return false;
-  if (a.offset !== b.offset) return false;
-
-  // Compare types arrays (order-independent)
-  const aTypes = a.types ? [...a.types].sort() : [];
-  const bTypes = b.types ? [...b.types].sort() : [];
-  if (aTypes.length !== bTypes.length) return false;
-  if (aTypes.some((type, i) => type !== bTypes[i])) return false;
-
-  // Compare categories arrays (order-independent)
-  const aCategories = a.categories ? [...a.categories].sort() : [];
-  const bCategories = b.categories ? [...b.categories].sort() : [];
-  if (aCategories.length !== bCategories.length) return false;
-  if (aCategories.some((cat, i) => cat !== bCategories[i])) return false;
-
-  return true;
 }
 
 /**

@@ -64,6 +64,7 @@ export function ListingCard({ listing, priority, onBookmarkChange }: ListingCard
               src={getImageUrl(coverImage.thumbnailUrl || coverImage.url)}
               alt={listing.title}
               fill
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
               className="object-cover"
               priority={priority}
             />

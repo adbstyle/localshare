@@ -1,6 +1,6 @@
 # Aufräumen vor Chat, Status, Benachrichtigungen und Kalender
 
-> Status: geplant, noch nicht umgesetzt (Stand 2026-09-30). Umsetzung PR für PR in der Reihenfolge unten.
+> Status: umgesetzt als gestapelte PRs #193–#200, #202, #203 (Stand 2026-09-30), Review und Merge offen. Reihenfolge und Inhalt siehe unten.
 
 ## Kontext
 

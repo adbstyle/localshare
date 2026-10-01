@@ -49,7 +49,9 @@ export function UserMenu({ user, logout }: UserMenuProps) {
   const initials = getUserInitials(user);
 
   return (
-    <DropdownMenu>
+    // modal=false like the other menus: no scroll lock or page-wide pointer
+    // block for a small menu that navigates away
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"

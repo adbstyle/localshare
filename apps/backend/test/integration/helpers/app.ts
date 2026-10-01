@@ -14,6 +14,7 @@ export interface RequestOptions {
   as?: string; // user id to authenticate as
   body?: unknown;
   viaCookie?: boolean;
+  cookie?: string; // raw Cookie header, e.g. a refresh token
 }
 
 export class TestApp {
@@ -23,6 +24,11 @@ export class TestApp {
     private readonly jwt: JwtService,
     private readonly baseUrl: string,
   ) {}
+
+  /** Resolve a provider from the running app, e.g. a service under test. */
+  get<T>(token: new (...args: any[]) => T): T {
+    return this.nestApp.get(token, { strict: false });
+  }
 
   tokenFor(userId: string): string {
     return this.jwt.sign({ sub: userId });
@@ -35,6 +41,8 @@ export class TestApp {
       if (options.viaCookie) headers.cookie = `accessToken=${token}`;
       else headers.authorization = `Bearer ${token}`;
     }
+
+    if (options.cookie) headers.cookie = options.cookie;
 
     let body: BodyInit | undefined;
     if (options.body instanceof FormData) {

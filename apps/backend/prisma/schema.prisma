@@ -70,7 +70,6 @@ model User {
   listings             Listing[]
   bookmarks            ListingBookmark[]
 
-  @@index([email])
   @@index([deletedAt])
   @@map("users")
 }
@@ -102,7 +101,6 @@ model RefreshToken {
 
   @@index([userId])
   @@index([expiresAt])
-  @@index([tokenHash])
   @@map("refresh_tokens")
 }
 
@@ -122,7 +120,6 @@ model Community {
   listingVisibility ListingVisibility[]
 
   @@index([ownerId])
-  @@index([inviteToken])
   @@index([deletedAt])
   @@map("communities")
 }
@@ -137,7 +134,6 @@ model CommunityMember {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([communityId, userId])
-  @@index([communityId])
   @@index([userId])
   @@index([joinedAt])
   @@map("community_members")
@@ -238,7 +234,6 @@ model ListingVisibility {
   group     Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([listingId, visibilityType, communityId, groupId])
-  @@index([listingId])
   @@index([communityId])
   @@index([groupId])
   @@index([visibilityType, communityId])
@@ -256,7 +251,6 @@ model ListingBookmark {
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@unique([userId, listingId])
-  @@index([userId])
   @@index([listingId])
   @@map("listing_bookmarks")
 }

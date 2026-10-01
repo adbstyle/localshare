@@ -105,7 +105,7 @@ apps/
 │   │   ├── users/    # User profile management
 │   │   ├── communities/  # Community CRUD + membership (+ membership.cascade.ts)
 │   │   ├── groups/   # Groups within communities
-│   │   ├── listings/ # Listings + images (listing-query.ts: feed where/includes)
+│   │   ├── listings/ # Listings + images (listing-query.ts: where/includes, listing.mapper.ts: responses, storage.ts: S3/local, lazy SDK)
 │   │   ├── common/   # Decorators, types, utils
 │   │   │   ├── decorators/  # @CurrentUser, @Public
 │   │   │   ├── types/       # Pagination types
@@ -158,10 +158,10 @@ Listings have visibility rules - they can be shared with specific communities or
 ### API Routes
 All backend routes are prefixed with `/api/v1/`:
 - `/auth/*` - OAuth flows, token refresh, logout
-- `/users/me` - Profile management
+- `/users/me` - Profile update (PATCH), account deletion (DELETE), `/users/me/export` (the current user is read via `/auth/me`)
 - `/communities/*` - Community CRUD, join/leave, member management (owner can remove members)
 - `/groups/*` - Group CRUD within communities, member management (owner can remove members)
-- `/listings/*` - Listing CRUD with image upload, bookmarks
+- `/listings/*` - Listing CRUD, bookmarks; `GET /listings/paginated` is the feed (`limit` ≤ 100); image endpoints (`POST :id/images`, `DELETE :id/images/:imageId`, `PATCH :id/images/:imageId/cover`) return `{ id, images }`
 - `/health` - Liveness (no DB), `/health/db` - runs `SELECT 1` (daily Vercel cron keeps the Supabase Free project from pausing); `/auth/health` kept for compatibility
 
 ### Auth Flow
@@ -227,7 +227,7 @@ Copy `.env.example` to `.env` at root level. Key variables:
 - `DATABASE_URL` - PostgreSQL connection (use port 5433 for local Docker)
 - `DIRECT_URL` - Connection used by Prisma for migrations (`directUrl`). Same as `DATABASE_URL` locally; on Supabase the session pooler (:5432) while `DATABASE_URL` is the transaction pooler (:6543)
 - `PRISMA_MIGRATE_ON_DEPLOY` - Vercel only: `true` lets the build apply pending migrations
-- `JWT_SECRET` / `JWT_REFRESH_SECRET` - JWT signing keys
+- `JWT_SECRET` - JWT signing key (refresh tokens are random values stored as SHA-256 hash, not JWTs)
 - `GOOGLE_CLIENT_ID/SECRET` - Google OAuth credentials
 - `MICROSOFT_CLIENT_ID/SECRET` - Microsoft OAuth credentials
 - `NEXT_PUBLIC_API_URL` - Backend URL for frontend

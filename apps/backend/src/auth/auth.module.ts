@@ -8,11 +8,9 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { MicrosoftStrategy } from './strategies/microsoft.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { InviteStateService } from './invite-state.service';
-import { DatabaseModule } from '../database/database.module';
 
 @Module({
   imports: [
-    DatabaseModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -33,6 +31,5 @@ import { DatabaseModule } from '../database/database.module';
     JwtStrategy,
     InviteStateService,
   ],
-  exports: [AuthService],
 })
 export class AuthModule {}

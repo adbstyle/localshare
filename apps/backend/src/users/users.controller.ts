@@ -15,11 +15,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Get('me')
-  async getProfile(@CurrentUser() user) {
-    return this.usersService.findById(user.id);
-  }
-
   @Patch('me')
   async updateProfile(@CurrentUser() user, @Body() dto: UpdateUserDto) {
     return this.usersService.update(user.id, dto);

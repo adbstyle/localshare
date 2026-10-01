@@ -94,11 +94,11 @@ export default function PrivacyPage() {
 
           <SubTitle>2.4 Anmeldesitzungen</SubTitle>
           <Text>
-            Damit Sie angemeldet bleiben, speichern wir bei jeder Anmeldung und bei jeder automatischen
-            Verlängerung der Sitzung (bei aktiver Nutzung etwa alle 15 Minuten) einen Eintrag mit einem
-            nicht umkehrbaren Prüfwert (Hash) des Sitzungsschlüssels, dem Zeitpunkt und dem Ablaufdatum. Aus diesen Einträgen
-            lässt sich ablesen, wann Sie die Plattform ungefähr genutzt haben. Wir werten sie dafür nicht
-            aus. Die Einträge werden derzeit erst gelöscht, wenn Sie Ihr Konto löschen.
+            Damit Sie angemeldet bleiben, speichern wir pro angemeldetem Gerät einen Eintrag mit einem
+            nicht umkehrbaren Prüfwert (Hash) des Sitzungsschlüssels, dem Zeitpunkt und dem Ablaufdatum.
+            Bei jeder automatischen Verlängerung der Sitzung (bei aktiver Nutzung etwa alle 15 Minuten)
+            ersetzen wir diesen Eintrag durch einen neuen. Abgelaufene Einträge löschen wir bei Ihrer
+            nächsten Anmeldung, beim Abmelden löschen wir alle Ihre Einträge.
           </Text>
 
           <SubTitle>2.5 Technische Daten bei unseren Hosting-Anbietern</SubTitle>
@@ -320,7 +320,8 @@ export default function PrivacyPage() {
               Preis bleiben als «gelöscht» markiert in der Datenbank, sind aber für niemanden mehr sichtbar.
             </li>
             <li>
-              <strong>Anmeldesitzungen:</strong> bis zur Löschung Ihres Kontos (siehe Abschnitt 2.4).
+              <strong>Anmeldesitzungen:</strong> bis zum Abmelden; abgelaufene Einträge bis zu Ihrer nächsten
+              Anmeldung oder der Löschung Ihres Kontos (siehe Abschnitt 2.4).
             </li>
             <li>
               <strong>Technische Protokolle:</strong> Wir können die Protokolle von Vercel 1 Stunde und die von

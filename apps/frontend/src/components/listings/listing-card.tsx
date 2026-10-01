@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { Listing } from '@localshare/shared';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/navigation';
-import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
-import { api } from '@/lib/api/client';
+import { formatPrice, formatRelativeDate, getImageUrl, shouldShowPrice } from '@/lib/utils';
+import { useToggleBookmark } from '@/lib/api/listings';
 import { useAuth } from '@/hooks/use-auth';
 import { Bookmark } from 'lucide-react';
 import Image from 'next/image';
@@ -15,43 +14,25 @@ import Image from 'next/image';
 interface ListingCardProps {
   listing: Listing;
   priority?: boolean;
-  onBookmarkChange?: (listingId: string, isBookmarked: boolean) => void;
 }
 
-export function ListingCard({ listing, priority, onBookmarkChange }: ListingCardProps) {
+export function ListingCard({ listing, priority }: ListingCardProps) {
   const t = useTranslations();
   const locale = useLocale();
   const { user } = useAuth();
-  const [isBookmarked, setIsBookmarked] = useState(listing.isBookmarked ?? false);
-  const [isLoading, setIsLoading] = useState(false);
+  const toggleBookmark = useToggleBookmark(listing.id);
+  const isBookmarked = toggleBookmark.data?.isBookmarked ?? listing.isBookmarked ?? false;
 
   const isOwner = user?.id === listing.creatorId;
 
   // Prefer cover image, fallback to first image
   const coverImage = listing.images.find((img) => img.isCover) || listing.images[0];
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  const getImageUrl = (url: string) => {
-    if (url.startsWith('http')) return url;
-    return `${apiUrl}${url}`;
-  };
-
-  const handleBookmarkClick = async (e: React.MouseEvent) => {
+  const handleBookmarkClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      const { data } = await api.post<{ isBookmarked: boolean }>(`/listings/${listing.id}/bookmark`);
-      setIsBookmarked(data.isBookmarked);
-      onBookmarkChange?.(listing.id, data.isBookmarked);
-    } catch (error) {
-      // Silent fail - loading state provides UI feedback
-    } finally {
-      setIsLoading(false);
-    }
+    // Failures stay silent; the icon simply keeps its state
+    if (!toggleBookmark.isPending) toggleBookmark.mutate();
   };
 
   return (
@@ -80,7 +61,7 @@ export function ListingCard({ listing, priority, onBookmarkChange }: ListingCard
               size="icon"
               className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background/90 backdrop-blur-sm"
               onClick={handleBookmarkClick}
-              disabled={isLoading}
+              disabled={toggleBookmark.isPending}
               aria-label={isBookmarked ? t('listings.bookmarked') : t('listings.bookmark')}
             >
               <Bookmark

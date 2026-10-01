@@ -82,41 +82,24 @@ export function buildURLFromFilters(
   page: number = 1
 ): string {
   const params = new URLSearchParams();
+  params.set('page', Math.max(1, page).toString());
+  return appendFilterParams(params, filters).toString();
+}
 
-  // Always include page (default to 1 if invalid)
-  const validPage = Math.max(1, page);
-  params.set('page', validPage.toString());
-
-  // Add search parameter if present
-  if (filters.search) {
-    params.set('search', filters.search);
-  }
-
-  // Add types as multiple parameters
-  if (filters.types && filters.types.length > 0) {
-    filters.types.forEach((type) => {
-      params.append('types', type);
-    });
-  }
-
-  // Add categories as multiple parameters
-  if (filters.categories && filters.categories.length > 0) {
-    filters.categories.forEach((cat) => {
-      params.append('categories', cat);
-    });
-  }
-
-  // Add myListings if true
-  if (filters.myListings) {
-    params.set('myListings', 'true');
-  }
-
-  // Add bookmarked if true
-  if (filters.bookmarked) {
-    params.set('bookmarked', 'true');
-  }
-
-  return params.toString();
+/**
+ * Append the filter values (not pagination) to search params. Shared by the
+ * page URL and the API query so both always encode filters the same way.
+ */
+export function appendFilterParams(
+  params: URLSearchParams,
+  filters: Partial<FilterListingsDto>
+): URLSearchParams {
+  if (filters.search) params.set('search', filters.search);
+  filters.types?.forEach((type) => params.append('types', type));
+  filters.categories?.forEach((category) => params.append('categories', category));
+  if (filters.myListings) params.set('myListings', 'true');
+  if (filters.bookmarked) params.set('bookmarked', 'true');
+  return params;
 }
 
 /**

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
-import { FilterListingsDto, ListingType, ListingCategory, PaginatedResponse, Listing } from '@localshare/shared';
-import { api } from '@/lib/api/client';
+import { FilterListingsDto, ListingType, ListingCategory } from '@localshare/shared';
+import { listingQueries } from '@/lib/api/listings';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
   Dialog,
@@ -19,7 +20,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/hooks/use-auth';
 
 interface MobileFilterSheetProps {
   open: boolean;
@@ -35,64 +35,27 @@ export function MobileFilterSheet({
   onApply,
 }: MobileFilterSheetProps) {
   const t = useTranslations();
-  const { user } = useAuth();
 
   const types = Object.values(ListingType);
   const categories = Object.values(ListingCategory);
 
-  // Temporary filter state (local, not applied until "Suchen" click)
-  const [tempFilters, setTempFilters] = useState<Partial<FilterListingsDto>>({});
-  const [previewCount, setPreviewCount] = useState<number | null>(null);
-  const [isLoadingCount, setIsLoadingCount] = useState(false);
+  // Draft filters, applied only on "show results". The sheet is mounted per
+  // opening, so the draft starts from the current URL filters.
+  const [tempFilters, setTempFilters] = useState<Partial<FilterListingsDto>>(() => ({
+    search: currentFilters.search,
+    types: currentFilters.types,
+    categories: currentFilters.categories,
+    myListings: currentFilters.myListings,
+    bookmarked: currentFilters.bookmarked,
+  }));
 
-  // Debounce filters for API preview count
+  // Preview count of the draft (debounced; superseded requests are aborted)
   const debouncedFilters = useDebouncedValue(tempFilters, 300);
-
-  // Sync temp filters when sheet opens
-  useEffect(() => {
-    if (open) {
-      setTempFilters({
-        search: currentFilters.search,
-        types: currentFilters.types,
-        categories: currentFilters.categories,
-        myListings: currentFilters.myListings,
-        bookmarked: currentFilters.bookmarked,
-      });
-    }
-  }, [open, currentFilters]);
-
-  // Fetch preview count when filters change (debounced)
-  useEffect(() => {
-    if (!open) return;
-
-    const fetchPreviewCount = async () => {
-      setIsLoadingCount(true);
-      try {
-        const params = new URLSearchParams();
-        if (debouncedFilters.myListings) params.append('myListings', 'true');
-        if (debouncedFilters.bookmarked) params.append('bookmarked', 'true');
-        if (debouncedFilters.types?.length) {
-          debouncedFilters.types.forEach((type) => params.append('types', type));
-        }
-        if (debouncedFilters.categories?.length) {
-          debouncedFilters.categories.forEach((cat) => params.append('categories', cat));
-        }
-        if (debouncedFilters.search) params.append('search', debouncedFilters.search);
-        params.append('limit', '1');
-
-        const { data } = await api.get<PaginatedResponse<Listing>>(
-          `/listings/paginated?${params.toString()}`
-        );
-        setPreviewCount(data.total);
-      } catch {
-        setPreviewCount(0);
-      } finally {
-        setIsLoadingCount(false);
-      }
-    };
-
-    fetchPreviewCount();
-  }, [open, debouncedFilters]);
+  const { data: previewCount, isFetching: isLoadingCount } = useQuery({
+    ...listingQueries.count(debouncedFilters),
+    enabled: open,
+    placeholderData: keepPreviousData,
+  });
 
   const handleTypeToggle = (type: ListingType) => {
     const currentTypes = tempFilters.types || [];
@@ -187,40 +150,38 @@ export function MobileFilterSheet({
             </div>
 
             {/* My Listings & Bookmarked */}
-            {user && (
-              <div className="space-y-0">
-                <div className="flex items-center space-x-2 min-h-11">
-                  <Checkbox
-                    id="mobile-myListings"
-                    checked={tempFilters.myListings || false}
-                    onCheckedChange={(checked) =>
-                      setTempFilters((prev) => ({
-                        ...prev,
-                        myListings: checked ? true : undefined,
-                      }))
-                    }
-                  />
-                  <Label htmlFor="mobile-myListings" className="cursor-pointer">
-                    {t('listings.myListings')}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2 min-h-11">
-                  <Checkbox
-                    id="mobile-bookmarked"
-                    checked={tempFilters.bookmarked || false}
-                    onCheckedChange={(checked) =>
-                      setTempFilters((prev) => ({
-                        ...prev,
-                        bookmarked: checked ? true : undefined,
-                      }))
-                    }
-                  />
-                  <Label htmlFor="mobile-bookmarked" className="cursor-pointer">
-                    {t('listings.onlyBookmarks')}
-                  </Label>
-                </div>
+            <div className="space-y-0">
+              <div className="flex items-center space-x-2 min-h-11">
+                <Checkbox
+                  id="mobile-myListings"
+                  checked={tempFilters.myListings || false}
+                  onCheckedChange={(checked) =>
+                    setTempFilters((prev) => ({
+                      ...prev,
+                      myListings: checked ? true : undefined,
+                    }))
+                  }
+                />
+                <Label htmlFor="mobile-myListings" className="cursor-pointer">
+                  {t('listings.myListings')}
+                </Label>
               </div>
-            )}
+              <div className="flex items-center space-x-2 min-h-11">
+                <Checkbox
+                  id="mobile-bookmarked"
+                  checked={tempFilters.bookmarked || false}
+                  onCheckedChange={(checked) =>
+                    setTempFilters((prev) => ({
+                      ...prev,
+                      bookmarked: checked ? true : undefined,
+                    }))
+                  }
+                />
+                <Label htmlFor="mobile-bookmarked" className="cursor-pointer">
+                  {t('listings.onlyBookmarks')}
+                </Label>
+              </div>
+            </div>
 
             <Separator />
 

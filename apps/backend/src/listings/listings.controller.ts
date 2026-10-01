@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -27,25 +28,20 @@ export class ListingsController {
     return this.listingsService.create(user.id, dto);
   }
 
-  @Get()
-  async findAll(@CurrentUser() user, @Query() filters: FilterListingsDto) {
-    return this.listingsService.findAll(user.id, filters);
-  }
-
   @Get('paginated')
   async findAllPaginated(@CurrentUser() user, @Query() filters: FilterListingsDto) {
     return this.listingsService.findAllPaginated(user.id, filters);
   }
 
   @Get(':id')
-  async findOne(@CurrentUser() user, @Param('id') id: string) {
+  async findOne(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
     return this.listingsService.findOne(id, user.id);
   }
 
   @Patch(':id')
   async update(
     @CurrentUser() user,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateListingDto,
   ) {
     return this.listingsService.update(id, user.id, dto);
@@ -53,12 +49,12 @@ export class ListingsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@CurrentUser() user, @Param('id') id: string) {
+  async delete(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
     await this.listingsService.delete(id, user.id);
   }
 
   @Post(':id/bookmark')
-  async toggleBookmark(@CurrentUser() user, @Param('id') id: string) {
+  async toggleBookmark(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
     return this.listingsService.toggleBookmark(id, user.id);
   }
 
@@ -81,7 +77,7 @@ export class ListingsController {
   )
   async uploadImages(
     @CurrentUser() user,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     if (!files || files.length === 0) {
@@ -94,8 +90,8 @@ export class ListingsController {
   @Delete(':id/images/:imageId')
   async deleteImage(
     @CurrentUser() user,
-    @Param('id') id: string,
-    @Param('imageId') imageId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('imageId', ParseUUIDPipe) imageId: string,
   ) {
     return this.listingsService.deleteImage(id, imageId, user.id);
   }
@@ -103,8 +99,8 @@ export class ListingsController {
   @Patch(':id/images/:imageId/cover')
   async setCoverImage(
     @CurrentUser() user,
-    @Param('id') id: string,
-    @Param('imageId') imageId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('imageId', ParseUUIDPipe) imageId: string,
   ) {
     return this.listingsService.setCoverImage(id, imageId, user.id);
   }

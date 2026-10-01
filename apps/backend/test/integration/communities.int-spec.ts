@@ -31,7 +31,7 @@ describe('Communities', () => {
     ]);
   });
 
-  it.failing('answers 404 when an outsider opens a community or its members', async () => {
+  it('answers 404 when an outsider opens a community or its members', async () => {
     const { outsider, community } = await setup();
 
     expect((await t.request('GET', `/communities/${community.id}`, { as: outsider.id })).status).toBe(404);
@@ -51,7 +51,7 @@ describe('Communities', () => {
     expect((await t.request('DELETE', path, { as: owner.id })).status).toBe(204);
   });
 
-  it.failing('answers 404 for owner actions by an outsider', async () => {
+  it('answers 404 for owner actions by an outsider', async () => {
     const { outsider, community } = await setup();
 
     expect(
@@ -78,6 +78,36 @@ describe('Communities', () => {
     expect((await t.request('POST', `/communities/join/${unknownToken}`, { as: member.id })).status).toBe(404);
   });
 
+  it('answers two parallel joins with one 201 and one 409', async () => {
+    const { community } = await setup();
+    const newcomer = await createUser(t);
+    const join = () => t.request('POST', `/communities/join/${community.inviteToken}`, { as: newcomer.id });
+
+    const statuses = (await Promise.all([join(), join()])).map((r) => r.status).sort();
+    expect(statuses).toEqual([201, 409]);
+  });
+
+  it('tells each viewer what they may do', async () => {
+    const { owner, member, community } = await setup();
+    const viewerOf = async (userId: string) =>
+      (await t.request('GET', `/communities/${community.id}`, { as: userId })).body.viewer;
+
+    expect(await viewerOf(owner.id)).toEqual({
+      role: 'owner',
+      canEdit: true,
+      canDelete: true,
+      canManageMembers: true,
+      canLeave: false,
+    });
+    expect(await viewerOf(member.id)).toEqual({
+      role: 'member',
+      canEdit: false,
+      canDelete: false,
+      canManageMembers: false,
+      canLeave: true,
+    });
+  });
+
   it('hides the preview of a deleted community', async () => {
     const { owner, community } = await setup();
     expectStatus(await t.request('DELETE', `/communities/${community.id}`, { as: owner.id }), 204);
@@ -90,7 +120,7 @@ describe('Communities', () => {
     expect((await t.request('DELETE', `/communities/${community.id}/leave`, { as: owner.id })).status).toBe(403);
   });
 
-  it.failing('answers 404 when an outsider tries to leave', async () => {
+  it('answers 404 when an outsider tries to leave', async () => {
     const { outsider, community } = await setup();
     expect((await t.request('DELETE', `/communities/${community.id}/leave`, { as: outsider.id })).status).toBe(404);
   });

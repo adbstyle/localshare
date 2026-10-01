@@ -6,11 +6,10 @@ import {
   Delete,
   Body,
   Param,
-  UseGuards,
+  ParseUUIDPipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { OwnershipGuard } from '../auth/guards/ownership.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { CommunitiesService } from './communities.service';
@@ -51,58 +50,58 @@ export class CommunitiesController {
 
   @Public()
   @Get('preview/:token')
-  async getPreview(@Param('token') token: string) {
+  async getPreview(@Param('token', ParseUUIDPipe) token: string) {
     return this.communitiesService.getPreviewByToken(token);
   }
 
   @Get(':id')
-  async findOne(@CurrentUser() user, @Param('id') id: string) {
+  async findOne(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
     const community = await this.communitiesService.findOne(id, user.id);
     return transformCommunityDto(community);
   }
 
   @Patch(':id')
-  @UseGuards(OwnershipGuard)
-  async update(@Param('id') id: string, @Body() dto: UpdateCommunityDto) {
-    return this.communitiesService.update(id, dto);
+  async update(
+    @CurrentUser() user,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCommunityDto,
+  ) {
+    return this.communitiesService.update(id, user.id, dto);
   }
 
   @Delete(':id')
-  @UseGuards(OwnershipGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string) {
-    await this.communitiesService.delete(id);
+  async delete(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
+    await this.communitiesService.delete(id, user.id);
   }
 
   @Post('join/:token')
-  async join(@CurrentUser() user, @Param('token') token: string) {
+  async join(@CurrentUser() user, @Param('token', ParseUUIDPipe) token: string) {
     return this.membershipService.joinCommunity(user.id, token);
   }
 
   @Delete(':id/leave')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async leave(@CurrentUser() user, @Param('id') id: string) {
+  async leave(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
     await this.membershipService.leaveCommunity(user.id, id);
   }
 
   @Post(':id/refresh-invite')
-  @UseGuards(OwnershipGuard)
-  async refreshInvite(@Param('id') id: string) {
-    return this.communitiesService.refreshInviteToken(id);
+  async refreshInvite(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
+    return this.communitiesService.refreshInviteToken(id, user.id);
   }
 
   @Get(':id/members')
-  async getMembers(@CurrentUser() user, @Param('id') id: string) {
+  async getMembers(@CurrentUser() user, @Param('id', ParseUUIDPipe) id: string) {
     return this.communitiesService.getMembers(id, user.id);
   }
 
   @Delete(':id/members/:memberId')
-  @UseGuards(OwnershipGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeMember(
     @CurrentUser() user,
-    @Param('id') id: string,
-    @Param('memberId') memberId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('memberId', ParseUUIDPipe) memberId: string,
   ) {
     await this.membershipService.removeMember(user.id, id, memberId);
   }

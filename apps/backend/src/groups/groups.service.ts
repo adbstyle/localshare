@@ -1,345 +1,123 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
+import { AccessService } from '../access/access.service';
+import { memberOfGroup } from '../access/access.where';
+import { communityViewer, memberRole } from '../access/permissions';
+import { softDeleteGroup } from '../communities/membership.cascade';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
+
+const ownerSummary = { select: { id: true, firstName: true, lastName: true } } as const;
+const communitySummary = { select: { id: true, name: true } } as const;
 
 @Injectable()
 export class GroupsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private access: AccessService,
+  ) {}
 
-  async create(userId: string, communityId: string, dto: CreateGroupDto) {
-    // Verify user is member of community
-    const membership = await this.prisma.communityMember.findUnique({
-      where: {
-        communityId_userId: {
-          communityId,
-          userId,
-        },
-      },
-    });
+  async create(userId: string, dto: CreateGroupDto) {
+    await this.access.assertCommunityMember(dto.communityId, userId);
 
-    if (!membership) {
-      throw new ForbiddenException(
-        'You must be a community member to create a group',
-      );
-    }
-
-    const group = await this.prisma.group.create({
+    return this.prisma.group.create({
       data: {
-        communityId,
+        communityId: dto.communityId,
         name: dto.name,
         description: dto.description,
         ownerId: userId,
-        members: {
-          create: {
-            userId,
-          },
-        },
+        members: { create: { userId } },
       },
       include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            members: true,
-          },
-        },
+        owner: ownerSummary,
+        community: communitySummary,
+        _count: { select: { members: true } },
       },
     });
-
-    return group;
   }
 
-  async findAllForUser(userId: string) {
+  /** The user's groups, optionally limited to one community. */
+  async findAllForUser(userId: string, communityId?: string) {
     const groups = await this.prisma.group.findMany({
-      where: {
-        deletedAt: null,
-        members: {
-          some: { userId },
-        },
-      },
+      where: { ...memberOfGroup(userId), communityId },
       include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            members: true,
-            listingVisibility: true,
-          },
-        },
+        owner: ownerSummary,
+        community: communitySummary,
+        _count: { select: { members: true, listingVisibility: true } },
       },
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: { name: 'asc' },
     });
 
-    return groups;
-  }
-
-  async findAllForCommunity(userId: string, communityId: string) {
-    const groups = await this.prisma.group.findMany({
-      where: {
-        deletedAt: null,
-        communityId,
-        members: {
-          some: { userId },
-        },
-      },
-      include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            members: true,
-            listingVisibility: true,
-          },
-        },
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
-
-    return groups;
+    return groups.map((g) => ({ ...g, viewer: communityViewer(g, userId) }));
   }
 
   async findOne(id: string, userId: string) {
-    const group = await this.prisma.group.findUnique({
-      where: { id, deletedAt: null },
+    const group = await this.prisma.group.findFirst({
+      where: { id, ...memberOfGroup(userId) },
       include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        members: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-          orderBy: {
-            joinedAt: 'desc',
-          },
-        },
-        _count: {
-          select: {
-            members: true,
-            listingVisibility: true,
-          },
-        },
+        owner: ownerSummary,
+        community: communitySummary,
+        _count: { select: { members: true, listingVisibility: true } },
       },
     });
+    if (!group) throw new NotFoundException('Group not found');
 
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-
-    // Check if user is member
-    const isMember = group.members.some((m) => m.userId === userId);
-    if (!isMember) {
-      throw new ForbiddenException('You are not a member of this group');
-    }
-
-    return group;
+    return { ...group, viewer: communityViewer(group, userId) };
   }
 
-  async update(id: string, dto: UpdateGroupDto) {
+  async update(id: string, userId: string, dto: UpdateGroupDto) {
+    await this.access.assertGroupOwner(id, userId);
     return this.prisma.group.update({
-      where: { id, deletedAt: null },
-      data: dto,
-      include: {
-        owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-  }
-
-  async delete(id: string) {
-    // Soft delete group
-    await this.prisma.group.update({
       where: { id },
-      data: { deletedAt: new Date() },
-    });
-
-    // Hard delete memberships
-    await this.prisma.groupMember.deleteMany({
-      where: { groupId: id },
-    });
-
-    // Remove visibility for listings
-    await this.prisma.listingVisibility.deleteMany({
-      where: { groupId: id },
+      data: dto,
+      include: { owner: ownerSummary, community: communitySummary },
     });
   }
 
-  async refreshInviteToken(id: string) {
-    // Generate new UUID for invite token
-    const newToken = randomUUID();
+  async delete(id: string, userId: string) {
+    await this.access.assertGroupOwner(id, userId);
+    await softDeleteGroup(this.prisma, id);
+  }
 
-    const updated = await this.prisma.group.update({
-      where: { id, deletedAt: null },
-      data: { inviteToken: newToken },
+  async refreshInviteToken(id: string, userId: string) {
+    await this.access.assertGroupOwner(id, userId);
+    return this.prisma.group.update({
+      where: { id },
+      data: { inviteToken: randomUUID() },
       select: { inviteToken: true },
     });
-
-    if (!updated) {
-      throw new NotFoundException('Group not found');
-    }
-
-    return { inviteToken: updated.inviteToken };
   }
 
   async getPreviewByToken(token: string) {
     const group = await this.prisma.group.findUnique({
-      where: {
-        inviteToken: token,
-        deletedAt: null,
-      },
+      where: { inviteToken: token, deletedAt: null },
       select: {
         id: true,
         name: true,
         description: true,
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            members: true,
-          },
-        },
+        community: communitySummary,
+        _count: { select: { members: true } },
       },
     });
-
-    if (!group) {
-      throw new NotFoundException('Invalid or expired invite token');
-    }
+    if (!group) throw new NotFoundException('Invalid or expired invite token');
 
     return group;
   }
 
   async getMembers(groupId: string, userId: string) {
-    // First verify the group exists and user is a member
-    const group = await this.prisma.group.findUnique({
-      where: { id: groupId, deletedAt: null },
-      select: {
-        id: true,
-        ownerId: true,
-        members: {
-          where: {
-            userId,
-          },
-        },
-      },
-    });
-
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-
-    // Check if user is member
-    if (group.members.length === 0) {
-      throw new ForbiddenException('You are not a member of this group');
-    }
-
-    // Fetch all members with user details
+    const group = await this.access.assertGroupMember(groupId, userId);
     const members = await this.prisma.groupMember.findMany({
-      where: {
-        groupId,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        joinedAt: 'desc',
-      },
+      where: { groupId },
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      orderBy: { joinedAt: 'desc' },
     });
 
-    // Transform to flat structure with role
-    const transformed = members.map((member) => ({
-      id: member.user.id,
-      firstName: member.user.firstName,
-      lastName: member.user.lastName,
-      email: member.user.email,
-      joinedAt: member.joinedAt,
-      role: member.userId === group.ownerId ? 'owner' : 'member',
+    const flat = members.map(({ user, joinedAt }) => ({
+      ...user,
+      joinedAt,
+      role: memberRole(group, user.id),
     }));
-
-    // Sort owner first, preserve joinedAt order for rest
-    return transformed.sort((a, b) => {
-      if (a.role === 'owner') return -1;
-      if (b.role === 'owner') return 1;
-      return 0;
-    });
+    // Owner first, the rest keeps the newest-first order
+    return [...flat.filter((m) => m.role === 'owner'), ...flat.filter((m) => m.role !== 'owner')];
   }
 }

@@ -87,7 +87,7 @@ describe('Listing mutations', () => {
     expect((await t.request('DELETE', `/listings/${listing.id}`, { as: member.id })).status).toBe(403);
   });
 
-  it.failing('answers 404 when an outsider tries to change a listing', async () => {
+  it('answers 404 when an outsider tries to change a listing', async () => {
     const owner = await createUser(t);
     const outsider = await createUser(t);
     const listing = await createListing(t, owner.id);
@@ -97,12 +97,31 @@ describe('Listing mutations', () => {
     ).toBe(404);
   });
 
-  it.failing('answers 404 when bookmarking a listing the user cannot see', async () => {
+  it('answers 404 when bookmarking a listing the user cannot see', async () => {
     const owner = await createUser(t);
     const outsider = await createUser(t);
     const listing = await createListing(t, owner.id);
 
     expect((await t.request('POST', `/listings/${listing.id}/bookmark`, { as: outsider.id })).status).toBe(404);
+  });
+
+  it('does not let the owner bookmark their own listing', async () => {
+    const owner = await createUser(t);
+    const listing = await createListing(t, owner.id);
+
+    expect((await t.request('POST', `/listings/${listing.id}/bookmark`, { as: owner.id })).status).toBe(403);
+  });
+
+  it('tells owner and other viewers what they may do', async () => {
+    const { owner, member, community } = await communityWithGroup(t);
+    const listing = await createListing(t, owner.id, { communityIds: [community.id] });
+    const viewerOf = async (userId: string) =>
+      (await t.request('GET', `/listings/${listing.id}`, { as: userId })).body.viewer;
+
+    expect(await viewerOf(owner.id)).toEqual({ isOwner: true, canEdit: true, canBookmark: false });
+    expect(await viewerOf(member.id)).toEqual({ isOwner: false, canEdit: false, canBookmark: true });
+    const feed = await t.request('GET', '/listings/paginated', { as: member.id });
+    expect(feed.body.data[0].viewer.canBookmark).toBe(true);
   });
 
   describe('images', () => {
@@ -121,7 +140,7 @@ describe('Listing mutations', () => {
       expect(after.body.images[0].isCover).toBe(true);
     });
 
-    it.failing('answers 400 for a fourth image', async () => {
+    it('answers 400 for a fourth image', async () => {
       const owner = await createUser(t);
       const listing = await createListing(t, owner.id);
       expectStatus(await upload(owner.id, listing.id, 3), 201);

@@ -127,7 +127,7 @@
     "join": "Rejoindre",
     "leave": "Quitter",
     "leaveConfirm": "Êtes-vous sûr de vouloir quitter cette communauté?",
-    "leaveWarning": "Vous serez retiré de tous les groupes et vos annonces ne seront plus visibles.",
+    "leaveWarning": "Vous serez retiré de tous les groupes et vos annonces ne seront plus visibles. Les groupes que vous avez créés seront transférés à la personne propriétaire de la communauté.",
     "edit": "Modifier",
     "delete": "Supprimer",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette communauté?",
@@ -162,7 +162,7 @@
     "refreshFailed": "Impossible de mettre à jour la liste. Veuillez recharger la page.",
     "removeMember": "Supprimer",
     "removeMemberConfirm": "Supprimer le membre?",
-    "removeMemberWarning": "\"{name}\" sera retiré de la communauté et de tous les groupes.",
+    "removeMemberWarning": "\"{name}\" sera retiré de la communauté et de tous les groupes. Les groupes créés par {name} vous seront transférés.",
     "memberRemoved": "Membre supprimé"
   },
   "groups": {

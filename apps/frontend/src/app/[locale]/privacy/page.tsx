@@ -338,8 +338,9 @@ export default function PrivacyPage() {
           <Text className="mt-2">
             <strong>Derzeit bleiben jedoch gespeichert:</strong> Ihr Name, Ihre E-Mail-Adresse, Adresse und
             Telefonnummer (als «gelöscht» markiert), der Text Ihrer Inserate, deren Bilder (weiterhin über die
-            Bildadresse abrufbar) und Ihre Merkliste. Communitys und Gruppen, die Sie gegründet haben, bleiben
-            bestehen, und Ihr Name wird dort weiterhin als Gründer angezeigt. Wir arbeiten daran, dass die
+            Bildadresse abrufbar) und Ihre Merkliste. Communitys, die Sie gegründet haben, bleiben bestehen,
+            und Ihr Name wird dort weiterhin als Gründer angezeigt. Gruppen, die Sie in Communitys anderer
+            Personen gegründet haben, gehen an die Person über, der die Community gehört. Wir arbeiten daran, dass die
             Löschung künftig alle Daten vollständig entfernt.
           </Text>
           <Text className="mt-2">

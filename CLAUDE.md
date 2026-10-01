@@ -99,11 +99,12 @@ docker-compose logs -f           # View logs
 apps/
 ├── backend/           # NestJS API (port 3001)
 │   ├── src/
+│   │   ├── access/   # Visibility + permission rules (where builders, assert*, viewer)
 │   │   ├── auth/     # OAuth2 strategies, JWT, guards
 │   │   ├── users/    # User profile management
-│   │   ├── communities/  # Community CRUD + membership
+│   │   ├── communities/  # Community CRUD + membership (+ membership.cascade.ts)
 │   │   ├── groups/   # Groups within communities
-│   │   ├── listings/ # Listings + images + visibility
+│   │   ├── listings/ # Listings + images (listing-query.ts: feed where/includes)
 │   │   ├── common/   # Decorators, types, utils
 │   │   │   ├── decorators/  # @CurrentUser, @Public
 │   │   │   ├── types/       # Pagination types
@@ -150,7 +151,7 @@ Key enums:
 - `PriceTimeUnit`: HOUR, DAY, WEEK, MONTH
 - `VisibilityType`: COMMUNITY, GROUP
 
-Listings have visibility rules - they can be shared with specific communities or groups. The `VisibilityService` handles access control.
+Listings have visibility rules - they can be shared with specific communities or groups. All access rules live in `src/access/` (see Key Patterns).
 
 ### API Routes
 All backend routes are prefixed with `/api/v1/`:
@@ -183,6 +184,12 @@ Auth state uses a lightweight global pattern in `use-auth.ts` (no Redux/Zustand)
 - Use `@Public()` decorator for unauthenticated endpoints
 - Services handle business logic; controllers handle HTTP
 - Soft delete pattern: set `deletedAt` instead of deleting
+- **Access rules live only in `src/access/`**:
+  - `access.where.ts`: pure Prisma where fragments (`visibleListingWhere`, `memberOfCommunity`, `memberOfGroup`, `shownVisibilityWhere`). Reads apply them inside their own query.
+  - `AccessService`: `assertListingVisible/Owner`, `assertCommunityMember/Owner`, `assertGroupMember/Owner`, `assertShareTargets`. Not visible → 404, visible but not allowed → 403.
+  - `permissions.ts`: `listingViewer` / `communityViewer`, returned as `viewer` in responses. The frontend reads `viewer.*` instead of comparing ids.
+- Ending a membership (leave, remove, delete community/group/account) goes through `communities/membership.cascade.ts` inside a transaction: shares of the user's listings in the community and its groups are removed, groups the user owns pass to the community owner.
+- Route ids and invite tokens use `ParseUUIDPipe` (malformed → 400)
 
 ### Frontend
 - All pages use `[locale]` dynamic route for i18n

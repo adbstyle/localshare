@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { revokeCommunityMembership } from '../communities/membership.cascade';
 
 @Injectable()
 export class UsersService {
@@ -47,23 +48,26 @@ export class UsersService {
   }
 
   async delete(id: string) {
-    // Soft delete user
-    await this.prisma.user.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+    await this.prisma.$transaction(async (tx) => {
+      // Leave every foreign community the regular way: shares go, owned groups
+      // pass to the community owner. Communities the user owns stay as they are.
+      const memberships = await tx.communityMember.findMany({
+        where: { userId: id, community: { ownerId: { not: id } } },
+        select: { community: { select: { id: true, ownerId: true } } },
+      });
+      for (const { community } of memberships) {
+        await revokeCommunityMembership(tx, community, id);
+      }
 
-    // Hard delete associated data
-    await this.prisma.refreshToken.deleteMany({ where: { userId: id } });
-    await this.prisma.ssoAccount.deleteMany({ where: { userId: id } });
-    await this.prisma.communityMember.deleteMany({ where: { userId: id } });
-    await this.prisma.groupMember.deleteMany({ where: { userId: id } });
-
-    // Soft delete user's listings
-    await this.prisma.listing.updateMany({
-      where: { creatorId: id },
-      data: { deletedAt: new Date() },
-    });
+      const now = new Date();
+      await tx.listingVisibility.deleteMany({ where: { listing: { creatorId: id } } });
+      await tx.listing.updateMany({ where: { creatorId: id, deletedAt: null }, data: { deletedAt: now } });
+      await tx.refreshToken.deleteMany({ where: { userId: id } });
+      await tx.ssoAccount.deleteMany({ where: { userId: id } });
+      await tx.communityMember.deleteMany({ where: { userId: id } });
+      await tx.groupMember.deleteMany({ where: { userId: id } });
+      await tx.user.update({ where: { id }, data: { deletedAt: now } });
+    }, { timeout: 15_000 }); // one cascade per community; pooled connections can be slow
   }
 
   async exportData(id: string) {

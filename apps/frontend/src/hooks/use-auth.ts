@@ -3,13 +3,18 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { authKeys, logoutRequest, meQuery } from '@/lib/api/auth';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 // Invite tokens parked in sessionStorage during the login flow
 const PENDING_INVITE_KEYS = ['pendingInviteToken', 'pendingGroupInviteToken', 'pendingInviteName'];
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const { data: user = null, isPending } = useQuery(meQuery);
+  const { data, isPending } = useQuery(meQuery);
+  // The server always renders "loading". A boundary that hydrates late (the
+  // header's Suspense) may find the user already cached; it must still render
+  // the server state first or React throws a hydration mismatch.
+  const hydrated = useHydrated();
 
   const logout = useCallback(async () => {
     try {
@@ -22,5 +27,5 @@ export function useAuth() {
     }
   }, [queryClient]);
 
-  return { user, loading: isPending, logout };
+  return { user: hydrated ? (data ?? null) : null, loading: !hydrated || isPending, logout };
 }

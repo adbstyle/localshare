@@ -7,7 +7,6 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/navigation';
 import { formatPrice, formatRelativeDate, getImageUrl, shouldShowPrice } from '@/lib/utils';
 import { useToggleBookmark } from '@/lib/api/listings';
-import { useAuth } from '@/hooks/use-auth';
 import { Bookmark } from 'lucide-react';
 import Image from 'next/image';
 
@@ -19,11 +18,8 @@ interface ListingCardProps {
 export function ListingCard({ listing, priority }: ListingCardProps) {
   const t = useTranslations();
   const locale = useLocale();
-  const { user } = useAuth();
   const toggleBookmark = useToggleBookmark(listing.id);
   const isBookmarked = toggleBookmark.data?.isBookmarked ?? listing.isBookmarked ?? false;
-
-  const isOwner = user?.id === listing.creatorId;
 
   // Prefer cover image, fallback to first image
   const coverImage = listing.images.find((img) => img.isCover) || listing.images[0];
@@ -55,7 +51,7 @@ export function ListingCard({ listing, priority }: ListingCardProps) {
             </div>
           )}
           {/* Bookmark button overlay - only for non-owners */}
-          {!isOwner && (
+          {listing.viewer.canBookmark && (
             <Button
               variant="ghost"
               size="icon"

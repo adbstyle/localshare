@@ -60,6 +60,22 @@ export interface UpdateUserDto {
   preferredLanguage?: string;
 }
 
+// What the current user may do with a resource. Computed by the backend
+// (apps/backend/src/access/permissions.ts); never re-derive it from ids.
+export interface CommunityViewer {
+  role: 'owner' | 'member';
+  canEdit: boolean;
+  canDelete: boolean;
+  canManageMembers: boolean;
+  canLeave: boolean;
+}
+
+export interface ListingViewer {
+  isOwner: boolean;
+  canEdit: boolean;
+  canBookmark: boolean;
+}
+
 // Community Types
 export interface Community {
   id: string;
@@ -76,6 +92,7 @@ export interface Community {
     members: number;
     sharedListings: number;
   };
+  viewer: CommunityViewer;
 }
 
 export interface CreateCommunityDto {
@@ -109,6 +126,7 @@ export interface Group {
     members: number;
     sharedListings: number;
   };
+  viewer: CommunityViewer;
 }
 
 export interface CreateGroupDto {
@@ -159,6 +177,7 @@ export interface Listing {
     group?: { id: string; name: string };
   }>;
   isBookmarked?: boolean;
+  viewer: ListingViewer;
   createdAt: string;
   updatedAt: string;
 }

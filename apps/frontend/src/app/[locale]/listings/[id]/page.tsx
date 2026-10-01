@@ -8,7 +8,6 @@ import { Bookmark } from 'lucide-react';
 import { Listing } from '@localshare/shared';
 import { useRouter } from '@/navigation';
 import { listingQueries, useToggleBookmark } from '@/lib/api/listings';
-import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { formatPrice, formatRelativeDate, shouldShowPrice } from '@/lib/utils';
@@ -53,7 +52,7 @@ function BookmarkButton({ listing }: { listing: Listing }) {
   );
 }
 
-function ListingHeader({ listing, isOwner }: { listing: Listing; isOwner: boolean }) {
+function ListingHeader({ listing }: { listing: Listing }) {
   const t = useTranslations();
   const price = listing.price !== null && shouldShowPrice(listing.type)
     ? formatPrice(listing.price, listing.priceTimeUnit, t)
@@ -66,7 +65,7 @@ function ListingHeader({ listing, isOwner }: { listing: Listing; isOwner: boolea
           <Badge variant="secondary" className="text-sm">{t(`listings.types.${listing.type}`)}</Badge>
           <Badge variant="outline" className="text-sm">{t(`listings.categories.${listing.category}`)}</Badge>
         </div>
-        {!isOwner && <BookmarkButton listing={listing} />}
+        {listing.viewer.canBookmark && <BookmarkButton listing={listing} />}
       </div>
 
       <h1 className="text-3xl font-bold leading-tight mb-4 break-words">{listing.title}</h1>
@@ -77,7 +76,7 @@ function ListingHeader({ listing, isOwner }: { listing: Listing; isOwner: boolea
         </p>
       )}
 
-      {isOwner && <ListingOwnerActions listingId={listing.id} />}
+      {listing.viewer.canEdit && <ListingOwnerActions listingId={listing.id} />}
     </div>
   );
 }
@@ -110,7 +109,6 @@ export default function ListingDetailPage() {
   const router = useRouter();
   const t = useTranslations();
   const { toast } = useToast();
-  const { user } = useAuth();
   const { data: listing, isError } = useQuery(listingQueries.detail(id));
 
   useEffect(() => {
@@ -121,7 +119,6 @@ export default function ListingDetailPage() {
 
   if (!listing) return <DetailSkeleton />;
 
-  const isOwner = user?.id === listing.creatorId;
 
   return (
     <div className="container py-8">
@@ -130,7 +127,7 @@ export default function ListingDetailPage() {
           <article>
             <Card>
               <CardHeader>
-                <ListingHeader listing={listing} isOwner={isOwner} />
+                <ListingHeader listing={listing} />
               </CardHeader>
               <CardContent className="space-y-6">
                 <ListingGallery title={listing.title} images={listing.images || []} />
@@ -148,7 +145,7 @@ export default function ListingDetailPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <ListingContactCard listing={listing} isOwner={isOwner} />
+          <ListingContactCard listing={listing} />
         </div>
       </div>
     </div>

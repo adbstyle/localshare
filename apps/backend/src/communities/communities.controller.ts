@@ -10,7 +10,6 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OwnershipGuard } from '../auth/guards/ownership.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -33,7 +32,6 @@ function transformCommunityDto(community: any) {
 }
 
 @Controller('communities')
-@UseGuards(JwtAuthGuard)
 export class CommunitiesController {
   constructor(
     private communitiesService: CommunitiesService,

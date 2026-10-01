@@ -78,6 +78,13 @@ npm run test                # Run tests
 npm run type-check          # TypeScript check (frontend)
 ```
 
+Backend integration tests (`apps/backend/test/integration/*.int-spec.ts`) run the real Nest app over HTTP against a local database `localshare_test` (same Docker Postgres, port 5433; override with `TEST_DATABASE_URL`). The global setup rebuilds that database from the migrations and refuses any URL that is not localhost and `*_test`:
+```bash
+docker-compose up -d postgres
+cd apps/backend && npm run test:int
+```
+Known bugs are pinned as `it.failing` until their fix lands. `npm run test` (unit tests in `apps/backend/test/**/*.spec.ts`) needs no database.
+
 ### Docker
 ```bash
 docker-compose up -d postgres    # Start only database

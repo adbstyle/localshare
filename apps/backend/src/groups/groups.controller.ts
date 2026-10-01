@@ -11,7 +11,6 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OwnershipGuard } from '../auth/guards/ownership.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -34,7 +33,6 @@ function transformGroupDto(group: any) {
 }
 
 @Controller('groups')
-@UseGuards(JwtAuthGuard)
 export class GroupsController {
   constructor(
     private groupsService: GroupsService,

@@ -15,6 +15,8 @@ export class ListingsService {
   ) {}
 
   async create(userId: string, dto: CreateListingDto) {
+    const targets = await this.assertShareTargets(userId, dto.communityIds, dto.groupIds);
+
     const listing = await this.prisma.listing.create({
       data: {
         creatorId: userId,
@@ -40,12 +42,40 @@ export class ListingsService {
     if (dto.communityIds || dto.groupIds) {
       await this.visibilityService.setVisibility(
         listing.id,
-        dto.communityIds || [],
-        dto.groupIds || [],
+        targets.communityIds,
+        targets.groupIds,
       );
     }
 
     return listing;
+  }
+
+  // Only communities/groups the user is an active member of may be share targets.
+  private async assertShareTargets(
+    userId: string,
+    communityIds: string[] = [],
+    groupIds: string[] = [],
+  ): Promise<{ communityIds: string[]; groupIds: string[] }> {
+    const uniqueCommunityIds = [...new Set(communityIds)];
+    const uniqueGroupIds = [...new Set(groupIds)];
+    const memberOf = { deletedAt: null, members: { some: { userId } } };
+
+    const [communityCount, groupCount] = await Promise.all([
+      uniqueCommunityIds.length > 0
+        ? this.prisma.community.count({ where: { id: { in: uniqueCommunityIds }, ...memberOf } })
+        : 0,
+      uniqueGroupIds.length > 0
+        ? this.prisma.group.count({ where: { id: { in: uniqueGroupIds }, ...memberOf } })
+        : 0,
+    ]);
+
+    if (communityCount !== uniqueCommunityIds.length || groupCount !== uniqueGroupIds.length) {
+      throw new ForbiddenException(
+        'You can only share with communities and groups you are a member of',
+      );
+    }
+
+    return { communityIds: uniqueCommunityIds, groupIds: uniqueGroupIds };
   }
 
   async toggleBookmark(listingId: string, userId: string): Promise<{ isBookmarked: boolean }> {
@@ -386,6 +416,8 @@ export class ListingsService {
       throw new ForbiddenException('You can only update your own listings');
     }
 
+    const targets = await this.assertShareTargets(userId, dto.communityIds, dto.groupIds);
+
     // Determine effective type: use dto.type if provided, otherwise keep existing
     const effectiveType = dto.type ?? listing.type;
 
@@ -409,8 +441,8 @@ export class ListingsService {
     if (dto.communityIds !== undefined || dto.groupIds !== undefined) {
       await this.visibilityService.setVisibility(
         id,
-        dto.communityIds || [],
-        dto.groupIds || [],
+        targets.communityIds,
+        targets.groupIds,
       );
     }
 

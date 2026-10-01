@@ -1,43 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from './app.module';
-import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-import { isS3StorageEnabled } from './common/utils/storage-provider';
+import { AppModule } from './app.module';
+import { configureApp } from './app.setup';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  // Serve static files for local uploads (only when not using S3)
-  if (!isS3StorageEnabled()) {
-    app.useStaticAssets(join(process.cwd(), 'uploads'), {
-      prefix: '/uploads',
-    });
-  }
-
-  // Security
-  app.use(helmet());
-  app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true,
-  });
-
-  // Cookie parser for refresh tokens
-  app.use(cookieParser());
-
-  // Global validation pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }),
-  );
-
-  // API prefix
-  app.setGlobalPrefix('api/v1');
+  configureApp(app);
 
   // Graceful shutdown
   const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT'];

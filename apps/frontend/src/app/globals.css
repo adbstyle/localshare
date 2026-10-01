@@ -58,4 +58,18 @@
     max-width: 100vw;
     @apply bg-background text-foreground;
   }
+
+  /* Radix scroll lock (menus, selects, dialogs) puts overflow:hidden on body.
+     With html{overflow-x:clip} that no longer reaches the viewport: body would
+     become its own scroll container and the sticky header (with the menu
+     anchored in it) would jump off screen. Lock the viewport instead and keep
+     body a plain box. */
+  html:has(> body[data-scroll-locked]) {
+    overflow-y: hidden;
+  }
+
+  html > body[data-scroll-locked] {
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+  }
 }

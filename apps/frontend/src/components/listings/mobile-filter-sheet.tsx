@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import { FilterListingsDto, ListingType, ListingCategory, PaginatedResponse, Listing } from '@localshare/shared';
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
   Dialog,

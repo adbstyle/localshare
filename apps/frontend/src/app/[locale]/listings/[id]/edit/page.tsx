@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useErrorToast } from '@/hooks/use-error-toast';
+import { api } from '@/lib/api/client';
 import { Listing, UpdateListingDto } from '@localshare/shared';
 import { ListingForm } from '@/components/listings/listing-form';
 
@@ -14,6 +15,7 @@ export default function EditListingPage() {
   const router = useRouter();
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,11 +47,7 @@ export default function EditListingPage() {
       });
       router.push(`/listings/${params.id}`);
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToUpdateListing'),
-        variant: 'destructive',
-      });
+      showError(error, 'errors.failedToUpdateListing');
       throw error;
     }
   };

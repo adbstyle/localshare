@@ -6,7 +6,8 @@ import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useErrorToast } from '@/hooks/use-error-toast';
+import { api } from '@/lib/api/client';
 import { Group } from '@localshare/shared';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,6 +67,7 @@ export default function GroupDetailPage() {
   const router = useRouter();
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
   const { user } = useAuth();
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<GroupMember[]>([]);
@@ -131,11 +133,7 @@ export default function GroupDetailPage() {
         title: t('groups.linkRefreshed'),
       });
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message,
-        variant: 'destructive',
-      });
+      showError(error, 'errors.unexpectedError');
     } finally {
       setActionLoading(false);
     }
@@ -151,11 +149,7 @@ export default function GroupDetailPage() {
       });
       router.push(`/communities/${group?.community?.id || ''}`);
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message,
-        variant: 'destructive',
-      });
+      showError(error, 'errors.unexpectedError');
     } finally {
       setActionLoading(false);
       setShowLeaveDialog(false);
@@ -181,11 +175,7 @@ export default function GroupDetailPage() {
       });
       router.push(`/communities/${group?.community?.id || ''}`);
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message,
-        variant: 'destructive',
-      });
+      showError(error, 'errors.unexpectedError');
     } finally {
       setActionLoading(false);
       setShowDeleteDialog(false);
@@ -208,11 +198,7 @@ export default function GroupDetailPage() {
       });
       fetchMembers();
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message,
-        variant: 'destructive',
-      });
+      showError(error, 'errors.unexpectedError');
     } finally {
       setActionLoading(false);
       setShowRemoveMemberDialog(false);

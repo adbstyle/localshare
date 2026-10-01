@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useErrorToast } from '@/hooks/use-error-toast';
+import { api } from '@/lib/api/client';
 import { Loader2 } from 'lucide-react';
 
 interface EditCommunityDialogProps {
@@ -22,6 +23,7 @@ interface EditCommunityDialogProps {
 export function EditCommunityDialog({ community, onSuccess }: EditCommunityDialogProps) {
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -46,11 +48,7 @@ export function EditCommunityDialog({ community, onSuccess }: EditCommunityDialo
       });
       onSuccess();
     } catch (error: any) {
-      toast({
-        title: t('errors.generic'),
-        description: error.response?.data?.message || t('errors.failedToUpdateCommunity'),
-        variant: 'destructive',
-      });
+      showError(error, 'errors.failedToUpdateCommunity');
     } finally {
       setLoading(false);
     }

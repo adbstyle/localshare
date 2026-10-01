@@ -6,7 +6,8 @@ import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useErrorToast } from '@/hooks/use-error-toast';
+import { api } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Loader2, AlertCircle, Building2 } from 'lucide-react';
@@ -30,6 +31,7 @@ function JoinGroupPageContent() {
   const searchParams = useSearchParams();
   const t = useTranslations();
   const { toast } = useToast();
+  const showError = useErrorToast();
   const { user, loading: authLoading } = useAuth();
   const [group, setGroup] = useState<GroupPreview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,11 +108,7 @@ function JoinGroupPageContent() {
         });
         router.push('/');
       } else {
-        toast({
-          title: t('errors.generic'),
-          description: error.response?.data?.message || t('errors.failedToJoinGroup'),
-          variant: 'destructive',
-        });
+        showError(error, 'errors.failedToJoinGroup');
       }
     } finally {
       setJoining(false);

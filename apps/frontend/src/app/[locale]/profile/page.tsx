@@ -28,13 +28,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { api } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { User } from '@localshare/shared';
+import { api } from '@/lib/api/client';
+import { authKeys } from '@/lib/api/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Trash2, LogOut } from 'lucide-react';
 import { useRouter, usePathname } from '@/navigation';
 
 export default function ProfilePage() {
-  const { user, loading: authLoading, fetchUser, logout } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
+  const queryClient = useQueryClient();
   const t = useTranslations();
   const { toast } = useToast();
   const router = useRouter();
@@ -99,8 +103,8 @@ export default function ProfilePage() {
     try {
       const previousLanguage = user?.preferredLanguage || 'de';
 
-      await api.patch('/users/me', data);
-      await fetchUser();
+      const { data: updated } = await api.patch<User>('/users/me', data);
+      queryClient.setQueryData(authKeys.me, updated);
 
       // If language changed, navigate to new locale URL
       if (data.preferredLanguage && data.preferredLanguage !== previousLanguage) {

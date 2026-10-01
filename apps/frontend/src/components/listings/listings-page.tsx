@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useRouter, usePathname } from '@/navigation';
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { Listing, FilterListingsDto, PaginatedResponse } from '@localshare/shared';
 import { ListingCard } from './listing-card';
 import { ListingFilters } from './listing-filters';

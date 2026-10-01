@@ -79,7 +79,7 @@ src/
 │   └── listings/          # Listing components
 │
 ├── lib/
-│   ├── api.ts             # Axios client with auth
+│   ├── api/               # Axios client with auth refresh, per-resource queries
 │   └── utils.ts           # Utilities (cn, formatDate, formatPrice)
 │
 ├── hooks/
@@ -226,7 +226,7 @@ export default function ProtectedPage() {
 ### Using the API Client
 
 ```typescript
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { useToast } from '@/hooks/use-toast';
 
 export function useMyFeature() {

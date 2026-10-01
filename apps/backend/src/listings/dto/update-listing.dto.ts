@@ -43,13 +43,9 @@ export class UpdateListingDto {
   @IsEnum(ListingCategory)
   category?: ListingCategory;
 
+  /** Communities and groups to share with (groups are communities with a parent). */
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   communityIds?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsUUID('4', { each: true })
-  groupIds?: string[];
 }

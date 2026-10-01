@@ -29,20 +29,18 @@ export async function joinCommunity(t: TestApp, userId: string, community: { inv
   expectStatus(response, 201);
 }
 
-export async function createGroup(t: TestApp, ownerId: string, communityId: string, name = 'Group') {
-  const response = await t.request('POST', '/groups', { as: ownerId, body: { name, communityId } });
+/** A group is a community with a parent. */
+export async function createGroup(t: TestApp, ownerId: string, parentId: string, name = 'Group') {
+  const response = await t.request('POST', '/communities', { as: ownerId, body: { name, parentId } });
   return expectStatus(response, 201).body as { id: string; inviteToken: string };
 }
 
-export async function joinGroup(t: TestApp, userId: string, group: { inviteToken: string }) {
-  const response = await t.request('POST', `/groups/join?token=${group.inviteToken}`, { as: userId });
-  expectStatus(response, 201);
-}
+export const joinGroup = joinCommunity;
 
 export async function createListing(
   t: TestApp,
   userId: string,
-  share: { communityIds?: string[]; groupIds?: string[] } = {},
+  share: { communityIds?: string[] } = {},
   title = 'Bohrmaschine',
 ) {
   const body = { title, type: 'LEND', category: 'TOOLS', ...share };

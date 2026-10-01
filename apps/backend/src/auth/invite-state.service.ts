@@ -15,12 +15,9 @@ export class InviteStateService {
     // Layer 2: Output Encoding - defense-in-depth against potential XSS
     const encodedToken = encodeURIComponent(inviteToken);
 
-    if (inviteType === 'community') {
-      return `/communities/join?token=${encodedToken}`;
-    } else if (inviteType === 'group') {
-      return `/groups/join?token=${encodedToken}`;
-    }
-    return '/';
+    // Communities and groups share one join page since #191; old group
+    // invites still carry inviteType 'group'.
+    return ['community', 'group'].includes(inviteType) ? `/communities/join?token=${encodedToken}` : '/';
   }
 
   /**

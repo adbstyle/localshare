@@ -1,144 +1,96 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useRouter } from '@/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { AlertCircle, Building2, Loader2, Users } from 'lucide-react';
+import { CommunityPreview } from '@localshare/shared';
+import { communityQueries, useJoinCommunity } from '@/lib/api/communities';
+import { getApiStatus } from '@/lib/api/errors';
+import { useRouter } from '@/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
-import { api } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Loader2, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-interface CommunityPreview {
-  id: string;
-  name: string;
-  description: string | null;
-  _count: {
-    members: number;
-  };
+// Single Active Invite Token: only the latest invite survives the login round trip
+const INVITE_KEYS = ['pendingInviteToken', 'pendingGroupInviteToken', 'pendingInviteName'];
+
+/** Logged out: remember the (valid) invite and go to the login page. */
+function useParkInviteForLogin(token: string | null, preview: CommunityPreview | undefined, enabled: boolean) {
+  const router = useRouter();
+  useEffect(() => {
+    if (!enabled || !token || !preview) return;
+    INVITE_KEYS.forEach((key) => sessionStorage.removeItem(key));
+    sessionStorage.setItem('pendingInviteName', preview.name);
+    // The group key makes the login page say "group"; both lead back here
+    sessionStorage.setItem(preview.parent ? 'pendingGroupInviteToken' : 'pendingInviteToken', token);
+    router.push('/');
+  }, [enabled, token, preview, router]);
 }
 
-function JoinCommunityPageContent() {
+function InvalidInvite({ message }: { message: string }) {
+  const t = useTranslations('errors');
   const router = useRouter();
-  const searchParams = useSearchParams();
+  return (
+    <div className="container max-w-md py-16">
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <AlertCircle className="h-16 w-16 text-destructive mb-4" />
+          <h2 className="text-xl font-semibold mb-2">{t('invalidInviteLinkTitle')}</h2>
+          <p className="text-muted-foreground text-center mb-6">{message}</p>
+          <Button onClick={() => router.push('/')}>{t('backToHome')}</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function JoinPageContent() {
   const t = useTranslations();
+  const token = useSearchParams().get('token');
+  const { user, loading: authLoading } = useAuth();
+  const preview = useQuery({ ...communityQueries.preview(token ?? ''), enabled: !!token });
+  useParkInviteForLogin(token, preview.data, !authLoading && !user);
+
+  if (!token) return <InvalidInvite message={t('errors.noInviteToken')} />;
+  if (preview.isError) return <InvalidInvite message={t('errors.invalidInviteLinkDescription')} />;
+  if (authLoading || !user || !preview.data) {
+    return (
+      <div className="container max-w-md py-16 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  return <JoinCard token={token} preview={preview.data} />;
+}
+
+function JoinCard({ token, preview }: { token: string; preview: CommunityPreview }) {
+  const t = useTranslations();
+  const tk = useTranslations(preview.parent ? 'groups' : 'communities');
+  const router = useRouter();
   const { toast } = useToast();
   const showError = useErrorToast();
-  const { user, loading: authLoading } = useAuth();
-  const [community, setCommunity] = useState<CommunityPreview | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [joining, setJoining] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const join = useJoinCommunity();
 
-  const token = searchParams.get('token');
-
-  useEffect(() => {
-    const handleInvite = async () => {
-      if (!authLoading) {
-        if (!user) {
-          // Validate token BEFORE storing in sessionStorage
-          if (token) {
-            // Clear ALL invite tokens first (SAIT pattern - Single Active Invite Token)
-            sessionStorage.removeItem('pendingInviteToken');
-            sessionStorage.removeItem('pendingGroupInviteToken');
-            sessionStorage.removeItem('pendingInviteName');
-            // Validate token via preview endpoint
-            try {
-              const { data } = await api.get<CommunityPreview>(`/communities/preview/${token}`);
-              // Token is valid - store and redirect to login
-              sessionStorage.setItem('pendingInviteName', data.name);
-              sessionStorage.setItem('pendingInviteToken', token);
-              router.push('/');
-            } catch {
-              // Invalid token - show error instead of silent redirect
-              setError(t('errors.invalidInviteLinkDescription'));
-              setLoading(false);
-            }
-          } else {
-            setError(t('errors.noInviteToken'));
-            setLoading(false);
-          }
-        } else if (token) {
-          fetchCommunityPreview();
-        } else {
-          setError(t('errors.noInviteToken'));
-          setLoading(false);
+  const handleJoin = () =>
+    join.mutate(token, {
+      onSuccess: () => {
+        toast({ variant: 'success', title: tk('joined') });
+        router.push(`/communities/${preview.id}`);
+      },
+      onError: (error) => {
+        if (getApiStatus(error) !== 409) {
+          showError(error, preview.parent ? 'errors.failedToJoinGroup' : 'errors.failedToJoinCommunity');
+          return;
         }
-      }
-    };
-    handleInvite();
-  }, [user, authLoading, token, router, t]);
-
-  const fetchCommunityPreview = async () => {
-    try {
-      const { data } = await api.get<CommunityPreview>(`/communities/preview/${token}`);
-      setCommunity(data);
-    } catch {
-      setError(t('errors.invalidInviteLinkDescription'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleJoin = async () => {
-    if (!token) return;
-
-    setJoining(true);
-    try {
-      await api.post(`/communities/join/${token}`);
-      toast({
-        variant: 'success',
-        title: t('communities.joined'),
-      });
-      router.push('/');
-    } catch (error: any) {
-      if (error.response?.status === 409 && error.response?.data?.alreadyMember) {
-        const entityName = error.response.data.name || community?.name || '';
-        toast({
-          variant: 'success',
-          title: t('communities.alreadyMemberSuccess', { name: entityName }),
-        });
-        router.push('/');
-      } else {
-        showError(error, 'errors.failedToJoinCommunity');
-      }
-    } finally {
-      setJoining(false);
-    }
-  };
-
-  if (authLoading || loading) {
-    return (
-      <div className="container max-w-md py-16">
-        <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !community) {
-    return (
-      <div className="container max-w-md py-16">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <AlertCircle className="h-16 w-16 text-destructive mb-4" />
-            <h2 className="text-xl font-semibold mb-2">{t('errors.invalidInviteLinkTitle')}</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              {error || t('errors.invalidInviteLinkDescription')}
-            </p>
-            <Button onClick={() => router.push('/')}>
-              {t('errors.backToHome')}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+        toast({ variant: 'success', title: tk('alreadyMemberSuccess', { name: preview.name }) });
+        router.push(`/communities/${preview.id}`);
+      },
+    });
 
   return (
     <div className="container max-w-md py-16">
@@ -147,40 +99,42 @@ function JoinCommunityPageContent() {
           <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
             <Users className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">{t('communities.join')}</CardTitle>
-          <CardDescription>
-            {t('invite.communityInvite')}
-          </CardDescription>
+          <CardTitle className="text-2xl">{tk('join')}</CardTitle>
+          <CardDescription>{t(preview.parent ? 'invite.groupInvite' : 'invite.communityInvite')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="p-4 rounded-lg border bg-muted/50">
-            <h3 className="font-semibold text-lg mb-2">{community.name}</h3>
-            {community.description && (
-              <p className="text-sm text-muted-foreground mb-3">
-                {community.description}
-              </p>
+          <div className="p-4 rounded-lg border bg-muted/50 space-y-2">
+            <h3 className="font-semibold text-lg">{preview.name}</h3>
+            {preview.description && <p className="text-sm text-muted-foreground">{preview.description}</p>}
+            {preview.parent && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Building2 className="h-4 w-4 mr-2" />
+                {t('groups.community')}: {preview.parent.name}
+              </div>
             )}
             <div className="flex items-center text-sm text-muted-foreground">
               <Users className="h-4 w-4 mr-2" />
-              {t('communities.memberCount', { count: community._count.members })}
+              {tk('memberCount', { count: preview._count.members })}
             </div>
           </div>
 
+          {preview.parent && (
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm">
+              <p className="text-blue-900 dark:text-blue-100">
+                {t.rich('invite.groupJoinNote', {
+                  communityName: preview.parent.name,
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
+              </p>
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Button
-              onClick={handleJoin}
-              disabled={joining}
-              className="w-full"
-              size="lg"
-            >
-              {joining && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('communities.join')}
+            <Button onClick={handleJoin} disabled={join.isPending} className="w-full" size="lg">
+              {join.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {tk('join')}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/communities')}
-              className="w-full"
-            >
+            <Button variant="outline" onClick={() => router.push('/communities')} className="w-full">
               {t('common.cancel')}
             </Button>
           </div>
@@ -190,10 +144,10 @@ function JoinCommunityPageContent() {
   );
 }
 
-export default function JoinCommunityPage() {
+export default function JoinPage() {
   return (
     <Suspense fallback={<LoadingSpinner className="container max-w-md" />}>
-      <JoinCommunityPageContent />
+      <JoinPageContent />
     </Suspense>
   );
 }

@@ -1,14 +1,9 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { memberOfCommunity, memberOfGroup, visibleListingWhere } from './access.where';
+import { memberOfCommunity, visibleListingWhere } from './access.where';
 
 // Guards for single resources. Rule everywhere: not visible to the user -> 404
 // (existence stays hidden), visible but action not allowed -> 403.
-
-export interface ShareTargets {
-  communityIds: string[];
-  groupIds: string[];
-}
 
 @Injectable()
 export class AccessService {
@@ -34,7 +29,7 @@ export class AccessService {
   async assertCommunityMember(communityId: string, userId: string) {
     const community = await this.prisma.community.findFirst({
       where: { id: communityId, ...memberOfCommunity(userId) },
-      select: { id: true, ownerId: true, name: true },
+      select: { id: true, ownerId: true, name: true, parentId: true },
     });
     if (!community) throw new NotFoundException('Community not found');
     return community;
@@ -48,47 +43,15 @@ export class AccessService {
     return community;
   }
 
-  async assertGroupMember(groupId: string, userId: string) {
-    const group = await this.prisma.group.findFirst({
-      where: { id: groupId, ...memberOfGroup(userId) },
-      select: { id: true, ownerId: true, communityId: true },
-    });
-    if (!group) throw new NotFoundException('Group not found');
-    return group;
-  }
+  /** Dedupes the ids; every target must be a community or group the user belongs to. */
+  async assertShareTargets(userId: string, communityIds: string[] = []): Promise<string[]> {
+    const ids = [...new Set(communityIds)];
+    if (ids.length === 0) return ids;
 
-  async assertGroupOwner(groupId: string, userId: string) {
-    const group = await this.assertGroupMember(groupId, userId);
-    if (group.ownerId !== userId) {
-      throw new ForbiddenException('Only the owner can do this');
+    const count = await this.prisma.community.count({ where: { id: { in: ids }, ...memberOfCommunity(userId) } });
+    if (count !== ids.length) {
+      throw new ForbiddenException('You can only share with communities and groups you are a member of');
     }
-    return group;
-  }
-
-  /** Dedupes the ids; every target must be a community/group the user belongs to. */
-  async assertShareTargets(
-    userId: string,
-    communityIds: string[] = [],
-    groupIds: string[] = [],
-  ): Promise<ShareTargets> {
-    const targets = { communityIds: [...new Set(communityIds)], groupIds: [...new Set(groupIds)] };
-
-    const [communityCount, groupCount] = await Promise.all([
-      targets.communityIds.length > 0
-        ? this.prisma.community.count({
-            where: { id: { in: targets.communityIds }, ...memberOfCommunity(userId) },
-          })
-        : 0,
-      targets.groupIds.length > 0
-        ? this.prisma.group.count({ where: { id: { in: targets.groupIds }, ...memberOfGroup(userId) } })
-        : 0,
-    ]);
-
-    if (communityCount !== targets.communityIds.length || groupCount !== targets.groupIds.length) {
-      throw new ForbiddenException(
-        'You can only share with communities and groups you are a member of',
-      );
-    }
-    return targets;
+    return ids;
   }
 }

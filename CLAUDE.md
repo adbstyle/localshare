@@ -103,8 +103,7 @@ apps/
 │   │   ├── access/   # Visibility + permission rules (where builders, assert*, viewer)
 │   │   ├── auth/     # OAuth2 strategies, JWT, guards
 │   │   ├── users/    # User profile management
-│   │   ├── communities/  # Community CRUD + membership (+ membership.cascade.ts)
-│   │   ├── groups/   # Groups within communities
+│   │   ├── communities/  # Communities and groups (a group = community with parentId), membership, membership.cascade.ts
 │   │   ├── listings/ # Listings + images (listing-query.ts: where/includes, listing.mapper.ts: responses, storage.ts: S3/local, lazy SDK)
 │   │   ├── common/   # Decorators, types, utils
 │   │   │   ├── decorators/  # @CurrentUser, @Public
@@ -121,8 +120,7 @@ apps/
     └── src/
         ├── app/[locale]/  # i18n routing (de/fr)
         │   ├── auth/callback/  # OAuth callback
-        │   ├── communities/    # Community pages
-        │   ├── groups/         # Group pages
+        │   ├── communities/    # Community and group pages (/groups/* redirects here)
         │   ├── listings/       # Listing CRUD pages
         │   ├── profile/        # User profile
         │   ├── imprint/        # Legal: Impressum
@@ -132,8 +130,7 @@ apps/
         │   ├── ui/           # shadcn/ui components
         │   ├── auth/         # Login components (login-page.tsx)
         │   ├── layout/       # Header, Footer, UserMenu
-        │   ├── communities/  # Community cards, dialogs
-        │   ├── groups/       # Group dialogs
+        │   ├── communities/  # Community/group detail parts, form + join dialogs
         │   ├── listings/     # Listing cards, forms, filters
         │   └── how-it-works.tsx  # How-it-works section
         ├── hooks/         # use-auth, use-toast, use-error-toast
@@ -145,13 +142,14 @@ packages/
 ```
 
 ### Database Schema (Prisma)
-Key models: `User`, `SsoAccount`, `RefreshToken`, `Community`, `CommunityMember`, `Group`, `GroupMember`, `Listing`, `ListingImage`, `ListingVisibility`, `ListingBookmark`
+Key models: `User`, `SsoAccount`, `RefreshToken`, `Community`, `CommunityMember`, `Listing`, `ListingImage`, `ListingVisibility`, `ListingBookmark`
+
+A group is a `Community` with `parentId` (one level deep, #191): joining a group joins its parent, leaving or deleting a community also affects its groups. `ListingVisibility` has one required `communityId` (`@@unique([listingId, communityId])`); sharing with a group means sharing with its community row.
 
 Key enums:
 - `ListingType`: SELL, RENT, LEND, SEARCH
 - `ListingCategory`: ELECTRONICS, FURNITURE, SPORTS, CLOTHING, HOUSEHOLD, GARDEN, BOOKS, TOYS, TOOLS, FOOD, SERVICES, VEHICLES, OTHER
 - `PriceTimeUnit`: HOUR, DAY, WEEK, MONTH
-- `VisibilityType`: COMMUNITY, GROUP
 
 Listings have visibility rules - they can be shared with specific communities or groups. All access rules live in `src/access/` (see Key Patterns).
 
@@ -159,8 +157,7 @@ Listings have visibility rules - they can be shared with specific communities or
 All backend routes are prefixed with `/api/v1/`:
 - `/auth/*` - OAuth flows, token refresh, logout
 - `/users/me` - Profile update (PATCH), account deletion (DELETE), `/users/me/export` (the current user is read via `/auth/me`)
-- `/communities/*` - Community CRUD, join/leave, member management (owner can remove members)
-- `/groups/*` - Group CRUD within communities, member management (owner can remove members)
+- `/communities/*` - Communities and groups: CRUD (`POST {name, description?, parentId?}` creates a group when `parentId` is set), `GET /communities` = flat list of all memberships with `parentId`/`parent`, `POST join/:token`, `GET preview/:token`, `DELETE :id/leave`, `POST :id/refresh-invite`, `:id/members` (owner can remove members). There is no `/groups` API anymore.
 - `/listings/*` - Listing CRUD, bookmarks; `GET /listings/paginated` is the feed (`limit` ≤ 100); image endpoints (`POST :id/images`, `DELETE :id/images/:imageId`, `PATCH :id/images/:imageId/cover`) return `{ id, images }`
 - `/health` - Liveness (no DB), `/health/db` - runs `SELECT 1` (daily Vercel cron keeps the Supabase Free project from pausing); `/auth/health` kept for compatibility
 
@@ -191,10 +188,10 @@ Server state goes through TanStack Query (`QueryProvider` in `[locale]/layout.ts
 - Services handle business logic; controllers handle HTTP
 - Soft delete pattern: set `deletedAt` instead of deleting
 - **Access rules live only in `src/access/`**:
-  - `access.where.ts`: pure Prisma where fragments (`visibleListingWhere`, `memberOfCommunity`, `memberOfGroup`, `shownVisibilityWhere`). Reads apply them inside their own query.
-  - `AccessService`: `assertListingVisible/Owner`, `assertCommunityMember/Owner`, `assertGroupMember/Owner`, `assertShareTargets`. Not visible → 404, visible but not allowed → 403.
+  - `access.where.ts`: pure Prisma where fragments (`visibleListingWhere`, `memberOfCommunity`, `shownVisibilityWhere`, `withGroups`). Reads apply them inside their own query.
+  - `AccessService`: `assertListingVisible/Owner`, `assertCommunityMember/Owner`, `assertShareTargets`. Not visible → 404, visible but not allowed → 403.
   - `permissions.ts`: `listingViewer` / `communityViewer`, returned as `viewer` in responses. The frontend reads `viewer.*` instead of comparing ids.
-- Ending a membership (leave, remove, delete community/group/account) goes through `communities/membership.cascade.ts` inside a transaction: shares of the user's listings in the community and its groups are removed, groups the user owns pass to the community owner.
+- Ending a membership (leave, remove, delete community/group/account) goes through `communities/membership.cascade.ts` (`revokeMembership`, `softDeleteCommunity`) inside a transaction: shares of the user's listings in the community and its groups are removed, groups the user owns pass to the community owner.
 - Route ids and invite tokens use `ParseUUIDPipe` (malformed → 400)
 
 ### Frontend

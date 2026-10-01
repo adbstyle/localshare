@@ -3,6 +3,14 @@ const withNextIntl = require('next-intl/plugin')('./src/i18n.ts');
 
 const nextConfig = {
   reactStrictMode: true,
+  // Groups became communities with a parent (#191) and kept their ids, so old
+  // group links and invites (/groups/join?token=...) land on the same pages.
+  // Temporary on purpose: browsers do not cache it, a rollback stays possible.
+  async redirects() {
+    return [
+      { source: '/:locale(de|fr)/groups/:path*', destination: '/:locale/communities/:path*', permanent: false },
+    ];
+  },
   transpilePackages: ['@localshare/shared'],
   images: {
     remotePatterns: [

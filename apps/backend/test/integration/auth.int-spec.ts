@@ -18,13 +18,12 @@ describe('Authentication', () => {
     expect(response.status).toBe(401);
   });
 
-  it('keeps health and invite previews public', async () => {
+  it('keeps health and the invite preview public', async () => {
     const owner = await createUser(t);
     const community = await createCommunity(t, owner.id);
 
     expect((await t.request('GET', '/health')).status).toBe(200);
     expect((await t.request('GET', `/communities/preview/${community.inviteToken}`)).status).toBe(200);
-    expect((await t.request('GET', `/groups/preview/${community.inviteToken}`)).status).toBe(404);
   });
 
   it('accepts the access token as bearer header and as cookie', async () => {
@@ -53,13 +52,10 @@ describe('Authentication', () => {
       expect(await t.prisma.refreshToken.count({ where: { userId: user.id } })).toBe(1);
     });
 
-    it('removes expired and revoked tokens on login and all tokens on logout', async () => {
+    it('removes expired tokens on login and all tokens on logout', async () => {
       const user = await createUser(t);
       await t.prisma.refreshToken.createMany({
-        data: [
-          { userId: user.id, tokenHash: 'expired', expiresAt: new Date(Date.now() - 1000) },
-          { userId: user.id, tokenHash: 'revoked', expiresAt: new Date(Date.now() + 1e9), revokedAt: new Date() },
-        ],
+        data: [{ userId: user.id, tokenHash: 'expired', expiresAt: new Date(Date.now() - 1000) }],
       });
 
       await t.get(AuthService).login({ id: user.id, email: 'x@test.local' });

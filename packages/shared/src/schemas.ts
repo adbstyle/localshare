@@ -33,21 +33,10 @@ export const updateUserSchema = z.object({
 export const createCommunitySchema = z.object({
   name: z.string().min(3).max(100).transform((val) => val.trim()),
   description: z.string().max(500).transform((val) => val.trim()).optional(),
+  parentId: z.string().uuid().optional(),
 });
 
 export const updateCommunitySchema = z.object({
-  name: z.string().min(3).max(100).transform((val) => val.trim()).optional(),
-  description: z.string().max(500).transform((val) => val.trim()).optional(),
-});
-
-// Group Schemas
-export const createGroupSchema = z.object({
-  name: z.string().min(3).max(100).transform((val) => val.trim()),
-  description: z.string().max(500).transform((val) => val.trim()).optional(),
-  communityId: z.string().uuid(),
-});
-
-export const updateGroupSchema = z.object({
   name: z.string().min(3).max(100).transform((val) => val.trim()).optional(),
   description: z.string().max(500).transform((val) => val.trim()).optional(),
 });
@@ -61,7 +50,6 @@ export const createListingSchema = z.object({
   priceTimeUnit: z.nativeEnum(PriceTimeUnit).optional(),
   category: z.nativeEnum(ListingCategory),
   communityIds: z.array(z.string().uuid()).optional(),
-  groupIds: z.array(z.string().uuid()).optional(),
 }).refine(
   (data) => {
     if (data.type === ListingType.SELL || data.type === ListingType.RENT) {
@@ -94,7 +82,6 @@ export const updateListingSchema = z.object({
   priceTimeUnit: z.nativeEnum(PriceTimeUnit).optional(),
   category: z.nativeEnum(ListingCategory).optional(),
   communityIds: z.array(z.string().uuid()).optional(),
-  groupIds: z.array(z.string().uuid()).optional(),
 });
 
 export const filterListingsSchema = z.object({

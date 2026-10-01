@@ -4,22 +4,14 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
-import { communityQueries } from '@/lib/api/communities';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Community } from '@localshare/shared';
+import { communityKeys, communityQueries } from '@/lib/api/communities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Users, MoreVertical, LinkIcon } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { CreateCommunityDialog } from '@/components/communities/create-community-dialog';
-import { JoinCommunityDialog } from '@/components/communities/join-community-dialog';
+import { CommunityFormDialog } from '@/components/communities/community-form-dialog';
+import { JoinDialog } from '@/components/communities/join-dialog';
 import { CommunityCard } from '@/components/communities/community-card';
 import {
   DropdownMenu,
@@ -32,9 +24,10 @@ export default function CommunitiesPage() {
   const t = useTranslations();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const communitiesQuery = useQuery({ ...communityQueries.list(), enabled: !!user });
-  const communities = communitiesQuery.data ?? [];
+  // The flat membership list also holds groups; they appear on their community's page
+  const communities = (communitiesQuery.data ?? []).filter((c) => !c.parentId);
   const loading = communitiesQuery.isPending;
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
@@ -45,52 +38,26 @@ export default function CommunitiesPage() {
     if (!authLoading && !user) router.push('/');
   }, [user, authLoading, router]);
 
-  const handleCommunityCreated = () => {
-    setCreateDialogOpen(false);
-    communitiesQuery.refetch();
-  };
-
-  const handleJoinSuccess = async (communityId: string) => {
-    // Set highlight state first (optimistic)
+  // The join mutation already refetched the list before calling back, so the
+  // cache is fresh here (no second request).
+  const handleJoinSuccess = (communityId: string) => {
     setHighlightId(communityId);
 
-    try {
-      // Fetch updated communities list
-      const { data: updatedCommunities = [] } = await communitiesQuery.refetch({ throwOnError: true });
+    // Scroll to the new community once it has rendered
+    setTimeout(() => {
+      const element = document.getElementById(`community-${communityId}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element?.focus();
+    }, 100);
 
-      // Scroll to new community after a brief delay (allow render)
-      setTimeout(() => {
-        const element = document.getElementById(`community-${communityId}`);
-        if (element) {
-          element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-          element.focus();
-        }
-      }, 100);
+    const joined = queryClient.getQueryData<Community[]>(communityKeys.list())?.find((c) => c.id === communityId);
+    if (joined) setLiveMessage(t('communities.joinedAnnouncement', { name: joined.name }));
 
-      // Screen reader announcement using fresh data
-      const newCommunity = updatedCommunities.find(c => c.id === communityId);
-      if (newCommunity) {
-        setLiveMessage(t('communities.joinedAnnouncement', { name: newCommunity.name }));
-      }
-
-      // Clear highlight after animation completes
-      setTimeout(() => {
-        setHighlightId(null);
-        setLiveMessage('');
-      }, 2000);
-    } catch (error) {
-      // Handle fetch error
-      toast({
-        title: t('errors.generic'),
-        description: t('communities.refreshFailed'),
-        variant: 'destructive',
-      });
-      // Clear highlight on error
+    // Clear highlight after the animation
+    setTimeout(() => {
       setHighlightId(null);
-    }
+      setLiveMessage('');
+    }, 2000);
   };
 
   if (authLoading || loading) {
@@ -129,27 +96,11 @@ export default function CommunitiesPage() {
 
         {/* Desktop: Direct buttons */}
         <div className="hidden md:flex gap-2">
-          <JoinCommunityDialog
-            onJoinSuccess={handleJoinSuccess}
-            variant="outline"
-          />
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="mr-2 h-4 w-4" />
-                {t('communities.create')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent closeLabel={t('common.close')}>
-              <DialogHeader>
-                <DialogTitle>{t('communities.create')}</DialogTitle>
-                <DialogDescription>
-                  {t('communities.descriptionPlaceholder')}
-                </DialogDescription>
-              </DialogHeader>
-              <CreateCommunityDialog onSuccess={handleCommunityCreated} />
-            </DialogContent>
-          </Dialog>
+          <JoinDialog kind="communities" onJoined={handleJoinSuccess} />
+          <Button variant="outline" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t('communities.create')}
+          </Button>
         </div>
 
         {/* Mobile: Dropdown menu */}
@@ -179,15 +130,12 @@ export default function CommunitiesPage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Controlled dialogs for mobile (without triggers) */}
-          <JoinCommunityDialog
-            open={joinDialogOpen}
-            onOpenChange={setJoinDialogOpen}
-            hideDefaultTrigger
-            onJoinSuccess={handleJoinSuccess}
-          />
+          {/* Controlled dialog for mobile (without trigger) */}
+          <JoinDialog kind="communities" open={joinDialogOpen} onOpenChange={setJoinDialogOpen} onJoined={handleJoinSuccess} />
         </div>
       </div>
+
+      <CommunityFormDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
 
       {communities.length === 0 ? (
         <Card>

@@ -46,20 +46,14 @@ async function main() {
     ],
   });
 
-  // Create group
-  const group = await prisma.group.create({
+  // Create a group (a community with a parent)
+  const group = await prisma.community.create({
     data: {
-      communityId: community.id,
+      parentId: community.id,
       name: 'Garten-Enthusiasten',
       description: 'Für alle die gerne gärtnern',
       ownerId: user1.id,
-    },
-  });
-
-  await prisma.groupMember.create({
-    data: {
-      groupId: group.id,
-      userId: user1.id,
+      members: { create: { userId: user1.id } },
     },
   });
 
@@ -78,7 +72,6 @@ async function main() {
   await prisma.listingVisibility.create({
     data: {
       listingId: listing1.id,
-      visibilityType: 'COMMUNITY',
       communityId: community.id,
     },
   });
@@ -96,8 +89,7 @@ async function main() {
   await prisma.listingVisibility.create({
     data: {
       listingId: listing2.id,
-      visibilityType: 'GROUP',
-      groupId: group.id,
+      communityId: group.id,
     },
   });
 

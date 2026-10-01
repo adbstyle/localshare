@@ -57,7 +57,7 @@ describe('Listing visibility', () => {
     const { owner, member, community, group } = await communityWithGroup(t);
     const communityOnly = await createUser(t);
     await joinCommunity(t, communityOnly.id, community);
-    const listing = await createListing(t, owner.id, { groupIds: [group.id] });
+    const listing = await createListing(t, owner.id, { communityIds: [group.id] });
 
     expect(await feedIds(member.id)).toEqual([listing.id]);
     expect(await feedIds(communityOnly.id)).toEqual([]);
@@ -89,10 +89,7 @@ describe('Listing visibility', () => {
   it('shows non-owners only the visibility entries of their own memberships', async () => {
     const { owner, member, community, group } = await communityWithGroup(t);
     const second = await createCommunity(t, owner.id, 'Second');
-    const listing = await createListing(t, owner.id, {
-      communityIds: [community.id, second.id],
-      groupIds: [group.id],
-    });
+    const listing = await createListing(t, owner.id, { communityIds: [community.id, second.id, group.id] });
     const communityOnly = await createUser(t);
     await joinCommunity(t, communityOnly.id, community);
 

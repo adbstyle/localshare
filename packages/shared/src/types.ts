@@ -27,11 +27,6 @@ export enum ListingCategory {
   OTHER = 'OTHER',
 }
 
-export enum VisibilityType {
-  COMMUNITY = 'COMMUNITY',
-  GROUP = 'GROUP',
-}
-
 export enum PriceTimeUnit {
   HOUR = 'HOUR',
   DAY = 'DAY',
@@ -76,12 +71,14 @@ export interface ListingViewer {
   canBookmark: boolean;
 }
 
-// Community Types
+// Community Types. A group is a community with a parent (one level deep).
 export interface Community {
   id: string;
   name: string;
   description: string | null;
   ownerId: string;
+  parentId: string | null;
+  parent: { id: string; name: string } | null;
   owner: {
     firstName: string;
     lastName: string;
@@ -93,49 +90,33 @@ export interface Community {
     sharedListings: number;
   };
   viewer: CommunityViewer;
+}
+
+export interface CommunityMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  joinedAt: string;
+  role: 'owner' | 'member';
+}
+
+export interface CommunityPreview {
+  id: string;
+  name: string;
+  description: string | null;
+  parent: { id: string; name: string } | null;
+  _count: { members: number };
 }
 
 export interface CreateCommunityDto {
   name: string;
   description?: string;
+  /** Set to create a group inside this community. */
+  parentId?: string;
 }
 
 export interface UpdateCommunityDto {
-  name?: string;
-  description?: string;
-}
-
-// Group Types
-export interface Group {
-  id: string;
-  name: string;
-  description: string | null;
-  communityId: string;
-  community: {
-    id: string;
-    name: string;
-  };
-  ownerId: string;
-  owner: {
-    firstName: string;
-    lastName: string;
-  };
-  inviteToken: string;
-  createdAt: string;
-  _count: {
-    members: number;
-    sharedListings: number;
-  };
-  viewer: CommunityViewer;
-}
-
-export interface CreateGroupDto {
-  name: string;
-  description?: string;
-  communityId: string;
-}
-
-export interface UpdateGroupDto {
   name?: string;
   description?: string;
 }
@@ -169,12 +150,10 @@ export interface Listing {
     phoneNumber: string | null;
   };
   images: ListingImage[];
+  /** Communities and groups the listing is shared with (as far as the viewer may see). */
   visibility: Array<{
-    type: VisibilityType;
-    communityId?: string;
-    groupId?: string;
-    community?: { id: string; name: string };
-    group?: { id: string; name: string };
+    communityId: string;
+    community: { id: string; name: string; parentId: string | null };
   }>;
   isBookmarked?: boolean;
   viewer: ListingViewer;
@@ -190,7 +169,6 @@ export interface CreateListingDto {
   priceTimeUnit?: PriceTimeUnit;
   category: ListingCategory;
   communityIds?: string[];
-  groupIds?: string[];
 }
 
 export interface UpdateListingDto {
@@ -201,7 +179,6 @@ export interface UpdateListingDto {
   priceTimeUnit?: PriceTimeUnit;
   category?: ListingCategory;
   communityIds?: string[];
-  groupIds?: string[];
 }
 
 export interface FilterListingsDto {

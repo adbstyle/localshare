@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { communityQueries } from '@/lib/api/communities';
-import { groupQueries } from '@/lib/api/groups';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
@@ -16,8 +15,7 @@ interface Option {
 
 interface VisibilityFieldsProps {
   communityIds: string[];
-  groupIds: string[];
-  onChange: (field: 'communityIds' | 'groupIds', ids: string[]) => void;
+  onChange: (ids: string[]) => void;
 }
 
 function toggle(ids: string[], id: string, checked: boolean): string[] {
@@ -55,17 +53,20 @@ function OptionList({ title, prefix, options, selected, onToggle }: {
 }
 
 /** Share targets: only the user's own communities and groups are offered. */
-export function ListingVisibilityFields({ communityIds, groupIds, onChange }: VisibilityFieldsProps) {
+export function ListingVisibilityFields({ communityIds, onChange }: VisibilityFieldsProps) {
   const t = useTranslations();
-  const communities = useQuery(communityQueries.list());
-  const groups = useQuery(groupQueries.mine());
+  const memberships = useQuery(communityQueries.list());
 
-  if (communities.isPending || groups.isPending) {
+  if (memberships.isPending) {
     return <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />;
   }
 
-  const communityOptions = (communities.data ?? []).map((c) => ({ id: c.id, label: c.name }));
-  const groupOptions = (groups.data ?? []).map((g) => ({ id: g.id, label: g.name, hint: g.community.name }));
+  // One flat list: communities at the top level, groups carry their parent
+  const all = memberships.data ?? [];
+  const communityOptions = all.filter((c) => !c.parentId).map((c) => ({ id: c.id, label: c.name }));
+  const groupOptions = all
+    .filter((c) => c.parent)
+    .map((g) => ({ id: g.id, label: g.name, hint: g.parent?.name }));
 
   if (communityOptions.length === 0 && groupOptions.length === 0) {
     return (
@@ -78,9 +79,9 @@ export function ListingVisibilityFields({ communityIds, groupIds, onChange }: Vi
   return (
     <>
       <OptionList title={t('nav.communities')} prefix="community" options={communityOptions} selected={communityIds}
-        onToggle={(id, checked) => onChange('communityIds', toggle(communityIds, id, checked))} />
-      <OptionList title={t('nav.groups')} prefix="group" options={groupOptions} selected={groupIds}
-        onToggle={(id, checked) => onChange('groupIds', toggle(groupIds, id, checked))} />
+        onToggle={(id, checked) => onChange(toggle(communityIds, id, checked))} />
+      <OptionList title={t('nav.groups')} prefix="group" options={groupOptions} selected={communityIds}
+        onToggle={(id, checked) => onChange(toggle(communityIds, id, checked))} />
     </>
   );
 }

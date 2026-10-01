@@ -101,10 +101,8 @@ export class AuthService {
   }
 
   async login(user: { id: string; email: string }) {
-    // Housekeeping: expired tokens and rows revoked by the old rotation logic
-    await this.prisma.refreshToken.deleteMany({
-      where: { userId: user.id, OR: [{ expiresAt: { lt: new Date() } }, { revokedAt: { not: null } }] },
-    });
+    // Housekeeping: expired tokens of this user
+    await this.prisma.refreshToken.deleteMany({ where: { userId: user.id, expiresAt: { lt: new Date() } } });
 
     return {
       accessToken: this.jwtService.sign({ sub: user.id, email: user.email }),
@@ -146,10 +144,10 @@ export class AuthService {
 
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash: this.hashRefreshToken(refreshToken) },
-      select: { id: true, expiresAt: true, revokedAt: true, user: { select: { id: true, email: true } } },
+      select: { id: true, expiresAt: true, user: { select: { id: true, email: true } } },
     });
 
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+    if (!stored || stored.expiresAt < new Date()) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 

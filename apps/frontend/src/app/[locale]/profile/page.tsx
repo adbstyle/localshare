@@ -32,6 +32,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { User } from '@localshare/shared';
 import { api } from '@/lib/api/client';
 import { authKeys } from '@/lib/api/auth';
+import { listingKeys } from '@/lib/api/listings';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Trash2, LogOut } from 'lucide-react';
 import { useRouter, usePathname } from '@/navigation';
@@ -105,6 +106,8 @@ export default function ProfilePage() {
 
       const { data: updated } = await api.patch<User>('/users/me', data);
       queryClient.setQueryData(authKeys.me, updated);
+      // Names are shown on listings too
+      queryClient.invalidateQueries({ queryKey: listingKeys.all });
 
       // If language changed, navigate to new locale URL
       if (data.preferredLanguage && data.preferredLanguage !== previousLanguage) {

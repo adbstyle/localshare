@@ -1,7 +1,8 @@
 export interface ParseResult {
   token: string | null;
   isValid: boolean;
-  errorKey?: string;
+  /** Relative to the caller's namespace ('communities' or 'groups'). */
+  errorKey?: 'errors.invalidUrl' | 'errors.invalidToken';
 }
 
 export function parseInviteInput(input: string): ParseResult {
@@ -22,7 +23,7 @@ export function parseInviteInput(input: string): ParseResult {
     return {
       token: null,
       isValid: false,
-      errorKey: 'communities.errors.invalidUrl'
+      errorKey: 'errors.invalidUrl'
     };
   } catch {
     // Not a URL - treat as raw token
@@ -32,7 +33,7 @@ export function parseInviteInput(input: string): ParseResult {
     return {
       token: null,
       isValid: false,
-      errorKey: 'communities.errors.invalidToken'
+      errorKey: 'errors.invalidToken'
     };
   }
 }

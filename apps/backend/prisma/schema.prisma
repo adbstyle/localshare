@@ -36,11 +36,6 @@ enum ListingCategory {
   OTHER
 }
 
-enum VisibilityType {
-  COMMUNITY
-  GROUP
-}
-
 enum PriceTimeUnit {
   HOUR
   DAY
@@ -65,8 +60,6 @@ model User {
   refreshTokens        RefreshToken[]
   ownedCommunities     Community[]       @relation("CommunityOwner")
   communityMemberships CommunityMember[]
-  ownedGroups          Group[]           @relation("GroupOwner")
-  groupMemberships     GroupMember[]
   listings             Listing[]
   bookmarks            ListingBookmark[]
 
@@ -95,7 +88,6 @@ model RefreshToken {
   tokenHash String    @unique @map("token_hash")
   expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -104,22 +96,27 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+// A community, or a group inside one (parentId set). Groups are one level
+// deep; joining a group joins its parent, leaving a parent leaves its groups.
 model Community {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String    @db.VarChar(100)
   description String?
   ownerId     String    @map("owner_id") @db.Uuid
+  parentId    String?   @map("parent_id") @db.Uuid
   inviteToken String    @unique @default(dbgenerated("gen_random_uuid()")) @map("invite_token") @db.Uuid
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   owner             User                @relation("CommunityOwner", fields: [ownerId], references: [id])
+  parent            Community?          @relation("CommunityChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children          Community[]         @relation("CommunityChildren")
   members           CommunityMember[]
-  groups            Group[]
   listingVisibility ListingVisibility[]
 
   @@index([ownerId])
+  @@index([parentId])
   @@index([deletedAt])
   @@map("communities")
 }
@@ -137,44 +134,6 @@ model CommunityMember {
   @@index([userId])
   @@index([joinedAt])
   @@map("community_members")
-}
-
-model Group {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  communityId String    @map("community_id") @db.Uuid
-  name        String    @db.VarChar(100)
-  description String?
-  ownerId     String    @map("owner_id") @db.Uuid
-  inviteToken String    @unique @default(dbgenerated("gen_random_uuid()")) @map("invite_token") @db.Uuid
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  community         Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  owner             User                @relation("GroupOwner", fields: [ownerId], references: [id])
-  members           GroupMember[]
-  listingVisibility ListingVisibility[]
-
-  @@index([communityId])
-  @@index([ownerId])
-  @@index([inviteToken])
-  @@index([deletedAt])
-  @@map("groups")
-}
-
-model GroupMember {
-  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  groupId  String   @map("group_id") @db.Uuid
-  userId   String   @map("user_id") @db.Uuid
-  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
-
-  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([groupId, userId])
-  @@index([groupId])
-  @@index([userId])
-  @@map("group_members")
 }
 
 model Listing {
@@ -222,22 +181,16 @@ model ListingImage {
 }
 
 model ListingVisibility {
-  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  listingId      String         @map("listing_id") @db.Uuid
-  visibilityType VisibilityType @map("visibility_type")
-  communityId    String?        @map("community_id") @db.Uuid
-  groupId        String?        @map("group_id") @db.Uuid
-  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listingId   String   @map("listing_id") @db.Uuid
+  communityId String   @map("community_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  listing   Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  community Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  group     Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
-  @@unique([listingId, visibilityType, communityId, groupId])
+  @@unique([listingId, communityId])
   @@index([communityId])
-  @@index([groupId])
-  @@index([visibilityType, communityId])
-  @@index([visibilityType, groupId])
   @@map("listing_visibility")
 }
 

@@ -28,13 +28,7 @@ export function toListingDetail<T>(row: DetailRow, userId: string, toImage: Imag
     // Own contact details are pointless on one's own listing
     creator: viewer.isOwner ? { ...creator, email: '', homeAddress: null, phoneNumber: null } : creator,
     isBookmarked: bookmarks.length > 0,
-    visibility: visibility.map((v) => ({
-      type: v.visibilityType,
-      communityId: v.communityId,
-      groupId: v.groupId,
-      community: v.community,
-      group: v.group,
-    })),
+    visibility: visibility.map((v) => ({ communityId: v.communityId, community: v.community })),
     images: images.map(toImage),
     viewer,
   };
